@@ -1,20 +1,20 @@
-# Frame & Soul — Photography & Videography Studio
+# Puniyakotti — Luxury Wedding Photography & Film Studio
 
-![Frame & Soul Landing Page Preview](./assets/preview.png)
+![Puniyakotti Portfolio Preview](./assets/preview.png)
 
-A luxury, editorial web application built for **Frame & Soul**, a high-end photography and videography studio specializing in weddings, corporate galas, brand campaigns, and aerial cinematography.
+A luxury, editorial web application built for **Puniyakotti Studio**, a high-end photography and videography studio specializing in weddings, baby showers, couple portraits, and cinematic films.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- 🎬 **Cinematic Hero Section**: Immersive hero overlay with custom typography and scroll indicator.
-- 📸 **Editorial Portfolio Grid**: Dynamic filterable gallery showcase with custom aspect ratios.
-- 🚁 **Drone & Aerial Showcase**: Full-width feature highlighting drone photography and cinematography.
-- 🎥 **Showreel & Film Section**: Interactive video showcase designed for cinematic storytelling.
-- 💬 **Client Testimonials Carousel**: Elegant quote carousel highlighting couple & corporate client reviews.
-- 📱 **Instagram & Journal Feed**: Social media grid and editorial blog post integrations.
-- ⚡ **Responsive & Animated**: Built with smooth scroll reveals (`IntersectionObserver`) and glassmorphism styling.
+- 🎬 **Cinematic Interactive Hero**: 360° interactive turn canvas animation & video hero transitions.
+- 📸 **Editorial Portfolio Gallery**: Dynamic, category-filtered portfolio showcase (`WEDDINGS`, `PREVIEW ALBUMN`, `BABY SHOWER`, `COUPLES`, `KIDS`).
+- 🌊 **Distorted WebGL Typography**: Custom WebGL interactive fluid typography headers.
+- ⏳ **Custom Preloader Curtain**: High-end brand motion preloader sequence.
+- 🎥 **Showreel & Film Showcase**: Interactive wedding showreels with video player modal.
+- 💬 **Client Testimonials**: Quote carousel highlighting couple reviews.
+- ⚡ **Vercel Deployment Ready**: Configured with `vercel.json` for SPA routing and optimal bundle performance.
 
 ---
 
@@ -23,7 +23,7 @@ A luxury, editorial web application built for **Frame & Soul**, a high-end photo
 - **Framework**: React 19 + TypeScript
 - **Build Tool**: Vite 8
 - **Styling**: Tailwind CSS v4
-- **Formatting**: OxFmt
+- **Deployment**: Vercel
 
 ---
 
@@ -31,7 +31,7 @@ A luxury, editorial web application built for **Frame & Soul**, a high-end photo
 
 ### Prerequisites
 
-Make sure you have Node.js and `pnpm` installed.
+Node.js (v18+) and `pnpm`.
 
 ### Installation
 
@@ -41,13 +41,11 @@ pnpm install
 
 ### Running Locally
 
-Start the Vite development server:
-
 ```bash
 pnpm run dev
 ```
 
-Open your browser at `http://localhost:5173` (or your configured port).
+Open your browser at `http://localhost:3000`.
 
 ### Building for Production
 
@@ -57,20 +55,12 @@ pnpm run build
 
 ---
 
-## 📁 Project Structure
+## 🌐 Deploying to Vercel
 
-```
-├── assets/
-│   └── preview.png          # Repository banner preview image
-├── src/
-│   ├── App.tsx              # Main website component & design sections
-│   ├── main.tsx             # React entrypoint
-│   └── index.css            # Global CSS & Tailwind imports
-├── index.html               # HTML Shell
-├── vite.config.ts           # Vite configuration
-└── package.json             # Dependencies and scripts
-```
+1. Push code to your GitHub / Git repository.
+2. Import the project in [Vercel](https://vercel.com).
+3. Vercel will automatically detect Vite. Click **Deploy**.
 
 ---
 
-© 2026 Frame & Soul Studio. All Rights Reserved.
+© 2026 Puniyakotti Studio. All Rights Reserved.

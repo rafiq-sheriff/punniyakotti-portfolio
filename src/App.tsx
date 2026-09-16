@@ -1,4 +1,10 @@
 import { useState, useEffect, useRef, type ReactNode, type CSSProperties } from 'react'
+import InteractiveHero from './components/InteractiveHero'
+import HeroAnimation from './components/HeroAnimation'
+import DistortedTypography from './components/DistortedTypography'
+import ProjectsPage from './components/ProjectsPage'
+import Preloader, { type IntroPhase } from './components/Preloader'
+import puniyakottiImg from '../assets/image/puniyakotti (2).webp'
 
 const unsplash = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&auto=format&q=85`
@@ -47,10 +53,20 @@ function Reveal({
   )
 }
 
-// ─── NAV ────────────────────────────────────────────────────────────────────
-function Nav() {
+interface NavProps {
+  currentPath: string
+  onNavigate?: (path: string, el?: HTMLElement | null, hashId?: string) => void
+  onNavigateWithFlash?: (path: string, el?: HTMLElement | null, hashId?: string) => void
+  heroMode: 'image' | 'animation'
+  onToggleHeroMode: () => void
+  introPhase: IntroPhase
+  navLogoRef: React.RefObject<HTMLAnchorElement | null>
+}
+
+function Nav({ currentPath, onNavigate, onNavigateWithFlash, introPhase, navLogoRef }: NavProps) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const isDark = false
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 50)
@@ -58,72 +74,150 @@ function Nav() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
+  const navItems = [
+    { label: 'Home', path: '/' },
+    { label: 'Portfolio', path: '/projects' },
+    { label: 'Services', path: '/#services' },
+    { label: 'About', path: '/#about' },
+    { label: 'Contact', path: '/#contact' },
+  ]
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, itemPath: string) => {
+    e.preventDefault()
+    setOpen(false)
+    const doNavigate = onNavigate || onNavigateWithFlash
+    if (itemPath === '/' || itemPath === '/projects') {
+      if (doNavigate) doNavigate(itemPath, e.currentTarget)
+    } else if (itemPath.includes('#')) {
+      const hashId = itemPath.split('#')[1]
+      if (currentPath !== '/') {
+        if (doNavigate) doNavigate('/', e.currentTarget, hashId)
+      } else {
+        const el = document.getElementById(hashId)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' })
+        }
+      }
+    }
+  }
+
+  const isNavLogoVisible = introPhase !== 'loading' && introPhase !== 'loader_sliding' && introPhase !== 'brand_moving'
+  const isNavContentVisible = introPhase === 'full_reveal' || introPhase === 'done'
+
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{
-        background: scrolled ? 'rgba(12,11,9,0.97)' : 'transparent',
-        borderBottom: scrolled ? '1px solid rgba(242,236,224,0.07)' : 'none',
+        background: scrolled
+          ? 'rgba(255,255,255,0.96)'
+          : 'transparent',
+        borderBottom: scrolled
+          ? '1px solid rgba(28,25,23,0.08)'
+          : 'none',
         backdropFilter: scrolled ? 'blur(16px)' : 'none',
       }}
     >
       <div
-        className="max-w-[1440px] mx-auto px-8 lg:px-16 flex items-center justify-between"
+        className="max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-16 flex items-center justify-between"
         style={{ height: 72 }}
       >
-        <a href="#" className="font-['DM_Serif_Display'] text-xl tracking-[0.22em] uppercase text-[#f2ece0]">
-          Frame&nbsp;&amp;&nbsp;Soul
+        <a
+          ref={navLogoRef}
+          href="/"
+          onClick={(e) => handleClick(e, '/')}
+          className="font-['Cormorant_Garamond'] font-bold text-2xl sm:text-3xl tracking-[0.08em] uppercase transition-opacity duration-300 text-[#1c1917]"
+          style={{
+            opacity: isNavLogoVisible ? 1 : 0,
+          }}
+        >
+          PUNNIYAKOTTI
         </a>
 
-        <div className="hidden lg:flex items-center gap-9">
-          {['Home', 'Portfolio', 'Services', 'About', 'Stories', 'Contact'].map((l) => (
-            <a
-              key={l}
-              href="#"
-              className="text-[11px] tracking-[0.18em] uppercase text-[#f2ece0]/60 hover:text-[#f2ece0] transition-colors duration-300"
-            >
-              {l}
-            </a>
-          ))}
+        <div
+          className="hidden lg:flex items-center gap-9 transition-all duration-700 ease-out"
+          style={{
+            opacity: isNavContentVisible ? 1 : 0,
+            transform: isNavContentVisible ? 'translateY(0)' : 'translateY(-12px)',
+            pointerEvents: isNavContentVisible ? 'auto' : 'none',
+          }}
+        >
+          {navItems.map((item) => {
+            const isActive = currentPath === item.path
+            return (
+              <a
+                key={item.label}
+                href={item.path}
+                onClick={(e) => handleClick(e, item.path)}
+                className="text-[13px] font-['Manrope'] font-medium tracking-[0.22em] uppercase transition-colors duration-300"
+                style={{
+                  color: isActive
+                    ? '#A85532'
+                    : 'rgba(28,25,23,0.65)',
+                }}
+              >
+                {item.label}
+              </a>
+            )
+          })}
         </div>
 
-        <a
-          href="#"
-          className="hidden lg:block text-[11px] tracking-[0.18em] uppercase px-6 py-3 border border-[#b8965a] text-[#b8965a] hover:bg-[#b8965a] hover:text-[#0c0b09] transition-all duration-350"
+        <div
+          className="flex items-center gap-3 transition-all duration-700 ease-out"
+          style={{
+            opacity: isNavContentVisible ? 1 : 0,
+            transform: isNavContentVisible ? 'translateY(0)' : 'translateY(-12px)',
+            pointerEvents: isNavContentVisible ? 'auto' : 'none',
+          }}
         >
-          Book a Session
-        </a>
+          <a
+            href="/#contact"
+            onClick={(e) => handleClick(e, '/#contact')}
+            className="hidden lg:block text-[11px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border transition-all duration-350 shadow-sm border-[#A85532] text-[#A85532] hover:bg-[#A85532] hover:text-[#ffffff]"
+          >
+            Book a Session
+          </a>
 
-        <button
-          onClick={() => setOpen(!open)}
-          className="lg:hidden flex flex-col gap-[5px] p-2 text-[#f2ece0]"
-          aria-label="Menu"
-        >
-          <span
-            className="block w-6 h-px bg-current origin-center transition-all duration-300"
-            style={{ transform: open ? 'rotate(45deg) translateY(6px)' : undefined }}
-          />
-          <span
-            className="block w-6 h-px bg-current transition-all duration-300"
-            style={{ opacity: open ? 0 : 1 }}
-          />
-          <span
-            className="block w-6 h-px bg-current origin-center transition-all duration-300"
-            style={{ transform: open ? 'rotate(-45deg) translateY(-6px)' : undefined }}
-          />
-        </button>
+          <button
+            onClick={() => setOpen(!open)}
+            className="lg:hidden flex flex-col gap-[5px] p-2 text-[#1c1917]"
+            aria-label="Menu"
+          >
+            <span
+              className="block w-6 h-px bg-current origin-center transition-all duration-300"
+              style={{ transform: open ? 'rotate(45deg) translateY(6px)' : undefined }}
+            />
+            <span
+              className="block w-6 h-px bg-current transition-all duration-300"
+              style={{ opacity: open ? 0 : 1 }}
+            />
+            <span
+              className="block w-6 h-px bg-current origin-center transition-all duration-300"
+              style={{ transform: open ? 'rotate(-45deg) translateY(-6px)' : undefined }}
+            />
+          </button>
+        </div>
       </div>
 
       {open && (
-        <div className="lg:hidden bg-[#0c0b09] px-8 pb-8 pt-2 flex flex-col gap-5 border-t border-[#f2ece0]/07">
-          {['Home', 'Portfolio', 'Services', 'About', 'Stories', 'Contact'].map((l) => (
-            <a key={l} href="#" className="text-sm tracking-[0.18em] uppercase text-[#f2ece0]/60">
-              {l}
+        <div
+          className="lg:hidden px-8 pb-8 pt-2 flex flex-col gap-5 border-t shadow-lg bg-white border-[#1c1917]/10 text-[#1c1917]"
+        >
+          {navItems.map((item) => (
+            <a
+              key={item.label}
+              href={item.path}
+              onClick={(e) => handleClick(e, item.path)}
+              className={`text-sm tracking-[0.18em] uppercase font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/70'
+                }`}
+            >
+              {item.label}
             </a>
           ))}
           <a
-            href="#"
-            className="self-start text-[11px] tracking-[0.18em] uppercase px-6 py-3 border border-[#b8965a] text-[#b8965a]"
+            href="/#contact"
+            onClick={(e) => handleClick(e, '/#contact')}
+            className={`self-start text-[11px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border ${isDark ? 'border-[#D07A55] text-[#D07A55]' : 'border-[#A85532] text-[#A85532]'
+              }`}
           >
             Book a Session
           </a>
@@ -147,121 +241,309 @@ function Nav() {
 }
 
 // ─── HERO ────────────────────────────────────────────────────────────────────
-function Hero() {
+interface HeroProps {
+  onNavigate?: (path: string, el?: HTMLElement | null, hashId?: string) => void
+  onNavigateWithFlash?: (path: string, el?: HTMLElement | null, hashId?: string) => void
+  theme: 'dark' | 'light'
+  heroMode: 'image' | 'animation'
+  introPhase: IntroPhase
+}
+
+function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: HeroProps) {
+  const doNavigate = onNavigate || onNavigateWithFlash
+  if (heroMode === 'animation') {
+    return <HeroAnimation onNavigate={doNavigate} theme={theme} />
+  }
+
+  const isDark = theme === 'dark'
+  const isPortfolioVisible = introPhase === 'portfolio_reveal' || introPhase === 'hero_image_reveal' || introPhase === 'full_reveal' || introPhase === 'done'
+  const isHeroImageVisible = introPhase === 'hero_image_reveal' || introPhase === 'full_reveal' || introPhase === 'done'
+  const isHeroContentVisible = introPhase === 'full_reveal' || introPhase === 'done'
+
   return (
-    <section className="relative w-full overflow-hidden" style={{ height: '100svh', minHeight: 680 }}>
-      <img
-        src={unsplash('1727430256509-0f897d6f4765', 1920, 1080)}
-        alt="Indian bride and groom standing under an arch of flowers"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: 'brightness(0.45)' }}
-      />
+    <section
+      className={`relative w-full overflow-hidden select-none transition-colors duration-700 ease-in-out ${isDark ? 'bg-black' : 'bg-white'
+        }`}
+      style={{ height: '100svh', minHeight: 680 }}
+    >
+      {/* Hero Image */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <img
+          src="/assets/image/hero/hero.webp"
+          alt="Punniyakotti Photography Studio Hero"
+          decoding="async"
+          className="w-[500px] h-[500px] max-w-[92vw] max-h-[70vh] object-cover md:w-full md:h-full md:max-w-none md:max-h-none md:object-cover transition-all duration-700 ease-in-out pointer-events-none origin-center"
+          style={{
+            opacity: isHeroImageVisible ? 1 : 0,
+          }}
+        />
+      </div>
+
+      {/* Centered Interactive WebGL Distorted PORTFOLIO Typography */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-auto select-none overflow-hidden px-2 transition-all duration-700 ease-out"
         style={{
-          background:
-            'linear-gradient(160deg, rgba(12,11,9,0.55) 0%, rgba(12,11,9,0.1) 55%, rgba(12,11,9,0.7) 100%)',
+          opacity: isPortfolioVisible ? 1 : 0,
+          transform: isPortfolioVisible ? 'scale(1)' : 'scale(0.92)',
+          WebkitMaskImage: isDark
+            ? 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 32%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 62%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%)'
+            : 'none',
+          maskImage: isDark
+            ? 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 32%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 62%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%)'
+            : 'none',
         }}
+      >
+        <DistortedTypography theme={theme} text="PORTFOLIO" />
+      </div>
+
+      {/* Subtle Gradient Overlay for visual polish */}
+      <div
+        className={`absolute inset-0 z-[6] pointer-events-none transition-all duration-700 ease-in-out ${isDark
+          ? 'bg-gradient-to-t from-black/60 via-transparent to-black/30'
+          : 'bg-gradient-to-t from-white/40 via-transparent to-white/20'
+          }`}
       />
 
-      <div className="relative z-10 h-full flex items-center max-w-[1440px] mx-auto px-8 lg:px-24">
-        <div className="max-w-3xl">
-          <p
-            className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-7"
-            style={{ animation: 'fadeUp 0.85s ease 0.25s both' }}
-          >
-            Photography &amp; Videography Studio — Est. 2016
-          </p>
-          <h1
-            className="font-['DM_Serif_Display'] leading-[0.95] text-[#f2ece0] mb-9"
-            style={{
-              fontSize: 'clamp(3rem, 7vw, 7rem)',
-              animation: 'fadeUp 0.9s ease 0.45s both',
-            }}
-          >
-            We Capture<br />Moments That<br />Last Forever.
-          </h1>
-          <p
-            className="text-sm text-[#f2ece0]/65 max-w-[420px] leading-[1.85] mb-12 tracking-wide"
-            style={{ animation: 'fadeUp 0.9s ease 0.65s both' }}
-          >
-            Photography, films, and aerial storytelling for weddings, events, brands, and unforgettable moments.
-          </p>
+      {/* 4-Corner Layout Overlay */}
+      <div
+        className="relative z-10 h-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-16 pt-24 pb-12 flex flex-col justify-between pointer-events-none transition-all duration-800 ease-out"
+        style={{
+          opacity: isHeroContentVisible ? 1 : 0,
+          transform: isHeroContentVisible ? 'translateY(0)' : 'translateY(24px)',
+        }}
+      >
+
+        {/* TOP ROW */}
+        <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:justify-between w-full">
+          {/* TOP LEFT: Studio Tag */}
           <div
-            className="flex flex-wrap gap-4"
-            style={{ animation: 'fadeUp 0.9s ease 0.85s both' }}
+            className={`pointer-events-auto inline-flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2 rounded-full backdrop-blur-md shadow-lg ${isDark
+              ? 'border border-[#D07A55]/35 bg-black/75'
+              : 'border border-[#A85532]/35 bg-white/85'
+              }`}
+            style={{ animation: 'fadeUp 0.85s ease 0.2s both' }}
+          >
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span
+                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isDark ? 'bg-[#D07A55]' : 'bg-[#A85532]'
+                  }`}
+              />
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${isDark ? 'bg-[#D07A55]' : 'bg-[#A85532]'
+                  }`}
+              />
+            </span>
+            <span
+              className={`text-[12px] sm:text-[13px] font-['Manrope'] font-semibold tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'
+                }`}
+            >
+              BEHIND THE LENS
+            </span>
+          </div>
+
+          {/* TOP RIGHT: People · Emotion · Moments */}
+          <div
+            className={`pointer-events-auto inline-flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4.5 py-2 rounded-full backdrop-blur-md shadow-lg ${isDark
+              ? 'border border-[#f2ece0]/20 bg-black/75 text-[#f2ece0]/90'
+              : 'border border-[#1c1917]/15 bg-white/85 text-[#1c1917]'
+              }`}
+            style={{ animation: 'fadeUp 0.85s ease 0.3s both' }}
+          >
+            <span className="text-[12px] sm:text-[13px] font-['Manrope'] font-semibold tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap">
+              People <span className={isDark ? 'text-[#D07A55] mx-1' : 'text-[#A85532] mx-1'}>·</span> Emotion <span className={isDark ? 'text-[#D07A55] mx-1' : 'text-[#A85532] mx-1'}>·</span> Moments
+            </span>
+          </div>
+        </div>
+
+        {/* BOTTOM ROW */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between w-full gap-5 sm:gap-8">
+          {/* BOTTOM LEFT: Headline */}
+          <div className="pointer-events-auto max-w-none sm:max-w-2xl lg:max-w-4xl">
+            <h1
+              className="leading-[0.95] drop-shadow-md"
+              style={{
+                animation: 'fadeUp 0.9s ease 0.4s both',
+              }}
+            >
+              <span
+                className={`font-['Cormorant_Garamond'] font-semibold block whitespace-nowrap ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'
+                  }`}
+                style={{ fontSize: 'clamp(48px, 10vw, 88px)' }}
+              >
+                I Capture
+              </span>
+              <span
+                className={`font-['Cormorant_Garamond'] font-bold italic block whitespace-nowrap ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'
+                  }`}
+                style={{ fontSize: 'clamp(48px, 10vw, 88px)' }}
+              >
+                What Words Can't
+              </span>
+            </h1>
+          </div>
+
+          {/* BOTTOM RIGHT: CTA Buttons */}
+          <div
+            className="pointer-events-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto sm:justify-end sm:mb-1"
+            style={{ animation: 'fadeUp 0.9s ease 0.7s both' }}
           >
             <a
-              href="#"
-              className="text-[11px] tracking-[0.22em] uppercase px-9 py-4 bg-[#f2ece0] text-[#0c0b09] font-medium hover:bg-[#b8965a] hover:text-[#f2ece0] transition-all duration-350"
+              href="/projects"
+              onClick={(e) => {
+                e.preventDefault()
+                if (doNavigate) {
+                  doNavigate('/projects', e.currentTarget)
+                }
+              }}
+              className={`group inline-flex items-center justify-center gap-3 text-[14px] sm:text-[14px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 transition-all duration-350 shadow-xl w-full sm:w-auto whitespace-nowrap ${isDark
+                ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
+                : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
+                }`}
             >
-              Explore Our Work
+              <span>SEE THE STORIES</span>
+              <span className="transition-transform duration-300 group-hover:translate-x-1.5">→</span>
             </a>
             <a
-              href="#"
-              className="text-[11px] tracking-[0.22em] uppercase px-9 py-4 border border-[#f2ece0]/35 text-[#f2ece0] hover:border-[#f2ece0] transition-all duration-350"
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault()
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+              }}
+              className={`inline-flex items-center justify-center text-[14px] sm:text-[14px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 border transition-all duration-350 backdrop-blur-sm shadow-md w-full sm:w-auto whitespace-nowrap ${isDark
+                ? 'border-[#f2ece0]/30 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
+                : 'border-[#1c1917]/25 bg-white/60 text-[#1c1917] hover:border-[#A85532] hover:text-[#A85532]'
+                }`}
             >
-              Book Your Date
+              BOOK A SESSION
             </a>
           </div>
         </div>
-      </div>
 
-      {/* Scroll indicator */}
-      <div
-        className="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        style={{ animation: 'fadeUp 0.9s ease 1.1s both' }}
-      >
-        <span className="text-[9px] tracking-[0.3em] uppercase text-[#f2ece0]/40">Scroll</span>
-        <div className="w-px h-12 bg-[#f2ece0]/20 relative overflow-hidden">
-          <div
-            className="absolute left-0 w-full bg-[#b8965a]"
-            style={{ height: '45%', animation: 'scrollDrop 1.6s ease infinite' }}
-          />
-        </div>
       </div>
     </section>
   )
 }
 
-// ─── STUDIO STATEMENT ────────────────────────────────────────────────────────
-function StudioStatement() {
+// ─── ABOUT SECTION ────────────────────────────────────────────────────────────
+function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
+  const isDark = theme === 'dark'
   return (
-    <section className="py-28 lg:py-40">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-16 grid lg:grid-cols-[1fr_1.15fr] gap-16 lg:gap-28 items-center">
+    <section id="about" className={`py-28 lg:py-40 relative overflow-hidden transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
+      {/* Background Subtle Accent Glow */}
+      <div
+        className="absolute top-1/2 -right-48 w-96 h-96 rounded-full blur-[140px] pointer-events-none opacity-20"
+        style={{ background: `radial-gradient(circle, ${isDark ? '#D07A55' : '#A85532'} 0%, transparent 70%)` }}
+      />
+
+      <div className="max-w-[1440px] mx-auto px-8 lg:px-16 grid lg:grid-cols-[1.15fr_1fr] gap-16 lg:gap-24 items-center relative z-10">
+        {/* Left Column: Text & Bio Content */}
         <Reveal>
-          <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-9">The Studio</p>
-          <h2
-            className="font-['DM_Serif_Display'] text-[#f2ece0] leading-[1.08] mb-9"
-            style={{ fontSize: 'clamp(2.2rem, 4vw, 3.8rem)' }}
-          >
-            Your Moments.<br />Our Perspective.
-          </h2>
-          <p className="text-sm text-[#f2ece0]/55 leading-[1.95] max-w-[400px] mb-11">
-            We capture authentic emotions, atmosphere, intimate details, and the people who make every event unforgettable. Through photography, cinematic films, and aerial cinematography, we transform fleeting moments into timeless stories.
-          </p>
-          <a
-            href="#"
-            className="text-[11px] tracking-[0.22em] uppercase text-[#b8965a] inline-flex items-center gap-3 border-b border-[#b8965a]/35 pb-1 hover:border-[#b8965a] transition-colors duration-300"
-          >
-            Our Story <span>→</span>
-          </a>
+          <div>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6 ${isDark ? 'bg-[#D07A55]/10 border border-[#D07A55]/30' : 'bg-[#A85532]/10 border border-[#A85532]/30'
+              }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#D07A55]' : 'bg-[#A85532]'}`} />
+              <span className={`text-[11px] tracking-[0.3em] uppercase font-semibold ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>About Me</span>
+            </div>
+
+            <h2
+              className={`font-['Cormorant_Garamond'] font-semibold leading-[1.12] mb-8 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
+              style={{ fontSize: 'clamp(2.2rem, 3.8vw, 3.6rem)' }}
+            >
+              Capturing Genuine Emotions,<br />
+              <span className={`italic font-normal ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Crafting Unforgettable Moments</span>
+            </h2>
+
+            <div className={`space-y-6 text-base leading-[1.85] font-light ${isDark ? 'text-[#f2ece0]/80' : 'text-[#1c1917]/80'}`}>
+              <p>
+                I’m Punniyakotti, a photographer and event planner with 7 years of experience in photography and 5 years in creating memorable events. I’m passionate about capturing genuine emotions and turning special occasions into experiences worth remembering.
+              </p>
+              <p>
+                With a B.Tech in Information Technology, I bring together creativity, technical expertise, and attention to detail in everything I do. Whether behind the camera or planning an event, I focus on creating meaningful moments that tell a story.
+              </p>
+            </div>
+
+            {/* Key Expertise Grid */}
+            <div className={`grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 mt-10 border-t ${isDark ? 'border-[#f2ece0]/10' : 'border-[#1c1917]/10'}`}>
+              <div className={`p-4 rounded-lg border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
+                <p className={`font-['Cormorant_Garamond'] font-bold text-2xl ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>7 Years</p>
+                <p className={`text-[11px] font-['Manrope'] tracking-[0.15em] uppercase mt-1 font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/65'}`}>Photography</p>
+              </div>
+              <div className={`p-4 rounded-lg border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
+                <p className={`font-['Cormorant_Garamond'] font-bold text-2xl ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>5 Years</p>
+                <p className={`text-[11px] font-['Manrope'] tracking-[0.15em] uppercase mt-1 font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/65'}`}>Event Planning</p>
+              </div>
+              <div className={`p-4 rounded-lg border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
+                <p className={`font-['Cormorant_Garamond'] font-bold text-2xl ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>B.Tech IT</p>
+                <p className={`text-[11px] font-['Manrope'] tracking-[0.15em] uppercase mt-1 font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/65'}`}>Tech & Precision</p>
+              </div>
+            </div>
+
+            <div className="mt-10 flex flex-wrap items-center gap-6">
+              <a
+                href="#contact"
+                onClick={(e) => {
+                  e.preventDefault()
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className={`text-[11px] font-semibold tracking-[0.22em] uppercase px-7 py-3.5 transition-colors duration-300 rounded-sm shadow-md ${isDark ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]' : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
+                  }`}
+              >
+                Get In Touch
+              </a>
+              <a
+                href="#services"
+                onClick={(e) => {
+                  e.preventDefault()
+                  document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className={`text-[11px] tracking-[0.22em] uppercase font-medium inline-flex items-center gap-2 border-b pb-1 transition-colors duration-300 ${isDark
+                  ? 'text-[#f2ece0]/70 border-[#f2ece0]/30 hover:text-[#D07A55] hover:border-[#D07A55]'
+                  : 'text-[#1c1917]/75 border-[#1c1917]/30 hover:text-[#A85532] hover:border-[#A85532]'
+                  }`}
+              >
+                Explore Services <span>→</span>
+              </a>
+            </div>
+          </div>
         </Reveal>
 
+        {/* Right Column: Image Portrait & Badge */}
         <Reveal delay={180}>
-          <div className="relative">
-            <img
-              src={unsplash('1665960213508-48f07086d49c', 760, 960)}
-              alt="Indian couple in traditional attire"
-              className="w-full object-cover"
-              style={{ aspectRatio: '4/5' }}
-            />
-            <div className="absolute -bottom-7 -left-7 w-44 h-56 overflow-hidden border-[5px] border-[#0c0b09]">
+          <div className="relative mx-auto lg:mx-0 max-w-[500px]">
+            {/* Outer Decorative Gold Border Frame */}
+            <div className={`absolute -inset-4 border rounded-2xl pointer-events-none hidden sm:block ${isDark ? 'border-[#D07A55]/25' : 'border-[#A85532]/30'
+              }`} />
+
+            {/* Main Portrait Container */}
+            <div className={`relative rounded-xl overflow-hidden border shadow-xl ${isDark ? 'border-[#f2ece0]/10 bg-[#14120e]' : 'border-[#e7e2d7] bg-white'
+              }`}>
               <img
-                src={unsplash('1611106211090-8f3c79eb8552', 280, 360)}
-                alt="Bride in green and gold sari"
-                className="w-full h-full object-cover"
+                src={puniyakottiImg}
+                alt="Punniyakotti - Photographer & Event Planner"
+                decoding="async"
+                className="w-full h-auto object-cover object-center transition-transform duration-700 hover:scale-[1.03]"
+                style={{ aspectRatio: '4/3' }}
               />
+              <div className={`absolute inset-0 bg-gradient-to-t pointer-events-none ${isDark ? 'from-[#0c0b09]/80 via-transparent to-transparent' : 'from-[#fbf9f5]/40 via-transparent to-transparent'
+                }`} />
+            </div>
+
+            {/* Floating Experience Badge */}
+            <div className={`absolute -bottom-6 -left-4 sm:left-6 border p-4 sm:p-5 rounded-xl shadow-xl backdrop-blur-md ${isDark ? 'bg-[#161410] border-[#D07A55]/40 text-[#f2ece0]' : 'bg-white border-[#A85532]/40 text-[#1c1917]'
+              }`}>
+              <div className="flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-[#D07A55]/15 border border-[#D07A55]/30 text-[#D07A55]' : 'bg-[#A85532]/15 border border-[#A85532]/30 text-[#A85532]'
+                  }`}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-['Cormorant_Garamond'] font-bold text-xl leading-none">7+ Years</p>
+                  <p className={`text-[10px] font-['Manrope'] tracking-[0.18em] uppercase font-semibold mt-1 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Creative Excellence</p>
+                </div>
+              </div>
             </div>
           </div>
         </Reveal>
@@ -274,51 +556,56 @@ function StudioStatement() {
 const SERVICES = [
   { title: 'Wedding Photography', desc: 'Every emotion, every glance — preserved in frames that outlast time.', img: '1735052712464-9d24b69be5f5' },
   { title: 'Wedding Films', desc: 'Cinematic wedding films that relive your love story with every viewing.', img: '1519741196428-6a2175fa2557' },
-  { title: 'Corporate & Business Events', desc: 'Professional photography that communicates authority and excellence.', img: '1772690445981-78b22eacda4b' },
+  { title: 'Pre-Wedding Photography', desc: 'Editorial pre-wedding shoots that tell your story before the ceremony.', img: '1633104502699-b2ecf0fee294' },
   { title: 'Event Photography', desc: 'From concerts to cultural celebrations — we document the energy.', img: '1764255510960-deee566a91f0' },
   { title: 'Event Videography', desc: 'High-production highlight reels for every event, large or intimate.', img: '1768508947605-8c7a50aed683' },
   { title: 'Drone & Aerial Cinematography', desc: 'Sweeping aerial perspectives that transform how your story is told.', img: '1767050248602-26b7386901ce' },
-  { title: 'Pre-Wedding Photography', desc: 'Editorial pre-wedding shoots that tell your story before the ceremony.', img: '1633104502699-b2ecf0fee294' },
-  { title: 'Brand & Commercial', desc: 'Visual content positioning your brand at the pinnacle of its industry.', img: '1768508947486-f54df8b43869' },
-  { title: 'Social Media Content', desc: 'Curated, on-brand content designed for the digital world.', img: '1785339677570-dc2e9f50737b' },
 ]
 
-function Services() {
+function Services({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 'light'; onNavigate?: (path: string, el?: HTMLElement | null) => void; onNavigateWithFlash?: (path: string, el?: HTMLElement | null) => void }) {
   const [hov, setHov] = useState<number | null>(null)
+  const isDark = theme === 'dark'
+  const doNavigate = onNavigate || onNavigateWithFlash
 
   return (
-    <section className="py-24 lg:py-36" style={{ background: '#0f0e0c' }}>
+    <section id="services" className={`py-24 lg:py-36 transition-colors duration-400 ${isDark ? 'bg-[#0f0e0c]' : 'bg-white'}`}>
       <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
         <Reveal className="mb-14">
-          <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-4">What We Do</p>
+          <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>What We Do</p>
           <h2
-            className="font-['DM_Serif_Display'] text-[#f2ece0]"
+            className={`font-['Cormorant_Garamond'] font-semibold ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
             style={{ fontSize: 'clamp(2rem, 3.5vw, 3.2rem)' }}
           >
             Our Services
           </h2>
         </Reveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: 'rgba(242,236,224,0.06)' }}>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-3 gap-px ${isDark ? 'bg-[#f2ece0]/10' : 'bg-[#1c1917]/10'}`}>
           {SERVICES.map((svc, i) => (
             <div
               key={svc.title}
-              className="relative overflow-hidden cursor-pointer"
-              style={{ background: '#0f0e0c', aspectRatio: '4/3' }}
+              className={`relative overflow-hidden cursor-pointer ${isDark ? 'bg-[#0f0e0c]' : 'bg-white'}`}
+              style={{ aspectRatio: '4/3' }}
               onMouseEnter={() => setHov(i)}
               onMouseLeave={() => setHov(null)}
+              onClick={(e) => {
+                if (doNavigate) {
+                  doNavigate('/projects', e.currentTarget)
+                }
+              }}
             >
               <img
                 src={unsplash(svc.img, 640, 480)}
                 alt={svc.title}
+                decoding="async"
                 className="w-full h-full object-cover transition-transform duration-700"
-                style={{ transform: hov === i ? 'scale(1.07)' : 'scale(1)', filter: 'brightness(0.45)' }}
+                style={{ transform: hov === i ? 'scale(1.07)' : 'scale(1)', filter: isDark ? 'brightness(0.55)' : 'brightness(0.65)' }}
               />
               <div
                 className="absolute inset-0 flex flex-col justify-end p-7 lg:p-8"
-                style={{ background: 'linear-gradient(to top, rgba(12,11,9,0.92) 0%, transparent 55%)' }}
+                style={{ background: isDark ? 'linear-gradient(to top, rgba(12,11,9,0.92) 0%, transparent 60%)' : 'linear-gradient(to top, rgba(28,25,23,0.9) 0%, transparent 60%)' }}
               >
-                <h3 className="font-['DM_Serif_Display'] text-[1.2rem] text-[#f2ece0] mb-2">{svc.title}</h3>
+                <h3 className="font-['Cormorant_Garamond'] font-bold text-[1.35rem] text-[#ffffff] mb-2">{svc.title}</h3>
                 <div
                   style={{
                     maxHeight: hov === i ? 80 : 0,
@@ -327,8 +614,8 @@ function Services() {
                     transition: 'max-height 0.45s ease, opacity 0.4s ease',
                   }}
                 >
-                  <p className="text-[12px] text-[#f2ece0]/65 leading-relaxed mb-3">{svc.desc}</p>
-                  <span className="text-[10px] tracking-[0.22em] uppercase text-[#b8965a]">View Work →</span>
+                  <p className="text-[12px] text-[#ffffff]/80 leading-relaxed mb-3">{svc.desc}</p>
+                  <span className={`text-[10px] tracking-[0.22em] uppercase font-semibold ${isDark ? 'text-[#D07A55]' : 'text-[#d4b06a]'}`}>View Work →</span>
                 </div>
               </div>
             </div>
@@ -340,44 +627,186 @@ function Services() {
 }
 
 // ─── PORTFOLIO ───────────────────────────────────────────────────────────────
-const CATS = ['ALL', 'WEDDINGS', 'EVENTS', 'CORPORATE', 'BRANDS', 'DRONE']
-const PORTFOLIO = [
-  { title: 'Arjun & Ananya — Wedding Story', cat: 'WEDDINGS', img: '1727430256509-0f897d6f4765', wide: true, tall: true },
-  { title: 'Urban Business Summit', cat: 'CORPORATE', img: '1772690445981-78b22eacda4b', wide: false, tall: false },
-  { title: 'Coastal Wedding — Chennai', cat: 'WEDDINGS', img: '1735052712464-9d24b69be5f5', wide: false, tall: true },
-  { title: 'Annual Corporate Gala', cat: 'EVENTS', img: '1764255510960-deee566a91f0', wide: false, tall: false },
-  { title: 'Destination Wedding', cat: 'WEDDINGS', img: '1665960213508-48f07086d49c', wide: false, tall: true },
-  { title: 'Luxury Brand Campaign', cat: 'BRANDS', img: '1768508947605-8c7a50aed683', wide: true, tall: false },
-  { title: 'Aerial Estate — Ooty', cat: 'DRONE', img: '1767050248602-26b7386901ce', wide: false, tall: false },
-  { title: 'Pre-Wedding Stories', cat: 'WEDDINGS', img: '1633104502699-b2ecf0fee294', wide: false, tall: false },
+const CATS = ['ALL', 'WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KIDS']
+
+// Selected top highlights for the "ALL" tab (Exactly 12 images)
+const FEATURED_ALL = [
+  { title: 'Royal Heritage Wedding', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4729.webp', wide: true, tall: true },
+  { title: 'Fine Art Album Spread', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/01.webp', wide: true, tall: false },
+  { title: 'Golden Blessing Ritual', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1749.webp', wide: false, tall: true },
+  { title: 'Romantic Sunset Portraits', cat: 'COUPLES', img: '/assets/image/COUPLES/RAM_0599.webp', wide: true, tall: true },
+  { title: 'Pure Joy & Innocence', cat: 'KIDS', img: '/assets/image/BABY/03.webp', wide: false, tall: true },
+  { title: 'Sacred Ceremonial Vows', cat: 'WEDDINGS', img: '/assets/image/WEDDING/RAM_0100.webp', wide: false, tall: false },
+  { title: 'Luxury Leather Album Spreads', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/10.webp', wide: false, tall: true },
+  { title: 'Traditional Seemantham Celebrations', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1834.webp', wide: true, tall: false },
+  { title: 'Candid Love Story', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0809.webp', wide: false, tall: false },
+  { title: 'Playful Childhood Milestones', cat: 'KIDS', img: '/assets/image/BABY/0B6A8894 - Copy.webp', wide: true, tall: false },
+  { title: 'Ethereal Bridal Elegance', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4811.webp', wide: false, tall: true },
+  { title: 'Emotions & Celebrations', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0822.webp', wide: false, tall: false },
 ]
 
-function Portfolio() {
+// All images per folder category
+const CATEGORIES_ALL_IMAGES: Record<string, { title: string; cat: string; img: string; wide?: boolean; tall?: boolean }[]> = {
+  WEDDINGS: [
+    { title: 'Royal Wedding Frame 1', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4729.webp', wide: true, tall: true },
+    { title: 'Ceremonial Moments 2', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4806.webp', wide: false, tall: false },
+    { title: 'Bridal Portraiture 3', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4811.webp', wide: false, tall: true },
+    { title: 'Sacred Vows 4', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4818.webp', wide: true, tall: false },
+    { title: 'Wedding Festivities 5', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4835.webp', wide: false, tall: false },
+    { title: 'Traditional Rituals 6', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4844.webp', wide: false, tall: true },
+    { title: 'Ethereal Bridal Frame 7', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4858.webp', wide: true, tall: false },
+    { title: 'Candid Couple Smiles 8', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4869.webp', wide: false, tall: false },
+    { title: 'Blessings Ceremony 9', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4873.webp', wide: false, tall: false },
+    { title: 'Grand Heritage Union 10', cat: 'WEDDINGS', img: '/assets/image/WEDDING/RAM_0100.webp', wide: true, tall: true },
+    { title: 'Sunset Couple Portrait 11', cat: 'WEDDINGS', img: '/assets/image/WEDDING/RAM_0103.webp', wide: false, tall: false },
+    { title: 'Timeless Emotion 12', cat: 'WEDDINGS', img: '/assets/image/WEDDING/12 345680.webp', wide: true, tall: false },
+    { title: 'Creative Editorial Frame 13', cat: 'WEDDINGS', img: '/assets/image/WEDDING/CRT02 1.webp', wide: false, tall: true },
+    { title: 'Creative Editorial Frame 14', cat: 'WEDDINGS', img: '/assets/image/WEDDING/CRT03 1.webp', wide: false, tall: false },
+    { title: 'Creative Editorial Frame 15', cat: 'WEDDINGS', img: '/assets/image/WEDDING/CRT03 2.webp', wide: true, tall: false },
+    { title: 'Creative Editorial Frame 16', cat: 'WEDDINGS', img: '/assets/image/WEDDING/CRT12 1.webp', wide: false, tall: true },
+  ],
+  'PREVIEW ALBUMN': [
+    { title: 'Album Spread 1', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/01.webp', wide: true, tall: true },
+    { title: 'Album Spread 2', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/04.webp', wide: false, tall: false },
+    { title: 'Album Spread 3', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/06.webp', wide: false, tall: true },
+    { title: 'Album Spread 4', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/10.webp', wide: true, tall: false },
+    { title: 'Album Spread 5', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/14.webp', wide: false, tall: false },
+    { title: 'Album Spread 6', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/15.webp', wide: false, tall: true },
+    { title: 'Album Spread 7', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/18.webp', wide: true, tall: false },
+    { title: 'Album Spread 8', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/CRT08.webp', wide: false, tall: false },
+    { title: 'Album Spread 9', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/CRT10.webp', wide: false, tall: false },
+    { title: 'Album Spread 10', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/CRT12.webp', wide: true, tall: true },
+    { title: 'Album Spread 11', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0018.webp', wide: false, tall: false },
+    { title: 'Album Spread 12', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0019.webp', wide: false, tall: true },
+    { title: 'Album Spread 13', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0020.webp', wide: true, tall: false },
+    { title: 'Album Spread 14', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0021.webp', wide: false, tall: false },
+    { title: 'Album Spread 15', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0022.webp', wide: false, tall: false },
+    { title: 'Album Spread 16', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0028.webp', wide: true, tall: false },
+    { title: 'Album Spread 17', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0031.webp', wide: false, tall: true },
+    { title: 'Album Spread 18', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0009.webp', wide: false, tall: false },
+    { title: 'Album Spread 19', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0014.webp', wide: true, tall: false },
+    { title: 'Album Spread 20', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0016.webp', wide: false, tall: false },
+    { title: 'Album Spread 21', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/SAVE_20250610_192917.webp', wide: false, tall: true },
+    { title: 'Album Spread 22', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/SAVE_20250610_192925.webp', wide: true, tall: false },
+  ],
+  'BABY SHOWER': [
+    { title: 'Baby Shower Frame 1', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8829 - Copy.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 2', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8839 - Copy.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 3', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8860 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 4', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8930 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 5', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8937 - Copy.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 6', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8943 - Copy.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 7', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8954 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 8', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8972 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 9', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8986 - Copy.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 10', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9078 - Copy.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 11', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9195 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 12', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9217 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 13', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9390.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 14', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9527.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 15', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/1B9A4827.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 16', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1749.webp', wide: true, tall: true },
+    { title: 'Baby Shower Frame 17', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1765.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 18', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1775.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 19', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1789.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 20', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1790.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 21', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1817.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 22', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1829.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 23', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1834.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 24', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1836.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 25', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1895.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 26', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1949.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 27', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC2247.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 28', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC2351.webp', wide: false, tall: false },
+  ],
+  COUPLES: [
+    { title: 'Couple Portrait 1', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0809.webp', wide: true, tall: false },
+    { title: 'Couple Portrait 2', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0822.webp', wide: false, tall: true },
+    { title: 'Couple Portrait 3', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0829.webp', wide: false, tall: false },
+    { title: 'Couple Portrait 4', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0831.webp', wide: true, tall: false },
+    { title: 'Couple Portrait 5', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0923.webp', wide: false, tall: false },
+    { title: 'Couple Portrait 6', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0961.webp', wide: false, tall: true },
+    { title: 'Couple Portrait 7', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0975.webp', wide: true, tall: false },
+    { title: 'Couple Portrait 8', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0986.webp', wide: false, tall: false },
+    { title: 'Couple Portrait 9', cat: 'COUPLES', img: '/assets/image/COUPLES/5I2A0403.webp', wide: false, tall: false },
+    { title: 'Couple Portrait 10', cat: 'COUPLES', img: '/assets/image/COUPLES/RAM_0599.webp', wide: true, tall: true },
+  ],
+  KIDS: [
+    { title: 'Kids Moment 1', cat: 'KIDS', img: '/assets/image/BABY/03.webp', wide: true, tall: true },
+    { title: 'Kids Moment 2', cat: 'KIDS', img: '/assets/image/BABY/0B6A8894 - Copy.webp', wide: false, tall: true },
+    { title: 'Kids Moment 3', cat: 'KIDS', img: '/assets/image/BABY/0B6A8912 - Copy.webp', wide: false, tall: false },
+    { title: 'Kids Moment 4', cat: 'KIDS', img: '/assets/image/BABY/0B6A9417.webp', wide: true, tall: false },
+    { title: 'Kids Moment 5', cat: 'KIDS', img: '/assets/image/BABY/0B6A9423.webp', wide: false, tall: false },
+    { title: 'Kids Moment 6', cat: 'KIDS', img: '/assets/image/BABY/0B6A9430.webp', wide: false, tall: true },
+    { title: 'Kids Moment 7', cat: 'KIDS', img: '/assets/image/BABY/0B6A9434.webp', wide: true, tall: false },
+    { title: 'Kids Moment 9', cat: 'KIDS', img: '/assets/image/BABY/1B9A6122.webp', wide: false, tall: false },
+    { title: 'Kids Moment 10', cat: 'KIDS', img: '/assets/image/BABY/1B9A6123.webp', wide: true, tall: true },
+    { title: 'Kids Moment 11', cat: 'KIDS', img: '/assets/image/BABY/1B9A6266.webp', wide: false, tall: false },
+    { title: 'Kids Moment 12', cat: 'KIDS', img: '/assets/image/BABY/DSC_7961.webp', wide: false, tall: false },
+    { title: 'Kids Moment 13', cat: 'KIDS', img: '/assets/image/BABY/DSC_8047.webp', wide: true, tall: false },
+    { title: 'Kids Moment 14', cat: 'KIDS', img: '/assets/image/BABY/DSC_8226.webp', wide: false, tall: true },
+  ],
+}
+
+function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?: (path: string, el?: HTMLElement | null) => void }) {
   const [cat, setCat] = useState('ALL')
-  const shown = cat === 'ALL' ? PORTFOLIO : PORTFOLIO.filter((p) => p.cat === cat)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
+  const isDark = theme === 'dark'
+  const rawShown = cat === 'ALL' ? FEATURED_ALL : (CATEGORIES_ALL_IMAGES[cat] || [])
+  const shown = rawShown.slice(0, 12)
+
+  const activePhoto = lightboxIndex !== null ? shown[lightboxIndex] : null
+
+  // Body scroll lock & Keyboard navigation for Portfolio Lightbox
+  useEffect(() => {
+    if (lightboxIndex !== null) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (lightboxIndex === null) return
+      if (e.key === 'Escape') setLightboxIndex(null)
+      if (e.key === 'ArrowRight') setLightboxIndex((prev) => (prev === null ? null : (prev + 1) % shown.length))
+      if (e.key === 'ArrowLeft') setLightboxIndex((prev) => (prev === null ? null : (prev - 1 + shown.length) % shown.length))
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [lightboxIndex, shown.length])
 
   return (
-    <section className="py-24 lg:py-40 max-w-[1440px] mx-auto px-8 lg:px-16">
+    <section className={`py-24 lg:py-40 max-w-[1440px] mx-auto px-8 lg:px-16 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
       <Reveal className="mb-14">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div>
-            <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-4">Our Work</p>
+            <p className={`text-[11px] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Selected Work</p>
             <h2
-              className="font-['DM_Serif_Display'] text-[#f2ece0]"
+              className={`font-['DM_Serif_Display'] ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
               style={{ fontSize: 'clamp(2rem, 3.5vw, 3.2rem)' }}
             >
               Featured Portfolio
             </h2>
+            {cat !== 'ALL' && (
+              <p className={`text-xs mt-2 font-medium ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
+                Showing all {shown.length} photos from {cat}
+              </p>
+            )}
           </div>
           <div className="flex flex-wrap gap-7">
             {CATS.map((c) => (
               <button
                 key={c}
-                onClick={() => setCat(c)}
-                className="text-[10px] tracking-[0.28em] uppercase transition-all duration-300 pb-0.5"
+                onClick={() => { setCat(c); setLightboxIndex(null); }}
+                className="text-[10px] tracking-[0.28em] uppercase transition-all duration-300 pb-0.5 font-medium cursor-pointer"
                 style={{
-                  color: cat === c ? '#b8965a' : 'rgba(242,236,224,0.38)',
-                  borderBottom: cat === c ? '1px solid #b8965a' : '1px solid transparent',
+                  color: cat === c ? (isDark ? '#D07A55' : '#A85532') : isDark ? 'rgba(242,236,224,0.4)' : 'rgba(28,25,23,0.5)',
+                  borderBottom: cat === c ? (isDark ? '2px solid #D07A55' : '2px solid #A85532') : '2px solid transparent',
                 }}
               >
                 {c}
@@ -388,98 +817,251 @@ function Portfolio() {
       </Reveal>
 
       <div
-        className="grid gap-2"
-        style={{ gridTemplateColumns: 'repeat(4, 1fr)', gridAutoRows: '200px' }}
+        className="grid gap-3"
+        style={{ gridTemplateColumns: 'repeat(4, 1fr)', gridAutoRows: '220px' }}
       >
         {shown.map((item, i) => (
           <Reveal
-            key={item.title + cat}
-            delay={i * 55}
-            className="relative overflow-hidden group cursor-pointer"
+            key={item.img + i}
+            delay={Math.min(i * 35, 400)}
+            className={`relative overflow-hidden group cursor-pointer rounded-sm shadow-sm border ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'
+              }`}
             style={{
-              background: '#1a1814',
               gridColumn: item.wide ? 'span 2' : 'span 1',
               gridRow: item.tall ? 'span 2' : 'span 1',
             }}
           >
-            <img
-              src={unsplash(item.img, 800, 600)}
-              alt={item.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-            />
-            <div
-              className="absolute inset-0 flex items-end p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-400"
-              style={{ background: 'linear-gradient(to top, rgba(12,11,9,0.88) 0%, transparent 55%)' }}
-            >
-              <div>
-                <p className="text-[10px] tracking-[0.22em] uppercase text-[#b8965a] mb-1">{item.cat}</p>
-                <p className="font-['DM_Serif_Display'] text-[1.15rem] text-[#f2ece0]">{item.title}</p>
-              </div>
+            <div className="w-full h-full" onClick={() => setLightboxIndex(i)}>
+              <img
+                src={item.img.startsWith('/') ? item.img : unsplash(item.img, 800, 600)}
+                alt={item.title}
+                decoding="async"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                loading="lazy"
+              />
             </div>
           </Reveal>
         ))}
       </div>
+
+      <div className="mt-14 text-center">
+        <a
+          href="/projects"
+          onClick={(e) => {
+            e.preventDefault()
+            if (onNavigate) onNavigate('/projects', e.currentTarget)
+          }}
+          className={`group inline-flex items-center gap-3 text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 transition-all duration-350 shadow-lg ${isDark
+              ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
+              : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
+            }`}
+        >
+          <span>EXPLORE ALL PROJECTS</span>
+          <span className="transition-transform duration-300 group-hover:translate-x-1.5">→</span>
+        </a>
+      </div>
+
+      {/* Lightbox Photo Preview Modal */}
+      {activePhoto && (
+        <div
+          className="fixed inset-0 z-[120] bg-black/92 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setLightboxIndex(null)}
+        >
+          <div
+            className="relative max-w-5xl w-full flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Bar */}
+            <div className="w-full flex items-center justify-between text-white mb-4 px-2">
+              <div>
+                <span className="text-[10px] tracking-[0.25em] uppercase text-[#D07A55] font-semibold block">{activePhoto.cat}</span>
+                <h3 className="font-['DM_Serif_Display'] text-xl">{activePhoto.title}</h3>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-white/60">{lightboxIndex! + 1} / {shown.length}</span>
+                <button
+                  onClick={() => setLightboxIndex(null)}
+                  className="text-white/80 hover:text-white text-2xl font-bold p-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Main Image */}
+            <div className="relative w-full max-h-[80vh] flex justify-center items-center overflow-hidden rounded border border-white/10 shadow-2xl bg-black">
+              <img
+                src={activePhoto.img}
+                alt={activePhoto.title}
+                className="max-h-[80vh] w-auto max-w-full object-contain"
+              />
+
+              {/* Prev Arrow */}
+              {shown.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setLightboxIndex((lightboxIndex! - 1 + shown.length) % shown.length)
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-3 transition-colors backdrop-blur-sm cursor-pointer"
+                >
+                  ←
+                </button>
+              )}
+
+              {/* Next Arrow */}
+              {shown.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setLightboxIndex((lightboxIndex! + 1) % shown.length)
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-3 transition-colors backdrop-blur-sm cursor-pointer"
+                >
+                  →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
 
 // ─── VIDEO SECTION ───────────────────────────────────────────────────────────
-function VideoSection() {
+function VideoSection({ theme }: { theme: 'dark' | 'light' }) {
+  const isDark = theme === 'dark'
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [showControls, setShowControls] = useState(false)
+  const hasStartedPlaying = useRef(false)
+
+  const togglePlay = () => {
+    if (!videoRef.current) return
+    if (isPlaying) {
+      videoRef.current.pause()
+      setIsPlaying(false)
+    } else {
+      if (!hasStartedPlaying.current) {
+        videoRef.current.currentTime = 0
+        hasStartedPlaying.current = true
+      }
+      videoRef.current.play()
+      setIsPlaying(true)
+    }
+  }
+
+  const toggleMute = () => {
+    if (!videoRef.current) return
+    videoRef.current.muted = !isMuted
+    setIsMuted(!isMuted)
+  }
+
   return (
-    <section className="py-24 lg:py-36" style={{ background: '#0f0e0c' }}>
+    <section className={`py-24 lg:py-36 transition-colors duration-400 ${isDark ? 'bg-black' : 'bg-white'}`}>
       <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
         <Reveal className="text-center mb-14">
-          <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-4">Cinematic Films</p>
+          <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Cinematic Films</p>
           <h2
-            className="font-['DM_Serif_Display'] text-[#f2ece0] mb-5"
+            className={`font-['Cormorant_Garamond'] font-semibold mb-5 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
             style={{ fontSize: 'clamp(2.2rem, 5vw, 5rem)' }}
           >
             Every Frame Tells a Story.
           </h2>
-          <p className="text-sm text-[#f2ece0]/55 max-w-[440px] mx-auto leading-[1.85]">
+          <p className={`text-sm max-w-[440px] mx-auto leading-[1.85] ${isDark ? 'text-[#f2ece0]/55' : 'text-[#1c1917]/65'}`}>
             From emotional wedding films to brand stories and event highlights — cinematic narratives that move people.
           </p>
         </Reveal>
 
         <Reveal delay={160}>
           <div
-            className="relative w-full overflow-hidden cursor-pointer group"
-            style={{ aspectRatio: '16/9', background: '#1a1814' }}
+            className={`relative w-full overflow-hidden cursor-pointer group rounded-lg shadow-xl border ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'
+              }`}
+            style={{ aspectRatio: '16/9' }}
+            onMouseEnter={() => setShowControls(true)}
+            onMouseLeave={() => setShowControls(false)}
+            onClick={togglePlay}
           >
-            <img
-              src={unsplash('1785339677570-dc2e9f50737b', 1600, 900)}
-              alt="Cinematic event film showcase"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-              style={{ filter: 'brightness(0.45)' }}
+            <video
+              ref={videoRef}
+              src="/assets/video/MONTAGE.mp4#t=14"
+              loop
+              muted={isMuted}
+              playsInline
+              preload="metadata"
+              onLoadedMetadata={(e) => {
+                if (!hasStartedPlaying.current) {
+                  e.currentTarget.currentTime = 14
+                }
+              }}
+              className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 flex items-center justify-center">
+
+            {/* Dark gradient overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+
+            {/* Center Play/Pause Indicator Button */}
+            <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${!isPlaying || showControls ? 'opacity-100' : 'opacity-0'}`}>
               <div
-                className="flex items-center justify-center transition-all duration-400 group-hover:scale-110"
+                className="flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-2xl backdrop-blur-md cursor-pointer"
                 style={{
-                  width: 80,
-                  height: 80,
+                  width: 84,
+                  height: 84,
                   borderRadius: '50%',
-                  border: '1px solid rgba(242,236,224,0.4)',
-                  background: 'rgba(184,150,90,0.12)',
+                  border: '1px solid rgba(255,255,255,0.4)',
+                  background: isPlaying ? 'rgba(0,0,0,0.5)' : isDark ? 'rgba(208,122,85,0.9)' : 'rgba(168,85,50,0.9)',
                 }}
               >
-                <div
-                  style={{
-                    width: 0,
-                    height: 0,
-                    marginLeft: 6,
-                    borderTop: '10px solid transparent',
-                    borderBottom: '10px solid transparent',
-                    borderLeft: '18px solid #f2ece0',
-                  }}
-                />
+                {isPlaying ? (
+                  <div className="flex gap-2">
+                    <div className="w-2 h-7 bg-white rounded-full" />
+                    <div className="w-2 h-7 bg-white rounded-full" />
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      width: 0,
+                      height: 0,
+                      marginLeft: 6,
+                      borderTop: '12px solid transparent',
+                      borderBottom: '12px solid transparent',
+                      borderLeft: '20px solid #ffffff',
+                    }}
+                  />
+                )}
               </div>
+              {!isPlaying && (
+                <span className="mt-4 text-xs font-semibold tracking-[0.25em] uppercase text-white/90 drop-shadow-md">
+                  Click To Play Video
+                </span>
+              )}
             </div>
-            <div className="absolute bottom-8 left-8 lg:bottom-12 lg:left-12">
-              <p className="font-['DM_Serif_Display'] text-2xl lg:text-3xl text-[#f2ece0] mb-1">
-                Watch Showreel
-              </p>
-              <p className="text-[11px] tracking-[0.22em] uppercase text-[#b8965a]">2026 Highlights — 4 min</p>
+
+            {/* Bottom Info Bar & Audio Toggle */}
+            <div className="absolute bottom-6 left-6 right-6 lg:bottom-10 lg:left-10 lg:right-10 flex items-end justify-between pointer-events-none">
+              <div>
+                <p className="font-['Cormorant_Garamond'] font-bold text-2xl lg:text-3xl text-[#ffffff] drop-shadow-md mb-1">
+                  Cinematic Montage Film
+                </p>
+                <p className={`text-[11px] font-['Manrope'] tracking-[0.22em] uppercase font-semibold drop-shadow-sm ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
+                  Frame &amp; Soul Official Showreel
+                </p>
+              </div>
+
+              {/* Sound Toggle Button */}
+              {isPlaying && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toggleMute()
+                  }}
+                  className="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-semibold tracking-wider border border-white/20 transition-all cursor-pointer shadow-lg"
+                >
+                  {isMuted ? '🔇 Muted' : '🔊 Sound On'}
+                </button>
+              )}
             </div>
           </div>
         </Reveal>
@@ -489,34 +1071,50 @@ function VideoSection() {
 }
 
 // ─── DRONE SECTION ───────────────────────────────────────────────────────────
-function DroneSection() {
+function DroneSection({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 'light'; onNavigate?: (path: string, el?: HTMLElement | null) => void; onNavigateWithFlash?: (path: string, el?: HTMLElement | null) => void }) {
+  const isDark = theme === 'dark'
+  const doNavigate = onNavigate || onNavigateWithFlash
   return (
     <section className="relative w-full flex items-center overflow-hidden" style={{ minHeight: '85vh' }}>
       <img
-        src={unsplash('1767050248602-26b7386901ce', 1920, 1080)}
-        alt="Aerial view of grand estate and formal gardens"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: 'brightness(0.35)' }}
+        src="/assets/image/WEDDING/RAM_0100.webp"
+        alt="Aerial Cinematography - Wedding Details"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
+        style={{ filter: isDark ? 'brightness(0.35)' : 'brightness(0.7)' }}
       />
       <div
-        className="absolute inset-0"
-        style={{ background: 'linear-gradient(140deg, rgba(12,11,9,0.75) 0%, rgba(12,11,9,0.1) 65%)' }}
+        className="absolute inset-0 transition-all duration-500"
+        style={{
+          background: isDark
+            ? 'linear-gradient(140deg, rgba(12,11,9,0.75) 0%, rgba(12,11,9,0.1) 65%)'
+            : 'linear-gradient(140deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.45) 65%)',
+        }}
       />
       <div className="relative z-10 max-w-[1440px] mx-auto px-8 lg:px-24 w-full py-32">
         <Reveal className="max-w-2xl">
-          <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-7">Aerial Cinematography</p>
+          <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-7 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Aerial Cinematography</p>
           <h2
-            className="font-['DM_Serif_Display'] text-[#f2ece0] leading-[1.0] mb-9"
+            className={`font-['Cormorant_Garamond'] font-semibold leading-[1.0] mb-9 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
             style={{ fontSize: 'clamp(2.8rem, 6vw, 6rem)' }}
           >
             See the Moment<br />from a Different<br />Angle.
           </h2>
-          <p className="text-sm text-[#f2ece0]/65 max-w-[400px] leading-[1.85] mb-11">
+          <p className={`text-sm max-w-[400px] leading-[1.85] mb-11 font-medium ${isDark ? 'text-[#f2ece0]/65' : 'text-[#1c1917]/75'}`}>
             Elevate your story with cinematic aerial photography and drone cinematography. Sweeping perspectives for weddings, events, and brand campaigns.
           </p>
           <a
-            href="#"
-            className="inline-block text-[11px] tracking-[0.22em] uppercase px-9 py-4 border border-[#b8965a] text-[#b8965a] hover:bg-[#b8965a] hover:text-[#0c0b09] transition-all duration-350"
+            href="/projects"
+            onClick={(e) => {
+              e.preventDefault()
+              if (doNavigate) {
+                doNavigate('/projects', e.currentTarget)
+              }
+            }}
+            className={`inline-block text-[11px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 border transition-all duration-350 shadow-md ${isDark
+              ? 'border-[#D07A55] text-[#D07A55] bg-[#0c0b09]/60 hover:bg-[#D07A55] hover:text-[#0c0b09]'
+              : 'border-[#A85532] text-[#A85532] bg-[#ffffff]/80 backdrop-blur-md hover:bg-[#A85532] hover:text-[#ffffff]'
+              }`}
           >
             Explore Aerial Work
           </a>
@@ -528,22 +1126,23 @@ function DroneSection() {
 
 // ─── WEDDING STORY ───────────────────────────────────────────────────────────
 const WEDDING_IMGS = [
-  { id: '1727430256509-0f897d6f4765', label: 'First Look' },
-  { id: '1519741196428-6a2175fa2557', label: 'Candid Emotion' },
-  { id: '1523369579000-4ec0fe04db44', label: 'The Ceremony' },
-  { id: '1660455559502-8f71b47443c4', label: 'Family Moments' },
-  { id: '1735052712464-9d24b69be5f5', label: 'Couple Portraits' },
-  { id: '1453857271477-4f9a4081966e', label: 'The Celebration' },
+  { src: '/assets/image/Wedding Photography/First Look.webp', label: 'First Look' },
+  { src: '/assets/image/Wedding Photography/Candid Emotion.webp', label: 'Candid Emotion' },
+  { src: '/assets/image/Wedding Photography/The Ceremony.webp', label: 'The Ceremony' },
+  { src: '/assets/image/Wedding Photography/Family Moments.webp', label: 'Family Moments' },
+  { src: '/assets/image/Wedding Photography/Couple Portraits.webp', label: 'Couple Portraits' },
+  { src: '/assets/image/Wedding Photography/The Celebration.webp', label: 'The Celebration' },
 ]
 
-function WeddingStory() {
+function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
+  const isDark = theme === 'dark'
   return (
-    <section className="py-24 lg:py-36">
+    <section className={`py-24 lg:py-36 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
       <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
         <Reveal className="text-center mb-20">
-          <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-4">Wedding Photography</p>
+          <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Wedding Photography</p>
           <h2
-            className="font-['DM_Serif_Display'] text-[#f2ece0] leading-[1.08]"
+            className={`font-['Cormorant_Garamond'] font-semibold leading-[1.08] ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
             style={{ fontSize: 'clamp(2.4rem, 5vw, 5rem)' }}
           >
             From the First Look<br />to the Last Dance.
@@ -559,19 +1158,20 @@ function WeddingStory() {
             const aspects = ['3/4', '4/5', '2/3', '3/4', '4/5', '3/4']
             return (
               <Reveal
-                key={item.id}
+                key={item.label}
                 delay={i * 70}
                 className="flex-shrink-0 group"
                 style={{ width: widths[i] }}
               >
-                <div className="overflow-hidden" style={{ aspectRatio: aspects[i] }}>
+                <div className={`overflow-hidden border rounded-sm shadow-sm ${isDark ? 'border-[#f2ece0]/10 bg-[#1a1814]' : 'border-[#e7e2d7] bg-white'}`} style={{ aspectRatio: aspects[i] }}>
                   <img
-                    src={unsplash(item.id, 400, 550)}
+                    src={item.src}
                     alt={item.label}
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
                   />
                 </div>
-                <p className="text-[10px] tracking-[0.25em] uppercase text-[#f2ece0]/40 mt-3">{item.label}</p>
+                <p className={`text-[10px] tracking-[0.25em] uppercase font-semibold mt-3 ${isDark ? 'text-[#f2ece0]/40' : 'text-[#1c1917]/60'}`}>{item.label}</p>
               </Reveal>
             )
           })}
@@ -581,209 +1181,27 @@ function WeddingStory() {
   )
 }
 
-// ─── CORPORATE SECTION ───────────────────────────────────────────────────────
-const CORP_ITEMS = [
-  { img: '1772690445981-78b22eacda4b', label: 'Conferences' },
-  { img: '1764255510960-deee566a91f0', label: 'Award Galas' },
-  { img: '1768508947605-8c7a50aed683', label: 'Networking Events' },
-  { img: '1768508947486-f54df8b43869', label: 'Product Launches' },
-]
-
-function CorporateSection() {
-  return (
-    <section className="py-24 lg:py-36" style={{ background: '#0f0e0c' }}>
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
-        <Reveal className="mb-14">
-          <div className="grid lg:grid-cols-2 gap-12 items-end">
-            <div>
-              <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-4">Corporate &amp; Events</p>
-              <h2
-                className="font-['DM_Serif_Display'] text-[#f2ece0] leading-[1.08]"
-                style={{ fontSize: 'clamp(2rem, 3.5vw, 3.5rem)' }}
-              >
-                Your Event.<br />Professionally Preserved.
-              </h2>
-            </div>
-            <p className="text-sm text-[#f2ece0]/55 leading-[1.9]">
-              From intimate business gatherings to large-scale conferences and award ceremonies — photography and video that reflects the calibre of your brand.
-            </p>
-          </div>
-        </Reveal>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-          {CORP_ITEMS.map((item, i) => (
-            <Reveal key={item.img} delay={i * 70} className="relative group overflow-hidden" style={{ background: '#1a1814' }}>
-              <img
-                src={unsplash(item.img, 500, 620)}
-                alt={item.label}
-                className="w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-                style={{ aspectRatio: '3/4', filter: 'brightness(0.55)' }}
-              />
-              <div
-                className="absolute bottom-0 left-0 right-0 p-5"
-                style={{ background: 'linear-gradient(to top, rgba(12,11,9,0.8) 0%, transparent 60%)' }}
-              >
-                <p className="text-[11px] tracking-[0.22em] uppercase text-[#f2ece0]/80">{item.label}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── ABOUT ───────────────────────────────────────────────────────────────────
-const STATS = [
-  { num: '100+', label: 'Events Captured' },
-  { num: '50+', label: 'Wedding Stories' },
-  { num: '25+', label: 'Corporate Events' },
-  { num: '10+', label: 'Destinations' },
-]
-
-function AboutSection() {
-  return (
-    <section className="py-24 lg:py-40">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-16 grid lg:grid-cols-[1.05fr_1fr] gap-16 lg:gap-28 items-center">
-        <Reveal>
-          <img
-            src={unsplash('1768508950778-9ba70d4445e9', 800, 1000)}
-            alt="Couple at a formal dinner event"
-            className="w-full object-cover"
-            style={{ aspectRatio: '4/5' }}
-          />
-        </Reveal>
-
-        <Reveal delay={180}>
-          <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-8">About</p>
-          <h2
-            className="font-['DM_Serif_Display'] text-[#f2ece0] mb-8"
-            style={{ fontSize: 'clamp(2.2rem, 3.5vw, 3.5rem)' }}
-          >
-            Behind the Lens.
-          </h2>
-          <p className="text-sm text-[#f2ece0]/55 leading-[1.95] mb-12">
-            We believe great photography isn't about simply recording what happened. It's about noticing the emotion, energy, details, and moments that make an event unforgettable. Every frame we capture carries intention — and a story worth telling for decades.
-          </p>
-          <div
-            className="grid grid-cols-2 gap-8 border-t pt-10"
-            style={{ borderColor: 'rgba(242,236,224,0.1)' }}
-          >
-            {STATS.map((s) => (
-              <div key={s.label}>
-                <p className="font-['DM_Serif_Display'] text-[2.4rem] text-[#b8965a] leading-none mb-2">{s.num}</p>
-                <p className="text-[11px] tracking-[0.18em] uppercase text-[#f2ece0]/45">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  )
-}
-
-// ─── TESTIMONIALS ────────────────────────────────────────────────────────────
-const TESTIMONIALS = [
-  {
-    quote: "They didn't just photograph our wedding. They captured every emotion, every laugh, and every little moment we never want to forget.",
-    name: 'Priya & Rahul Sharma',
-    type: 'Wedding — New Delhi',
-    img: '1630526720753-aa4e71acf67d',
-  },
-  {
-    quote: 'The corporate event coverage was exceptional. Professional, unobtrusive, and the final imagery elevated our entire brand presentation.',
-    name: 'Aditya Mehta',
-    type: 'Corporate Summit — Mumbai',
-    img: '1595970730815-f87de7a62635',
-  },
-  {
-    quote: 'Our pre-wedding shoot felt like a luxury editorial. The team\'s creative vision transformed our memories into art.',
-    name: 'Sneha & Vikram Nair',
-    type: 'Pre-Wedding — Goa',
-    img: '1660455559502-8f71b47443c4',
-  },
-]
-
-function Testimonials() {
-  const [cur, setCur] = useState(0)
-  const t = TESTIMONIALS[cur]
-
-  return (
-    <section className="py-24 lg:py-36" style={{ background: '#0f0e0c' }}>
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
-        <Reveal className="text-center mb-4">
-          <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a]">Client Stories</p>
-        </Reveal>
-
-        <div className="max-w-3xl mx-auto text-center py-8">
-          <p
-            className="font-['DM_Serif_Display'] text-[#b8965a]/25 leading-none mb-2 select-none"
-            style={{ fontSize: 'clamp(6rem, 12vw, 10rem)' }}
-          >
-            "
-          </p>
-          <p
-            key={cur}
-            className="font-['DM_Serif_Display'] text-[#f2ece0] leading-[1.5] mb-10"
-            style={{
-              fontSize: 'clamp(1.3rem, 2.5vw, 1.9rem)',
-              animation: 'fadeUp 0.6s ease both',
-            }}
-          >
-            {t.quote}
-          </p>
-          <div className="flex items-center justify-center gap-4 mb-10">
-            <img
-              src={unsplash(t.img, 80, 80)}
-              alt={t.name}
-              className="w-11 h-11 rounded-full object-cover"
-            />
-            <div className="text-left">
-              <p className="text-sm text-[#f2ece0] font-medium">{t.name}</p>
-              <p className="text-[11px] text-[#f2ece0]/45 tracking-wide">{t.type}</p>
-            </div>
-          </div>
-          <div className="flex justify-center gap-3">
-            {TESTIMONIALS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCur(i)}
-                aria-label={`Testimonial ${i + 1}`}
-                className="rounded-full transition-all duration-350"
-                style={{
-                  width: i === cur ? 24 : 6,
-                  height: 6,
-                  background: i === cur ? '#b8965a' : 'rgba(242,236,224,0.2)',
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 // ─── INSTAGRAM GRID ──────────────────────────────────────────────────────────
 const INSTA = [
-  '1727430256509-0f897d6f4765',
-  '1665960213508-48f07086d49c',
-  '1735052712464-9d24b69be5f5',
-  '1519741196428-6a2175fa2557',
-  '1523369579000-4ec0fe04db44',
-  '1767050248602-26b7386901ce',
-  '1764255510960-deee566a91f0',
-  '1768508947605-8c7a50aed683',
-  '1785339677570-dc2e9f50737b',
+  '/assets/image/WEDDING/DSC_4811.webp',
+  '/assets/image/BABYSHOWER/_DSC1789.webp',
+  '/assets/image/COUPLES/RAM_0599.webp',
+  '/assets/image/BABYSHOWER/_DSC1834.webp',
+  '/assets/image/WEDDING/RAM_0103.webp',
+  '/assets/image/BABYSHOWER/_DSC2247.webp',
+  '/assets/image/BABY/0B6A9436.webp',
+  '/assets/image/BABYSHOWER/0B6A8954 - Copy.webp',
+  '/assets/image/BABYSHOWER/_DSC2351.webp',
 ]
 
-function InstagramGrid() {
+function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
+  const isDark = theme === 'dark'
   return (
-    <section className="py-24 lg:py-36 max-w-[1440px] mx-auto px-8 lg:px-16">
+    <section className={`py-24 lg:py-36 max-w-[1440px] mx-auto px-8 lg:px-16 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
       <Reveal className="text-center mb-12">
-        <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-4">@frameandsoul</p>
+        <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>@frameandsoul</p>
         <h2
-          className="font-['DM_Serif_Display'] text-[#f2ece0] mb-7"
+          className={`font-['Cormorant_Garamond'] font-semibold mb-7 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
           style={{ fontSize: 'clamp(2rem, 3.5vw, 3.2rem)' }}
         >
           Follow the Stories.
@@ -791,20 +1209,22 @@ function InstagramGrid() {
       </Reveal>
 
       <div className="grid grid-cols-3 lg:grid-cols-9 gap-1 mb-9">
-        {INSTA.map((id, i) => (
+        {INSTA.map((imgSrc, i) => (
           <Reveal
-            key={id}
+            key={imgSrc}
             delay={i * 35}
-            className="relative overflow-hidden group cursor-pointer"
-            style={{ background: '#1a1814', aspectRatio: '1/1' }}
+            className={`relative overflow-hidden group cursor-pointer border ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'}`}
+            style={{ aspectRatio: '1/1' }}
           >
             <img
-              src={unsplash(id, 280, 280)}
-              alt="Studio photography on Instagram"
+              src={imgSrc}
+              alt="Studio photography story"
+              decoding="async"
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-[#0c0b09]/55 opacity-0 group-hover:opacity-100 transition-opacity duration-350 flex items-center justify-center">
-              <span className="text-[#f2ece0] text-xl">♡</span>
+            <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-350 flex items-center justify-center ${isDark ? 'bg-[#0c0b09]/60' : 'bg-white/75'
+              }`}>
+              <span className={`text-xl font-bold ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>♡</span>
             </div>
           </Reveal>
         ))}
@@ -812,9 +1232,13 @@ function InstagramGrid() {
 
       <Reveal className="text-center">
         <a
-          href="#"
-          className="inline-block text-[11px] tracking-[0.22em] uppercase px-9 py-4 border text-[#f2ece0]/65 hover:border-[#b8965a] hover:text-[#b8965a] transition-all duration-350"
-          style={{ borderColor: 'rgba(242,236,224,0.18)' }}
+          href="https://instagram.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-block text-[11px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 border transition-all duration-350 shadow-sm ${isDark
+            ? 'border-[#f2ece0]/20 text-[#f2ece0]/70 hover:border-[#D07A55] hover:text-[#D07A55]'
+            : 'border-[#1c1917]/18 text-[#1c1917]/70 hover:border-[#A85532] hover:text-[#A85532]'
+            }`}
         >
           Follow Us on Instagram
         </a>
@@ -823,100 +1247,47 @@ function InstagramGrid() {
   )
 }
 
-// ─── JOURNAL ─────────────────────────────────────────────────────────────────
-const POSTS = [
-  { title: 'A Chennai Wedding Through Our Lens', date: 'Jul 2026', cat: 'Weddings', img: '1727430256509-0f897d6f4765' },
-  { title: 'How We Capture Authentic Wedding Moments', date: 'Jun 2026', cat: 'Stories', img: '1519741196428-6a2175fa2557' },
-  { title: 'Behind the Scenes of a Corporate Event', date: 'May 2026', cat: 'Corporate', img: '1772690445981-78b22eacda4b' },
-  { title: 'The Art of Cinematic Drone Photography', date: 'Apr 2026', cat: 'Aerial', img: '1767050248602-26b7386901ce' },
-]
-
-function Journal() {
-  return (
-    <section className="py-24 lg:py-36" style={{ background: '#0f0e0c' }}>
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
-        <Reveal className="mb-14">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-4">Journal</p>
-              <h2
-                className="font-['DM_Serif_Display'] text-[#f2ece0]"
-                style={{ fontSize: 'clamp(2rem, 3.5vw, 3.2rem)' }}
-              >
-                Stories &amp; Insights
-              </h2>
-            </div>
-            <a
-              href="#"
-              className="hidden lg:inline text-[11px] tracking-[0.22em] uppercase text-[#b8965a] border-b border-[#b8965a]/35 pb-0.5 hover:border-[#b8965a] transition-colors duration-300"
-            >
-              View All →
-            </a>
-          </div>
-        </Reveal>
-
-        <div className="grid lg:grid-cols-4 gap-6">
-          {POSTS.map((post, i) => (
-            <Reveal key={post.title} delay={i * 70} className="group cursor-pointer">
-              <div className="overflow-hidden mb-5" style={{ background: '#1a1814' }}>
-                <img
-                  src={unsplash(post.img, 480, 320)}
-                  alt={post.title}
-                  className="w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-                  style={{ aspectRatio: '3/2' }}
-                />
-              </div>
-              <p className="text-[10px] tracking-[0.28em] uppercase text-[#b8965a] mb-2">
-                {post.cat} — {post.date}
-              </p>
-              <h3
-                className="font-['DM_Serif_Display'] text-[#f2ece0] leading-snug transition-colors duration-300 group-hover:text-[#b8965a]"
-                style={{ fontSize: '1.15rem' }}
-              >
-                {post.title}
-              </h3>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 // ─── FINAL CTA ───────────────────────────────────────────────────────────────
-function FinalCTA() {
+function FinalCTA({ theme }: { theme: 'dark' | 'light' }) {
+  const isDark = theme === 'dark'
   return (
-    <section className="relative w-full flex items-center justify-center overflow-hidden" style={{ minHeight: '85vh' }}>
+    <section id="contact" className="relative w-full flex items-center justify-center overflow-hidden" style={{ minHeight: '85vh' }}>
       <img
-        src={unsplash('1665960213508-48f07086d49c', 1920, 1080)}
-        alt="Indian couple — final call to action"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: 'brightness(0.28)' }}
+        src="/assets/image/COUPLES/RAM_0599.webp"
+        alt="Couple silhouette — Get in Touch"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
+        style={{ filter: isDark ? 'brightness(0.35)' : 'brightness(0.75)' }}
       />
-      <div className="absolute inset-0" style={{ background: 'rgba(12,11,9,0.45)' }} />
+      <div className={`absolute inset-0 transition-all duration-500 ${isDark ? 'bg-[#0c0b09]/50' : 'bg-white/30'}`} />
       <div className="relative z-10 text-center px-8 py-28">
         <Reveal>
-          <p className="text-[11px] tracking-[0.35em] uppercase text-[#b8965a] mb-7">Get in Touch</p>
+          <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-7 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Get in Touch</p>
           <h2
-            className="font-['DM_Serif_Display'] text-[#f2ece0] leading-[1.04] mb-8"
+            className={`font-['Cormorant_Garamond'] font-semibold leading-[1.04] mb-8 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
             style={{ fontSize: 'clamp(2.6rem, 6vw, 6rem)' }}
           >
             Let's Create Something<br />Worth Remembering.
           </h2>
-          <p className="text-sm text-[#f2ece0]/60 max-w-[380px] mx-auto leading-[1.85] mb-12">
+          <p className={`text-sm max-w-[380px] mx-auto leading-[1.85] mb-12 font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/70'}`}>
             Have an event, wedding, brand story, or celebration coming up? Let's talk.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="#"
-              className="text-[11px] tracking-[0.22em] uppercase px-11 py-4 bg-[#b8965a] text-[#0c0b09] font-medium hover:bg-[#f2ece0] transition-all duration-350"
+              href="mailto:punniyakottistudio@gmail.com"
+              className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 transition-all duration-350 shadow-md ${isDark
+                ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
+                : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
+                }`}
             >
               Check Availability
             </a>
             <a
-              href="#"
-              className="text-[11px] tracking-[0.22em] uppercase px-11 py-4 border text-[#f2ece0] hover:border-[#f2ece0] transition-all duration-350"
-              style={{ borderColor: 'rgba(242,236,224,0.35)' }}
+              href="tel:+919876543210"
+              className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 border transition-all duration-350 shadow-sm ${isDark
+                ? 'border-[#f2ece0]/35 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
+                : 'border-[#1c1917]/35 text-[#1c1917] bg-[#ffffff]/60 hover:border-[#A85532] hover:text-[#A85532]'
+                }`}
             >
               Start a Conversation
             </a>
@@ -928,43 +1299,71 @@ function FinalCTA() {
 }
 
 // ─── FOOTER ──────────────────────────────────────────────────────────────────
-function Footer() {
+function Footer({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 'light'; onNavigate?: (path: string, el?: HTMLElement | null, hashId?: string) => void; onNavigateWithFlash?: (path: string, el?: HTMLElement | null, hashId?: string) => void }) {
+  const isDark = theme === 'dark'
+  const doNavigate = onNavigate || onNavigateWithFlash
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault()
+    if (path.includes('#')) {
+      const hashId = path.split('#')[1]
+      const el = document.getElementById(hashId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+      } else if (doNavigate) {
+        doNavigate('/', e.currentTarget, hashId)
+      }
+    } else if (doNavigate) {
+      doNavigate(path, e.currentTarget)
+    }
+  }
+
   return (
-    <footer style={{ background: '#080706', borderTop: '1px solid rgba(242,236,224,0.07)' }}>
+    <footer className={`transition-colors duration-400 ${isDark ? 'bg-[#080706] border-t border-[#f2ece0]/07' : 'bg-white border-t border-[#1c1917]/08'}`}>
       <div className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16 lg:py-20">
         <div className="grid lg:grid-cols-[2fr_1fr_1fr_1.4fr] gap-12 lg:gap-16 mb-16">
           <div>
-            <span className="font-['DM_Serif_Display'] text-2xl tracking-[0.22em] uppercase text-[#f2ece0] block mb-5">
-              Frame &amp; Soul
+            <span className={`font-['Cormorant_Garamond'] font-bold text-2xl tracking-[0.08em] uppercase block mb-5 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}>
+              PUNNIYAKOTTI
             </span>
-            <p className="text-[12px] text-[#f2ece0]/38 leading-[1.85] max-w-[260px]">
+            <p className={`text-[12px] leading-[1.85] max-w-[260px] ${isDark ? 'text-[#f2ece0]/38' : 'text-[#1c1917]/65'}`}>
               A premium photography and videography studio capturing weddings, events, brands, and the moments that define us.
             </p>
           </div>
 
           <div>
-            <p className="text-[10px] tracking-[0.32em] uppercase text-[#b8965a] mb-6">Navigate</p>
+            <p className={`text-[10px] tracking-[0.32em] uppercase font-semibold mb-6 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Navigate</p>
             <div className="flex flex-col gap-3.5">
-              {['Home', 'Portfolio', 'Services', 'About', 'Stories', 'Contact'].map((l) => (
+              {[
+                { label: 'Home', path: '/' },
+                { label: 'Portfolio', path: '/projects' },
+                { label: 'Services', path: '/#services' },
+                { label: 'About', path: '/#about' },
+                { label: 'Contact', path: '/#contact' },
+              ].map((item) => (
                 <a
-                  key={l}
-                  href="#"
-                  className="text-[12px] text-[#f2ece0]/48 hover:text-[#f2ece0] transition-colors duration-300 tracking-wide"
+                  key={item.label}
+                  href={item.path}
+                  onClick={(e) => handleLinkClick(e, item.path)}
+                  className={`text-[12px] transition-colors duration-300 tracking-wide font-medium ${isDark ? 'text-[#f2ece0]/48 hover:text-[#f2ece0]' : 'text-[#1c1917]/65 hover:text-[#1c1917]'
+                    }`}
                 >
-                  {l}
+                  {item.label}
                 </a>
               ))}
             </div>
           </div>
 
           <div>
-            <p className="text-[10px] tracking-[0.32em] uppercase text-[#b8965a] mb-6">Services</p>
+            <p className={`text-[10px] tracking-[0.32em] uppercase font-semibold mb-6 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Services</p>
             <div className="flex flex-col gap-3.5">
               {['Wedding Photography', 'Wedding Films', 'Corporate Events', 'Event Videography', 'Drone & Aerial', 'Brand Photography'].map((s) => (
                 <a
                   key={s}
-                  href="#"
-                  className="text-[12px] text-[#f2ece0]/48 hover:text-[#f2ece0] transition-colors duration-300 tracking-wide"
+                  href="/projects"
+                  onClick={(e) => handleLinkClick(e, '/projects')}
+                  className={`text-[12px] transition-colors duration-300 tracking-wide font-medium ${isDark ? 'text-[#f2ece0]/48 hover:text-[#f2ece0]' : 'text-[#1c1917]/65 hover:text-[#1c1917]'
+                    }`}
                 >
                   {s}
                 </a>
@@ -973,24 +1372,31 @@ function Footer() {
           </div>
 
           <div>
-            <p className="text-[10px] tracking-[0.32em] uppercase text-[#b8965a] mb-6">Contact</p>
+            <p className={`text-[10px] tracking-[0.32em] uppercase font-semibold mb-6 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Contact</p>
             <div className="flex flex-col gap-3.5 mb-8">
-              <a href="mailto:hello@frameandsoul.in" className="text-[12px] text-[#f2ece0]/48 hover:text-[#f2ece0] transition-colors duration-300">
-                hello@frameandsoul.in
+              <a href="mailto:punniyakottistudio@gmail.com" className={`text-[12px] transition-colors duration-300 font-medium ${isDark ? 'text-[#f2ece0]/48 hover:text-[#f2ece0]' : 'text-[#1c1917]/65 hover:text-[#1c1917]'}`}>
+                punniyakottistudio@gmail.com
               </a>
-              <a href="tel:+919876543210" className="text-[12px] text-[#f2ece0]/48 hover:text-[#f2ece0] transition-colors duration-300">
+              <a href="tel:+919876543210" className={`text-[12px] transition-colors duration-300 font-medium ${isDark ? 'text-[#f2ece0]/48 hover:text-[#f2ece0]' : 'text-[#1c1917]/65 hover:text-[#1c1917]'}`}>
                 +91 98765 43210
               </a>
-              <p className="text-[12px] text-[#f2ece0]/38">Chennai, Tamil Nadu, India</p>
+              <p className={`text-[12px] font-medium ${isDark ? 'text-[#f2ece0]/38' : 'text-[#1c1917]/50'}`}>Chennai, Tamil Nadu, India</p>
             </div>
             <div className="flex gap-6">
-              {['Instagram', 'YouTube', 'WhatsApp'].map((s) => (
+              {[
+                { name: 'Instagram', url: 'https://instagram.com' },
+                { name: 'YouTube', url: 'https://youtube.com' },
+                { name: 'WhatsApp', url: 'https://wa.me/919876543210' },
+              ].map((s) => (
                 <a
-                  key={s}
-                  href="#"
-                  className="text-[10px] tracking-[0.18em] uppercase text-[#f2ece0]/35 hover:text-[#b8965a] transition-colors duration-300"
+                  key={s.name}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`text-[10px] tracking-[0.18em] uppercase transition-colors duration-300 font-semibold ${isDark ? 'text-[#f2ece0]/35 hover:text-[#D07A55]' : 'text-[#1c1917]/60 hover:text-[#A85532]'
+                    }`}
                 >
-                  {s}
+                  {s.name}
                 </a>
               ))}
             </div>
@@ -998,13 +1404,13 @@ function Footer() {
         </div>
 
         <div
-          className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pt-8"
-          style={{ borderTop: '1px solid rgba(242,236,224,0.07)' }}
+          className={`flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pt-8 border-t ${isDark ? 'border-[#f2ece0]/07' : 'border-[#1c1917]/08'
+            }`}
         >
-          <p className="text-[10px] text-[#f2ece0]/28 tracking-[0.18em]">
-            © 2026 Frame &amp; Soul. All Rights Reserved.
+          <p className={`text-[10px] tracking-[0.18em] ${isDark ? 'text-[#f2ece0]/28' : 'text-[#1c1917]/50'}`}>
+            © 2026 Punniyakotti Photography. All Rights Reserved.
           </p>
-          <p className="text-[10px] text-[#f2ece0]/18 tracking-[0.22em] uppercase">
+          <p className={`text-[10px] tracking-[0.22em] uppercase font-medium ${isDark ? 'text-[#f2ece0]/18' : 'text-[#1c1917]/40'}`}>
             Photography &amp; Videography Studio — Chennai
           </p>
         </div>
@@ -1015,23 +1421,85 @@ function Footer() {
 
 // ─── APP ─────────────────────────────────────────────────────────────────────
 export default function App() {
+  const [currentPath, setCurrentPath] = useState<string>(() => window.location.pathname || '/')
+  const [heroMode, setHeroMode] = useState<'image' | 'animation'>('image')
+  const [introPhase, setIntroPhase] = useState<IntroPhase>('loading')
+  const navLogoRef = useRef<HTMLAnchorElement | null>(null)
+
+  const toggleHeroMode = () => setHeroMode((prev) => (prev === 'image' ? 'animation' : 'image'))
+
+  useEffect(() => {
+    document.body.classList.remove('dark-theme')
+    localStorage.removeItem('app_theme')
+  }, [])
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname || '/')
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const handleNavigate = (toPath: string, _targetEl?: HTMLElement | null, hashId?: string) => {
+    window.history.pushState({}, '', toPath + (hashId ? `#${hashId}` : ''))
+    setCurrentPath(toPath)
+    if (hashId) {
+      setTimeout(() => {
+        const el = document.getElementById(hashId)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' })
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' })
+        }
+      }, 50)
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }
+
   return (
-    <div style={{ background: '#0c0b09', color: '#f2ece0' }}>
-      <Nav />
-      <Hero />
-      <StudioStatement />
-      <Services />
-      <Portfolio />
-      <VideoSection />
-      <DroneSection />
-      <WeddingStory />
-      <CorporateSection />
-      <AboutSection />
-      <Testimonials />
-      <InstagramGrid />
-      <Journal />
-      <FinalCTA />
-      <Footer />
+    <div className="min-h-screen bg-white text-[#1c1917]">
+      <Preloader
+        theme="light"
+        onPhaseChange={setIntroPhase}
+        navLogoRef={navLogoRef}
+      />
+      <Nav
+        currentPath={currentPath}
+        onNavigate={handleNavigate}
+        onNavigateWithFlash={handleNavigate}
+        heroMode={heroMode}
+        onToggleHeroMode={toggleHeroMode}
+        introPhase={introPhase}
+        navLogoRef={navLogoRef}
+      />
+
+      {currentPath === '/projects' ? (
+        <ProjectsPage
+          onNavigateHome={() => handleNavigate('/')}
+          theme="light"
+        />
+      ) : (
+        <>
+          <Hero
+            onNavigate={handleNavigate}
+            onNavigateWithFlash={handleNavigate}
+            theme="light"
+            heroMode={heroMode}
+            introPhase={introPhase}
+          />
+          <Portfolio theme="light" onNavigate={handleNavigate} />
+          <AboutSection theme="light" />
+          <Services theme="light" onNavigate={handleNavigate} onNavigateWithFlash={handleNavigate} />
+          <VideoSection theme="light" />
+          <DroneSection theme="light" onNavigate={handleNavigate} onNavigateWithFlash={handleNavigate} />
+          <WeddingStory theme="light" />
+          <InstagramGrid theme="light" />
+          <FinalCTA theme="light" />
+        </>
+      )}
+      <Footer theme="light" onNavigate={handleNavigate} onNavigateWithFlash={handleNavigate} />
     </div>
   )
 }
