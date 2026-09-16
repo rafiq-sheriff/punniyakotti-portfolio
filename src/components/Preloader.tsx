@@ -13,9 +13,21 @@ interface PreloaderProps {
   onPhaseChange?: (phase: IntroPhase) => void
   navLogoRef?: React.RefObject<HTMLAnchorElement | null>
   theme?: 'dark' | 'light'
+  heroImages?: string[]
 }
 
-export default function Preloader({ onPhaseChange, navLogoRef, theme = 'dark' }: PreloaderProps) {
+const DEFAULT_HERO_IMAGES = [
+  '/assets/image/hero/hero.webp',
+  '/hero-sprites/hero_spritesheet_24fps_grid.webp',
+]
+
+const ESTIMATED_SIZES: Record<string, number> = {
+  '/assets/image/hero/hero.webp': 433582,
+  '/hero-sprites/hero_spritesheet_24fps_grid.webp': 3754054,
+  '/hero-sprites/hero_spritesheet_horizontal.webp': 274428,
+}
+
+export default function Preloader({ onPhaseChange, navLogoRef, theme = 'dark', heroImages }: PreloaderProps) {
   const [progress, setProgress] = useState(0)
   const [phase, setPhase] = useState<IntroPhase>('loading')
   const [targetPos, setTargetPos] = useState<{ top: number; left: number; width: number; height: number } | null>(null)
@@ -31,32 +43,109 @@ export default function Preloader({ onPhaseChange, navLogoRef, theme = 'dark' }:
     // Prevent body scroll during intro sequence
     document.body.style.overflow = 'hidden'
 
-    const startTime = performance.now()
-    const duration = 1800 // 1.8s progress duration
+    const targets = heroImages && heroImages.length > 0 ? heroImages : DEFAULT_HERO_IMAGES
+
+    const loadedBytes = new Array(targets.length).fill(0)
+    const totalBytes = targets.map((url) => ESTIMATED_SIZES[url] || 500000)
+    const isDone = new Array(targets.length).fill(false)
+
+    let completedCount = 0
+    let isAllComplete = false
+
+    const activeXHRs: XMLHttpRequest[] = []
+
+    targets.forEach((url, index) => {
+      // Preload image element into memory
+      const img = new Image()
+      img.src = url
+
+      const xhr = new XMLHttpRequest()
+      activeXHRs.push(xhr)
+      xhr.open('GET', url, true)
+
+      xhr.onprogress = (event) => {
+        if (event.lengthComputable && event.total > 0) {
+          totalBytes[index] = event.total
+          loadedBytes[index] = event.loaded
+        } else {
+          loadedBytes[index] = Math.min(event.loaded, totalBytes[index])
+        }
+      }
+
+      const markSingleComplete = () => {
+        if (!isDone[index]) {
+          isDone[index] = true
+          loadedBytes[index] = totalBytes[index]
+          completedCount++
+          if (completedCount >= targets.length) {
+            isAllComplete = true
+          }
+        }
+      }
+
+      xhr.onload = markSingleComplete
+      xhr.onerror = markSingleComplete
+      xhr.onabort = markSingleComplete
+
+      try {
+        xhr.send()
+      } catch {
+        markSingleComplete()
+      }
+    })
+
+    // Safety fallback timeout (10s max)
+    const timeoutId = setTimeout(() => {
+      isAllComplete = true
+    }, 10000)
 
     let frameId: number
+    let currentDisplay = 0
+    const minDuration = 1200 // smooth minimum duration in ms
+    const startTime = performance.now()
 
-    const updateProgress = (currentTime: number) => {
-      const elapsed = currentTime - startTime
-      const rawRatio = Math.min(elapsed / duration, 1)
+    const updateLoop = (now: number) => {
+      const elapsed = now - startTime
+      const minRatio = Math.min(elapsed / minDuration, 1)
 
-      const easedProgress = Math.round((1 - Math.pow(1 - rawRatio, 3)) * 100)
-      setProgress(easedProgress)
+      const sumLoaded = loadedBytes.reduce((a, b) => a + b, 0)
+      const sumTotal = totalBytes.reduce((a, b) => a + b, 0)
+      const downloadRatio = sumTotal > 0 ? Math.min(sumLoaded / sumTotal, 1) : isAllComplete ? 1 : 0
 
-      if (rawRatio < 1) {
-        frameId = requestAnimationFrame(updateProgress)
+      let targetRatio = Math.min(downloadRatio, minRatio)
+      if (!isAllComplete && targetRatio > 0.95) {
+        targetRatio = 0.95
+      }
+      if (isAllComplete && minRatio >= 1) {
+        targetRatio = 1
+      }
+
+      currentDisplay += (targetRatio - currentDisplay) * 0.15
+
+      if (Math.abs(targetRatio - currentDisplay) < 0.005) {
+        currentDisplay = targetRatio
+      }
+
+      const percentage = Math.min(Math.floor(currentDisplay * 100), 100)
+      setProgress(percentage)
+
+      if (percentage < 100 || !isAllComplete || minRatio < 1) {
+        frameId = requestAnimationFrame(updateLoop)
       } else {
         // Progress 100% reached -> Slide loader page UP
+        setProgress(100)
         setTimeout(() => {
           updatePhase('loader_sliding')
-        }, 100)
+        }, 150)
       }
     }
 
-    frameId = requestAnimationFrame(updateProgress)
+    frameId = requestAnimationFrame(updateLoop)
 
     return () => {
       cancelAnimationFrame(frameId)
+      clearTimeout(timeoutId)
+      activeXHRs.forEach((xhr) => xhr.abort())
       document.body.style.overflow = ''
     }
   }, [])
