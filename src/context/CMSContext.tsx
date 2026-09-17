@@ -153,7 +153,7 @@ interface CMSContextType {
   resetProjectImage: (id: string) => Promise<void>
 
   // Dynamic Category Tab Methods
-  addCategory: (name: string) => Promise<void>
+  addCategory: (name: string, type?: 'image' | 'video') => Promise<void>
   updateCategoryName: (id: string, newName: string) => Promise<void>
   toggleCategoryActive: (id: string) => Promise<void>
   reorderCategories: (reorderedList: ProjectCategory[]) => Promise<void>
@@ -248,10 +248,12 @@ export function CMSProvider({ children }: { children: ReactNode }) {
           : def.display_order
 
         const name = localItem?.name || dbItem?.name || def.name
+        const type = localItem?.type || dbItem?.type || def.type || 'image'
 
         return {
           ...def,
           name,
+          type,
           display_order: displayOrder,
           is_active: isActive,
         }
@@ -262,6 +264,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         if (!mergedCats.some((m) => m.id === c.id || m.name.trim().toUpperCase() === c.name.trim().toUpperCase())) {
           mergedCats.push({
             ...c,
+            type: c.type || 'image',
             is_active: c.is_active !== undefined ? c.is_active : true,
           })
         }
@@ -364,7 +367,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   }
 
   // Category Tab Handlers
-  const addCategory = async (name: string) => {
+  const addCategory = async (name: string, type: 'image' | 'video' = 'image') => {
     const trimmed = name.trim().toUpperCase()
     if (!trimmed) return
     if (categories.some((c) => c.name.toUpperCase() === trimmed)) {
@@ -376,12 +379,19 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       id: newId,
       name: trimmed,
       display_order: categories.length + 1,
+      type: type,
       is_active: true,
       is_default: false,
     }
 
     const { error } = await supabase.from('project_categories').insert(newCat)
-    if (error) console.warn('Add category Supabase notice:', error.message)
+    if (error) {
+      console.warn('Add category Supabase notice:', error.message)
+      if (error.message.includes('schema cache') || error.message.includes('column')) {
+        const { type: _t, ...fallbackCat } = newCat
+        await supabase.from('project_categories').insert(fallbackCat)
+      }
+    }
 
     setCategories((prev) => {
       const updated = [...prev, newCat]
@@ -499,7 +509,16 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     }
 
     const { error } = await supabase.from('projects').insert(newProject)
-    if (error) throw new Error(error.message)
+    if (error) {
+      console.warn('Add project Supabase notice:', error.message)
+      if (error.message.includes('schema cache') || error.message.includes('column')) {
+        const { type: _t, youtube_url: _y, ...fallbackProject } = newProject
+        const { error: fallbackErr } = await supabase.from('projects').insert(fallbackProject)
+        if (fallbackErr) console.warn('Fallback project insert notice:', fallbackErr.message)
+      } else {
+        throw new Error(error.message)
+      }
+    }
 
     setProjects((prev) => [...prev, newProject])
   }

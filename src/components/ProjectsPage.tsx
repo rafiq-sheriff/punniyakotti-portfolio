@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useCMS } from '../context/CMSContext'
+import { extractYouTubeId } from '../lib/supabase'
 
 export interface GalleryItem {
   id: string
   src: string
-  category: 'WEDDINGS' | 'PREVIEW ALBUMN' | 'BABY SHOWER' | 'COUPLES' | 'KIDS'
+  category: string
   title: string
+  type?: 'image' | 'video'
+  youtube_url?: string | null
 }
 
 // Default hardcoded 89 photography images as default fallbacks
@@ -151,6 +154,8 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
       category: d.category,
       default_src: d.src,
       custom_src: null,
+      type: 'image' as const,
+      youtube_url: null,
       display_order: 1,
       is_active: true,
     }))
@@ -160,8 +165,10 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
       .map((p) => ({
         id: p.id,
         title: p.title,
-        category: p.category as GalleryItem['category'],
+        category: p.category,
         src: p.custom_src || p.default_src,
+        type: p.type || (p.youtube_url ? 'video' : 'image'),
+        youtube_url: p.youtube_url,
       }))
   }, [cmsProjects, disabledCategoryNames])
 
@@ -331,27 +338,44 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
       {/* PINTEREST MASONRY GALLERY */}
       <section className="max-w-[1536px] mx-auto px-6 sm:px-10 lg:px-16 pt-2">
         <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 xl:gap-6 space-y-4 xl:space-y-6">
-          {currentItems.map((item, i) => (
-            <div
-              key={item.id + i}
-              className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5"
-              onClick={() => setLightboxIndex(i)}
-            >
-              <img
-                src={item.src}
-                alt={item.title}
-                decoding="async"
-                loading="lazy"
-                className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-              />
+          {currentItems.map((item, i) => {
+            const isVideo = item.type === 'video' || Boolean(item.youtube_url)
+
+            return (
               <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                style={{
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.15)',
-                }}
-              />
-            </div>
-          ))}
+                key={item.id + i}
+                className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5"
+                onClick={() => setLightboxIndex(i)}
+              >
+                <img
+                  src={item.src}
+                  alt={item.title}
+                  decoding="async"
+                  loading="lazy"
+                  className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                />
+
+                {/* Video Play Overlay */}
+                {isVideo && (
+                  <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center transition-all duration-300 group-hover:bg-black/20">
+                    <div className="w-14 h-14 rounded-full bg-[#A85532] text-white flex items-center justify-center shadow-2xl transition-all duration-300 group-hover:scale-115 group-hover:bg-[#1c1917] border border-white/20">
+                      <span className="text-xl ml-1">▶</span>
+                    </div>
+                    <span className="text-[10px] font-mono tracking-widest text-white uppercase font-bold mt-2.5 bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                      Watch Video
+                    </span>
+                  </div>
+                )}
+
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.15)',
+                  }}
+                />
+              </div>
+            )
+          })}
         </div>
       </section>
 
@@ -387,12 +411,24 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
               </div>
             </div>
 
-            <div className="relative w-full max-h-[85vh] flex justify-center items-center overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-black/50">
-              <img
-                src={currentItems[lightboxIndex].src}
-                alt={currentItems[lightboxIndex].title}
-                className="max-h-[85vh] w-auto max-w-full object-contain rounded-lg select-none"
-              />
+            <div className="relative w-full max-h-[85vh] flex justify-center items-center overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-black/90">
+              {currentItems[lightboxIndex].type === 'video' || currentItems[lightboxIndex].youtube_url ? (
+                <div className="w-full aspect-video max-h-[80vh] bg-black flex items-center justify-center rounded-xl overflow-hidden shadow-2xl">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${extractYouTubeId(currentItems[lightboxIndex].youtube_url || '')}?autoplay=1`}
+                    title={currentItems[lightboxIndex].title}
+                    className="w-full h-full border-0 rounded-xl"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <img
+                  src={currentItems[lightboxIndex].src}
+                  alt={currentItems[lightboxIndex].title}
+                  className="max-h-[85vh] w-auto max-w-full object-contain rounded-lg select-none"
+                />
+              )}
 
               {currentItems.length > 1 && (
                 <button

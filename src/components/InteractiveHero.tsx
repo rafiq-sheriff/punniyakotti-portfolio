@@ -409,7 +409,9 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
               <span className="transition-transform duration-300 group-hover:translate-x-1.5">→</span>
             </a>
             <a
-              href="#contact"
+              href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20book%20a%20photography%20session."
+              target="_blank"
+              rel="noopener noreferrer"
               className={`inline-flex items-center text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 border transition-all duration-350 backdrop-blur-sm shadow-md rounded-[12px] ${
                 isDark
                   ? 'border-[#f2ece0]/30 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'

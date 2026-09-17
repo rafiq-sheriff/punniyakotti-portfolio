@@ -174,8 +174,9 @@ function Nav({ currentPath, onNavigate, onNavigateWithFlash, introPhase, navLogo
           }}
         >
           <a
-            href="/#contact"
-            onClick={(e) => handleClick(e, '/#contact')}
+            href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20book%20a%20photography%20session."
+            target="_blank"
+            rel="noopener noreferrer"
             className="hidden lg:block text-[11px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border transition-all duration-350 shadow-sm rounded-[12px] border-[#A85532] text-[#A85532] hover:bg-[#A85532] hover:text-[#ffffff]"
           >
             Book a Session
@@ -218,8 +219,9 @@ function Nav({ currentPath, onNavigate, onNavigateWithFlash, introPhase, navLogo
             </a>
           ))}
           <a
-            href="/#contact"
-            onClick={(e) => handleClick(e, '/#contact')}
+            href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20book%20a%20photography%20session."
+            target="_blank"
+            rel="noopener noreferrer"
             className={`self-start text-[11px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border rounded-[12px] ${isDark ? 'border-[#D07A55] text-[#D07A55]' : 'border-[#A85532] text-[#A85532]'
               }`}
           >
@@ -380,11 +382,9 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
               <span className="transition-transform duration-300 group-hover:translate-x-1.5">→</span>
             </a>
             <a
-              href="#contact"
-              onClick={(e) => {
-                e.preventDefault()
-                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-              }}
+              href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20book%20a%20photography%20session."
+              target="_blank"
+              rel="noopener noreferrer"
               className={`inline-flex items-center justify-center text-[14px] sm:text-[14px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 border transition-all duration-350 backdrop-blur-sm shadow-md rounded-[12px] w-full sm:w-auto whitespace-nowrap ${isDark
                 ? 'border-[#f2ece0]/30 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
                 : 'border-[#1c1917]/25 bg-white/60 text-[#1c1917] hover:border-[#A85532] hover:text-[#A85532]'
@@ -667,6 +667,8 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
       title: p.title,
       cat: p.category,
       img: p.custom_src || p.default_src,
+      type: p.type,
+      youtube_url: p.youtube_url,
     }))
   }, [activeProjects, cat, categoryTabs])
 
@@ -783,7 +785,7 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
             delay={Math.min(i * 30, 300)}
             className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5"
           >
-            <div className="w-full h-full" onClick={() => setLightboxIndex(i)}>
+            <div className="w-full h-full relative" onClick={() => setLightboxIndex(i)}>
               <img
                 src={item.img}
                 alt={item.title}
@@ -791,6 +793,18 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
                 loading="lazy"
                 className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
               />
+
+              {item.type === 'video' && (
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/45 transition-colors flex flex-col items-center justify-center p-4">
+                  <div className="w-12 h-12 rounded-full bg-[#A85532]/90 text-white flex items-center justify-center shadow-lg border border-white/30 transform group-hover:scale-110 transition-transform">
+                    <div className="w-0 h-0 border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent border-l-[12px] border-l-white ml-1" />
+                  </div>
+                  <span className="mt-2 text-[10px] tracking-[0.2em] font-bold text-white uppercase bg-black/60 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                    Watch Video
+                  </span>
+                </div>
+              )}
+
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                 style={{
@@ -851,11 +865,23 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
             </div>
 
             <div className="relative w-full max-h-[85vh] flex justify-center items-center overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-black/50">
-              <img
-                src={activePhoto.img}
-                alt={activePhoto.title}
-                className="max-h-[85vh] w-auto max-w-full object-contain rounded-lg select-none"
-              />
+              {activePhoto.type === 'video' && activePhoto.youtube_url ? (
+                <div className="relative w-full aspect-video max-h-[85vh]">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${extractYouTubeId(activePhoto.youtube_url)}?autoplay=1&rel=0`}
+                    title={activePhoto.title}
+                    className="w-full h-full border-0 rounded-xl"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <img
+                  src={activePhoto.img}
+                  alt={activePhoto.title}
+                  className="max-h-[85vh] w-auto max-w-full object-contain rounded-lg select-none"
+                />
+              )}
 
               {shown.length > 1 && (
                 <button
@@ -1024,7 +1050,7 @@ function DroneSection({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark
   const { getSectionAsset } = useCMS()
   const isDark = theme === 'dark'
   const doNavigate = onNavigate || onNavigateWithFlash
-  const droneBg = getSectionAsset('drone_bg', '/assets/image/WEDDING/RAM_0100.webp').src
+  const droneBg = getSectionAsset('drone_bg', '/assets/image/puniyakotti (2).webp').src
 
   return (
     <section className="relative w-full flex items-center overflow-hidden" style={{ minHeight: '85vh' }}>
@@ -1089,10 +1115,27 @@ const DEFAULT_WEDDING_IMGS = [
 function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
   const { getSectionAsset } = useCMS()
   const isDark = theme === 'dark'
+
+  const activeWeddingImgs = useMemo(() => {
+    return DEFAULT_WEDDING_IMGS.map((item, i) => {
+      const assetState = getSectionAsset(item.id, item.defaultSrc)
+      return {
+        ...item,
+        assetState,
+        width: [280, 220, 200, 260, 240, 210][i % 6],
+        aspect: ['3/4', '4/5', '2/3', '3/4', '4/5', '3/4'][i % 6]
+      }
+    }).filter(item => !item.assetState.isDisabled)
+  }, [getSectionAsset])
+
+  const marqueeItems = useMemo(() => {
+    return [...activeWeddingImgs, ...activeWeddingImgs]
+  }, [activeWeddingImgs])
+
   return (
-    <section className={`py-24 lg:py-36 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
-        <Reveal className="text-center mb-20">
+    <section className={`py-24 lg:py-36 transition-colors duration-400 overflow-hidden ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
+      <div className="max-w-[1440px] mx-auto px-8 lg:px-16 mb-16">
+        <Reveal className="text-center">
           <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Wedding Photography</p>
           <h2
             className={`font-['Cormorant_Garamond'] font-semibold leading-[1.08] ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
@@ -1101,38 +1144,42 @@ function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
             From the First Look<br />to the Last Dance.
           </h2>
         </Reveal>
-
-        <div
-          className="flex gap-4 lg:gap-6 overflow-x-auto pb-3"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {DEFAULT_WEDDING_IMGS.map((item, i) => {
-            const assetState = getSectionAsset(item.id, item.defaultSrc)
-            if (assetState.isDisabled) return null
-
-            const widths = [280, 220, 200, 260, 240, 210]
-            const aspects = ['3/4', '4/5', '2/3', '3/4', '4/5', '3/4']
-            return (
-              <Reveal
-                key={item.label}
-                delay={i * 70}
-                className="flex-shrink-0 group"
-                style={{ width: widths[i] }}
-              >
-                <div className={`overflow-hidden border rounded-2xl shadow-sm ${isDark ? 'border-[#f2ece0]/10 bg-[#1a1814]' : 'border-[#e7e2d7] bg-white'}`} style={{ aspectRatio: aspects[i] }}>
-                  <img
-                    src={assetState.src}
-                    alt={item.label}
-                    decoding="async"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-                  />
-                </div>
-                <p className={`text-[10px] tracking-[0.25em] uppercase font-semibold mt-3 ${isDark ? 'text-[#f2ece0]/40' : 'text-[#1c1917]/60'}`}>{item.label}</p>
-              </Reveal>
-            )
-          })}
-        </div>
       </div>
+
+      <Reveal className="relative w-full overflow-hidden">
+        {/* Left & Right gradient edge masks for smooth appearance */}
+        <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-16 lg:w-32 z-10 bg-gradient-to-r ${isDark ? 'from-[#0c0b09] to-transparent' : 'from-white to-transparent'}`} />
+        <div className={`pointer-events-none absolute right-0 top-0 bottom-0 w-16 lg:w-32 z-10 bg-gradient-to-l ${isDark ? 'from-[#0c0b09] to-transparent' : 'from-white to-transparent'}`} />
+
+        <div className="flex w-max animate-marquee gap-4 lg:gap-6 py-4">
+          {marqueeItems.map((item, idx) => (
+            <div
+              key={`${item.id}-${idx}`}
+              className="flex-shrink-0 group cursor-pointer"
+              style={{ width: item.width }}
+            >
+              <div
+                className={`overflow-hidden border rounded-2xl shadow-sm transition-all duration-300 group-hover:shadow-xl ${
+                  isDark ? 'border-[#f2ece0]/10 bg-[#1a1814]' : 'border-[#e7e2d7] bg-white'
+                }`}
+                style={{ aspectRatio: item.aspect }}
+              >
+                <img
+                  src={item.assetState.src}
+                  alt={item.label}
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+                />
+              </div>
+              <p className={`text-[10px] tracking-[0.25em] uppercase font-semibold mt-3 transition-colors duration-300 ${
+                isDark ? 'text-[#f2ece0]/40 group-hover:text-[#D07A55]' : 'text-[#1c1917]/60 group-hover:text-[#A85532]'
+              }`}>
+                {item.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Reveal>
     </section>
   )
 }
@@ -1157,7 +1204,7 @@ function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
   return (
     <section className={`py-24 lg:py-36 max-w-[1440px] mx-auto px-8 lg:px-16 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
       <Reveal className="text-center mb-12">
-        <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>@frameandsoul</p>
+        <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>@spbeventplanner86</p>
         <h2
           className={`font-['Cormorant_Garamond'] font-semibold mb-7 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
           style={{ fontSize: 'clamp(2rem, 3.5vw, 3.2rem)' }}
@@ -1195,7 +1242,7 @@ function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
 
       <Reveal className="text-center">
         <a
-          href="https://instagram.com"
+          href="https://www.instagram.com/spbeventplanner86"
           target="_blank"
           rel="noopener noreferrer"
           className={`inline-block text-[11px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 border transition-all duration-350 shadow-sm rounded-[12px] ${isDark
@@ -1240,7 +1287,9 @@ function FinalCTA({ theme }: { theme: 'dark' | 'light' }) {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="mailto:punniyakottistudio@gmail.com"
+              href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20check%20availability%20for%20a%20photography%20session."
+              target="_blank"
+              rel="noopener noreferrer"
               className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 transition-all duration-350 shadow-md rounded-[12px] ${isDark
                 ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
                 : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
@@ -1249,7 +1298,9 @@ function FinalCTA({ theme }: { theme: 'dark' | 'light' }) {
               Check Availability
             </a>
             <a
-              href="tel:+919876543210"
+              href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20start%20a%20conversation%20about%20booking."
+              target="_blank"
+              rel="noopener noreferrer"
               className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 border transition-all duration-350 shadow-sm rounded-[12px] ${isDark
                 ? 'border-[#f2ece0]/35 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
                 : 'border-[#1c1917]/35 text-[#1c1917] bg-[#ffffff]/60 hover:border-[#A85532] hover:text-[#A85532]'
@@ -1340,19 +1391,19 @@ function Footer({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 'l
           <div>
             <p className={`text-[10px] tracking-[0.32em] uppercase font-semibold mb-6 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Contact</p>
             <div className="flex flex-col gap-3.5 mb-8">
-              <a href="mailto:punniyakottistudio@gmail.com" className={`text-[12px] transition-colors duration-300 font-medium ${isDark ? 'text-[#f2ece0]/48 hover:text-[#f2ece0]' : 'text-[#1c1917]/65 hover:text-[#1c1917]'}`}>
-                punniyakottistudio@gmail.com
+              <a href="mailto:spbeventplanner86@gmail.com" className={`text-[12px] transition-colors duration-300 font-medium ${isDark ? 'text-[#f2ece0]/48 hover:text-[#f2ece0]' : 'text-[#1c1917]/65 hover:text-[#1c1917]'}`}>
+                spbeventplanner86@gmail.com
               </a>
-              <a href="tel:+919876543210" className={`text-[12px] transition-colors duration-300 font-medium ${isDark ? 'text-[#f2ece0]/48 hover:text-[#f2ece0]' : 'text-[#1c1917]/65 hover:text-[#1c1917]'}`}>
-                +91 98765 43210
+              <a href="https://wa.me/917708665274" target="_blank" rel="noopener noreferrer" className={`text-[12px] transition-colors duration-300 font-medium ${isDark ? 'text-[#f2ece0]/48 hover:text-[#f2ece0]' : 'text-[#1c1917]/65 hover:text-[#1c1917]'}`}>
+                +91 7708 665 274
               </a>
               <p className={`text-[12px] font-medium ${isDark ? 'text-[#f2ece0]/38' : 'text-[#1c1917]/50'}`}>Chennai, Tamil Nadu, India</p>
             </div>
             <div className="flex gap-6">
               {[
-                { name: 'Instagram', url: 'https://instagram.com' },
+                { name: 'Instagram', url: 'https://www.instagram.com/spbeventplanner86' },
                 { name: 'YouTube', url: 'https://youtube.com' },
-                { name: 'WhatsApp', url: 'https://wa.me/919876543210' },
+                { name: 'WhatsApp', url: 'https://wa.me/917708665274' },
               ].map((s) => (
                 <a
                   key={s.name}

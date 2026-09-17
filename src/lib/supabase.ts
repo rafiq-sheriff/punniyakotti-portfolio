@@ -20,6 +20,8 @@ export interface CMSProject {
   category: string
   default_src: string
   custom_src?: string | null
+  type?: 'image' | 'video'
+  youtube_url?: string | null
   display_order: number
   is_active: boolean
   created_at?: string
@@ -30,6 +32,7 @@ export interface ProjectCategory {
   id: string
   name: string
   display_order: number
+  type?: 'image' | 'video'
   is_active?: boolean
   is_default?: boolean
   created_at?: string

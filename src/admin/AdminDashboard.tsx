@@ -38,12 +38,14 @@ export default function AdminDashboard() {
   // Category Edit / Add Modal State
   const [showAddCatModal, setShowAddCatModal] = useState(false)
   const [newCatName, setNewCatName] = useState('')
+  const [newCatType, setNewCatType] = useState<'image' | 'video'>('image')
   const [editingCatId, setEditingCatId] = useState<string | null>(null)
   const [editingCatNameText, setEditingCatNameText] = useState('')
 
   // New Project Form State
   const [showAddProjectModal, setShowAddProjectModal] = useState(false)
   const [newTitle, setNewTitle] = useState('')
+  const [newYtUrl, setNewYtUrl] = useState('')
   const [newFile, setNewFile] = useState<File | null>(null)
   const [addingProject, setAddingProject] = useState(false)
   const [projectError, setProjectError] = useState<string | null>(null)
@@ -127,7 +129,7 @@ export default function AdminDashboard() {
       id: 'drone_bg',
       name: 'Drone Section Background',
       purpose: 'Parallax background image for Aerial Cinematography section',
-      defaultSrc: '/assets/image/WEDDING/RAM_0100.webp',
+      defaultSrc: '/assets/image/puniyakotti (2).webp',
       folder: 'drone',
       tab: 'video_drone',
     },
@@ -176,10 +178,11 @@ export default function AdminDashboard() {
     e.preventDefault()
     if (!newCatName.trim()) return
     try {
-      await addCategory(newCatName)
+      await addCategory(newCatName, newCatType)
       setSelectedCategoryName(newCatName.trim().toUpperCase())
       setShowAddCatModal(false)
       setNewCatName('')
+      setNewCatType('image')
     } catch (err: any) {
       alert(err.message || 'Failed to add category tab')
     }
@@ -199,13 +202,21 @@ export default function AdminDashboard() {
     }
   }
 
-  // Add Project Submit
+  // Add Project Submit (Photo or Video Asset)
   const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault()
     setProjectError(null)
 
     if (!newTitle.trim()) {
-      setProjectError('Please enter a project title.')
+      setProjectError('Please enter a title.')
+      return
+    }
+
+    const currentCatObj = categories.find((c) => c.name.toUpperCase() === selectedCategoryName.toUpperCase())
+    const isVideoTab = currentCatObj?.type === 'video'
+
+    if (isVideoTab && !newYtUrl.trim()) {
+      setProjectError('Please enter a YouTube video URL.')
       return
     }
 
@@ -214,23 +225,26 @@ export default function AdminDashboard() {
       let customUrl: string | undefined = undefined
 
       if (newFile) {
-        customUrl = await uploadWebsiteAsset(newFile, 'projects')
+        customUrl = await uploadWebsiteAsset(newFile, isVideoTab ? 'video_covers' : 'projects')
       }
 
       await addProject({
         title: newTitle,
         category: selectedCategoryName,
-        default_src: customUrl || '/assets/image/hero/hero.webp',
+        default_src: customUrl || (isVideoTab ? '/assets/image/services/Wedding.webp' : '/assets/image/hero/hero.webp'),
         custom_src: customUrl,
+        type: isVideoTab ? 'video' : 'image',
+        youtube_url: isVideoTab ? newYtUrl : null,
         display_order: currentCategoryProjects.length + 1,
         is_active: true,
       })
 
       setShowAddProjectModal(false)
       setNewTitle('')
+      setNewYtUrl('')
       setNewFile(null)
     } catch (err: any) {
-      setProjectError(err.message || 'Failed to add project.')
+      setProjectError(err.message || 'Failed to add asset.')
     } finally {
       setAddingProject(false)
     }
@@ -1069,15 +1083,50 @@ export default function AdminDashboard() {
 
             <form onSubmit={handleAddCategorySubmit} className="space-y-4 text-xs">
               <div>
+                <label className="block text-stone-700 font-bold uppercase tracking-wider mb-2">
+                  1. Select Category Type
+                </label>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setNewCatType('image')}
+                    className={`p-3.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center cursor-pointer ${
+                      newCatType === 'image'
+                        ? 'bg-[#A85532] text-white border-[#A85532] shadow-sm font-bold'
+                        : 'bg-[#faf9f6] text-stone-700 border-stone-200 hover:border-stone-300'
+                    }`}
+                  >
+                    <span className="text-xl">📷</span>
+                    <span className="text-xs uppercase tracking-wider font-mono">Image Category</span>
+                    <span className="text-[10px] opacity-80">Photo gallery tab</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setNewCatType('video')}
+                    className={`p-3.5 rounded-2xl border flex flex-col items-center gap-1.5 transition-all text-center cursor-pointer ${
+                      newCatType === 'video'
+                        ? 'bg-[#A85532] text-white border-[#A85532] shadow-sm font-bold'
+                        : 'bg-[#faf9f6] text-stone-700 border-stone-200 hover:border-stone-300'
+                    }`}
+                  >
+                    <span className="text-xl">🎥</span>
+                    <span className="text-xs uppercase tracking-wider font-mono">Video Category</span>
+                    <span className="text-[10px] opacity-80">YouTube video tab</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-stone-700 font-bold uppercase tracking-wider mb-1">
-                  Tab Name (e.g. PRE WEDDING, CORPORATE, MATERNITY)
+                  2. Tab Name (e.g. WEDDING REELS, CORPORATE, MATERNITY)
                 </label>
                 <input
                   type="text"
                   required
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
-                  placeholder="e.g. PRE WEDDING"
+                  placeholder={newCatType === 'video' ? 'e.g. WEDDING FILMS' : 'e.g. PRE WEDDING'}
                   className="w-full bg-[#faf9f6] border border-stone-200 rounded-xl p-3 text-stone-900 uppercase font-mono focus:outline-none focus:border-[#A85532]"
                 />
               </div>
@@ -1323,86 +1372,121 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* ADD NEW PROJECT MODAL */}
-      {showAddProjectModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-stone-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-              <h4 className="font-['Cormorant_Garamond'] font-bold text-2xl text-[#1c1917]">
-                Add Photo To {selectedCategoryName}
-              </h4>
-              <button
-                onClick={() => setShowAddProjectModal(false)}
-                className="text-stone-400 hover:text-stone-800 text-lg"
-              >
-                ✕
-              </button>
-            </div>
+      {/* ADD NEW PROJECT / VIDEO MODAL */}
+      {showAddProjectModal && (() => {
+        const currentCatObj = categories.find((c) => c.name.toUpperCase() === selectedCategoryName.toUpperCase())
+        const isVideoTab = currentCatObj?.type === 'video'
 
-            <form onSubmit={handleAddProject} className="space-y-4 text-xs">
-              {projectError && (
-                <div className="bg-red-50 text-red-700 border border-red-200 p-3 rounded-xl font-medium">
-                  ⚠️ {projectError}
+        return (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white border border-stone-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div>
+                  <h4 className="font-['Cormorant_Garamond'] font-bold text-2xl text-[#1c1917]">
+                    {isVideoTab ? `Add Video to ${selectedCategoryName}` : `Add Photo to ${selectedCategoryName}`}
+                  </h4>
+                  <p className="text-stone-400 text-xs font-mono mt-0.5">
+                    {isVideoTab ? '🎥 Video Collection Item' : '📷 Photo Gallery Item'}
+                  </p>
                 </div>
-              )}
-
-              <div>
-                <label className="block text-stone-700 font-bold uppercase tracking-wider mb-1">Photo Title</label>
-                <input
-                  type="text"
-                  required
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="e.g. Royal Heritage Frame"
-                  className="w-full bg-[#faf9f6] border border-stone-200 rounded-xl p-3 text-stone-900 focus:outline-none focus:border-[#A85532]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-stone-700 font-bold uppercase tracking-wider mb-1">Target Category Tab</label>
-                <select
-                  value={selectedCategoryName}
-                  onChange={(e) => setSelectedCategoryName(e.target.value)}
-                  className="w-full bg-[#faf9f6] border border-stone-200 rounded-xl p-3 text-stone-900 focus:outline-none focus:border-[#A85532]"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-stone-700 font-bold uppercase tracking-wider mb-1">Upload Photo</label>
-                <input
-                  type="file"
-                  accept=".webp,.jpg,.jpeg,.png"
-                  onChange={(e) => setNewFile(e.target.files?.[0] || null)}
-                  className="w-full bg-[#faf9f6] border border-stone-200 rounded-xl p-2.5 text-stone-700"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-stone-100">
                 <button
-                  type="button"
                   onClick={() => setShowAddProjectModal(false)}
-                  className="px-4 py-2.5 text-stone-500 hover:text-stone-800 font-semibold"
+                  className="text-stone-400 hover:text-stone-800 text-lg"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={addingProject}
-                  className="bg-[#A85532] text-white font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl hover:bg-[#1c1917] transition-all shadow-md"
-                >
-                  {addingProject ? 'Adding...' : 'Create Photo'}
+                  ✕
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleAddProject} className="space-y-4 text-xs">
+                {projectError && (
+                  <div className="bg-red-50 text-red-700 border border-red-200 p-3 rounded-xl font-medium">
+                    ⚠️ {projectError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-stone-700 font-bold uppercase tracking-wider mb-1">
+                    {isVideoTab ? 'Video Title' : 'Photo Title'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    placeholder={isVideoTab ? 'e.g. Swetha & Rahul Pre-Wedding Teaser' : 'e.g. Royal Heritage Frame'}
+                    className="w-full bg-[#faf9f6] border border-stone-200 rounded-xl p-3 text-stone-900 focus:outline-none focus:border-[#A85532]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-stone-700 font-bold uppercase tracking-wider mb-1">Target Category Tab</label>
+                  <select
+                    value={selectedCategoryName}
+                    onChange={(e) => setSelectedCategoryName(e.target.value)}
+                    className="w-full bg-[#faf9f6] border border-stone-200 rounded-xl p-3 text-stone-900 focus:outline-none focus:border-[#A85532]"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name} ({cat.type === 'video' ? '🎥 Video' : '📷 Image'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {isVideoTab && (
+                  <div>
+                    <label className="block text-stone-700 font-bold uppercase tracking-wider mb-1">
+                      YouTube Video Link / URL
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newYtUrl}
+                      onChange={(e) => setNewYtUrl(e.target.value)}
+                      placeholder="e.g. https://www.youtube.com/watch?v=b68HETiNO98"
+                      className="w-full bg-[#faf9f6] border border-stone-200 rounded-xl p-3 text-stone-900 focus:outline-none focus:border-[#A85532]"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-stone-700 font-bold uppercase tracking-wider mb-1">
+                    {isVideoTab ? 'Upload Cover Image (Thumbnail)' : 'Upload Photo'}
+                  </label>
+                  <input
+                    type="file"
+                    accept=".webp,.jpg,.jpeg,.png"
+                    onChange={(e) => setNewFile(e.target.files?.[0] || null)}
+                    className="w-full bg-[#faf9f6] border border-stone-200 rounded-xl p-2.5 text-stone-700"
+                  />
+                  {isVideoTab && (
+                    <p className="text-stone-400 text-[11px] mt-1">
+                      This cover image will be displayed on the gallery card with a Play button overlay!
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddProjectModal(false)}
+                    className="px-4 py-2.5 text-stone-500 hover:text-stone-800 font-semibold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={addingProject}
+                    className="bg-[#A85532] text-white font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl hover:bg-[#1c1917] transition-all shadow-md"
+                  >
+                    {addingProject ? 'Adding...' : isVideoTab ? 'Create Video Item' : 'Create Photo'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* EDIT PROJECT MODAL */}
       {editingProject && (
