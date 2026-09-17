@@ -49,12 +49,12 @@ export default function DistortedTypography({
     const container = containerRef.current
     if (!canvas || !container) return
 
-    const gl = canvas.getContext('webgl', {
+    const gl = (canvas.getContext('webgl', {
       alpha: true,
       antialias: true,
       premultipliedAlpha: false,
       preserveDrawingBuffer: false,
-    })
+    }) || canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null
 
     if (!gl) {
       setWebglSupported(false)
@@ -127,25 +127,25 @@ export default function DistortedTypography({
         float dist = length(st - mouseSt);
 
         // Radial falloff radius (localized around the cursor)
-        float radius = 0.24;
+        float radius = 0.32;
         float falloff = smoothstep(radius, 0.0, dist);
-        falloff = pow(falloff, 1.35); // Smooth radial decay
+        falloff = pow(falloff, 1.2); // Smooth radial decay
 
         // Direction vector from mouse origin to UV
         vec2 dir = (dist > 0.0001) ? normalize(st - mouseSt) : vec2(0.0, 1.0);
         dir = dir / aspectVec;
 
         // Organic temporal wave oscillations
-        float wave1 = sin(dist * 28.0 - u_time * 3.2) * 0.5 + 0.5;
-        float wave2 = cos(dist * 18.0 - u_time * 2.4) * 0.5 + 0.5;
-        float n = snoise(uv * 7.0 + vec2(u_time * 0.4, u_time * 0.3));
+        float wave1 = sin(dist * 26.0 - u_time * 3.5) * 0.5 + 0.5;
+        float wave2 = cos(dist * 16.0 - u_time * 2.6) * 0.5 + 0.5;
+        float n = snoise(uv * 6.0 + vec2(u_time * 0.5, u_time * 0.4));
 
         // Push displacement vector (liquid displacement expanding outward)
-        vec2 pushDistort = dir * (0.055 + 0.035 * wave1 + 0.02 * n) * falloff;
+        vec2 pushDistort = dir * (0.075 + 0.045 * wave1 + 0.03 * n) * falloff;
 
         // Tangential swirl component for organic letter bending
         vec2 perp = vec2(-dir.y, dir.x);
-        vec2 swirlDistort = perp * (sin(dist * 20.0 - u_time * 2.8) * 0.025 + 0.015 * wave2) * falloff;
+        vec2 swirlDistort = perp * (sin(dist * 18.0 - u_time * 3.0) * 0.035 + 0.02 * wave2) * falloff;
 
         vec2 totalDisplacement = (pushDistort + swirlDistort) * u_hover;
 
@@ -153,13 +153,13 @@ export default function DistortedTypography({
         vec2 displacedUV = clamp(uv - totalDisplacement, 0.0, 1.0);
         vec4 texColor = texture2D(u_texture, displacedUV);
 
-        // Liquid glass refraction edge highlight (matching reference image 2)
+        // Liquid glass refraction edge highlight
         float dispMag = length(totalDisplacement * aspectVec);
-        float refraction = pow(dispMag * 14.0, 2.2) * falloff * u_hover;
+        float refraction = pow(dispMag * 12.0, 1.8) * falloff * u_hover;
 
         vec3 highlight = (u_isDark > 0.5) 
-          ? vec3(1.0, 0.95, 0.9) * refraction * 0.35
-          : vec3(0.1, 0.08, 0.05) * refraction * 0.25;
+          ? vec3(1.0, 0.95, 0.9) * refraction * 0.45
+          : vec3(0.1, 0.08, 0.05) * refraction * 0.35;
 
         gl_FragColor = vec4(texColor.rgb + highlight, texColor.a);
       }
@@ -208,9 +208,9 @@ export default function DistortedTypography({
       gl.ARRAY_BUFFER,
       new Float32Array([
         -1, -1,
-         1, -1,
-        -1,  1,
-         1,  1,
+        1, -1,
+        -1, 1,
+        1, 1,
       ]),
       gl.STATIC_DRAW
     )
@@ -343,14 +343,25 @@ export default function DistortedTypography({
         clientY = (e as MouseEvent).clientY
       }
 
-      // Check if mouse is anywhere inside or near container
-      const u = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
-      const v = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+      // Check if mouse cursor is inside or near container boundaries
+      const isInside =
+        clientX >= rect.left - 60 &&
+        clientX <= rect.right + 60 &&
+        clientY >= rect.top - 60 &&
+        clientY <= rect.bottom + 60
 
-      stateRef.current.targetMouseX = u
-      stateRef.current.targetMouseY = v
-      stateRef.current.targetHoverFactor = 1.0
-      stateRef.current.isHovered = true
+      if (isInside) {
+        const u = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+        const v = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+
+        stateRef.current.targetMouseX = u
+        stateRef.current.targetMouseY = v
+        stateRef.current.targetHoverFactor = 1.0
+        stateRef.current.isHovered = true
+      } else {
+        stateRef.current.targetHoverFactor = 0.0
+        stateRef.current.isHovered = false
+      }
     }
 
     const handlePointerLeave = () => {
@@ -407,11 +418,11 @@ export default function DistortedTypography({
       }
 
       // Smooth Spring Lerp Interpolation for Mouse Position & Hover Factor
-      const mouseSpeed = 0.12
+      const mouseSpeed = 0.18
       stateRef.current.mouseX += (stateRef.current.targetMouseX - stateRef.current.mouseX) * mouseSpeed
       stateRef.current.mouseY += (stateRef.current.targetMouseY - stateRef.current.mouseY) * mouseSpeed
 
-      const hoverSpeed = stateRef.current.targetHoverFactor > stateRef.current.hoverFactor ? 0.1 : 0.05
+      const hoverSpeed = stateRef.current.targetHoverFactor > stateRef.current.hoverFactor ? 0.15 : 0.08
       stateRef.current.hoverFactor += (stateRef.current.targetHoverFactor - stateRef.current.hoverFactor) * hoverSpeed
 
       const elapsed = (time - startTime) / 1000.0
@@ -506,9 +517,8 @@ export default function DistortedTypography({
         /* Fallback for non-WebGL / reduced-motion environments */
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-2">
           <span
-            className={`font-['Manrope'] font-extrabold uppercase transition-colors duration-700 whitespace-nowrap text-center ${
-              isDark ? 'text-[#f2ece0]/22' : 'text-[#1c1917]/12'
-            }`}
+            className={`font-['Manrope'] font-extrabold uppercase transition-colors duration-700 whitespace-nowrap text-center ${isDark ? 'text-[#f2ece0]/22' : 'text-[#1c1917]/12'
+              }`}
             style={{
               fontSize: 'clamp(32px, 11vw, 260px)',
               letterSpacing: '0.08em',

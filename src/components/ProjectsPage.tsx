@@ -7,107 +7,106 @@ export interface GalleryItem {
   title: string
 }
 
-// 85 photography images across all categories
+// 89 photography images across all categories
 const GALLERY_DATA: GalleryItem[] = [
   // WEDDINGS
-  { id: 'w-1', src: '/assets/image/WEDDING/DSC_4729.webp', category: 'WEDDINGS', title: 'Royal Heritage Wedding' },
-  { id: 'w-2', src: '/assets/image/WEDDING/DSC_4806.webp', category: 'WEDDINGS', title: 'Sacred Vows & Rituals' },
-  { id: 'w-3', src: '/assets/image/WEDDING/DSC_4811.webp', category: 'WEDDINGS', title: 'Bridal Elegance' },
-  { id: 'w-4', src: '/assets/image/WEDDING/DSC_4818.webp', category: 'WEDDINGS', title: 'Ceremonial Moments' },
-  { id: 'w-5', src: '/assets/image/WEDDING/DSC_4835.webp', category: 'WEDDINGS', title: 'Joyful Celebrations' },
-  { id: 'w-6', src: '/assets/image/WEDDING/DSC_4844.webp', category: 'WEDDINGS', title: 'Traditional Union' },
-  { id: 'w-7', src: '/assets/image/WEDDING/DSC_4858.webp', category: 'WEDDINGS', title: 'Ethereal Bridal Frame' },
-  { id: 'w-8', src: '/assets/image/WEDDING/DSC_4869.webp', category: 'WEDDINGS', title: 'Candid Couple Smiles' },
-  { id: 'w-9', src: '/assets/image/WEDDING/DSC_4873.webp', category: 'WEDDINGS', title: 'Blessings & Rituals' },
-  { id: 'w-10', src: '/assets/image/WEDDING/RAM_0100.webp', category: 'WEDDINGS', title: 'Grand Heritage Celebration' },
-  { id: 'w-11', src: '/assets/image/WEDDING/RAM_0103.webp', category: 'WEDDINGS', title: 'Sunset Couple Portrait' },
-  { id: 'w-12', src: '/assets/image/WEDDING/12 345680.webp', category: 'WEDDINGS', title: 'Timeless Wedding Story' },
-  { id: 'w-13', src: '/assets/image/WEDDING/CRT02 1.webp', category: 'WEDDINGS', title: 'Creative Editorial Frame 01' },
-  { id: 'w-14', src: '/assets/image/WEDDING/CRT03 1.webp', category: 'WEDDINGS', title: 'Creative Editorial Frame 02' },
-  { id: 'w-15', src: '/assets/image/WEDDING/CRT03 2.webp', category: 'WEDDINGS', title: 'Creative Editorial Frame 03' },
-  { id: 'w-16', src: '/assets/image/WEDDING/CRT12 1.webp', category: 'WEDDINGS', title: 'Creative Editorial Frame 04' },
+  { id: 'w-1', src: '/assets/comperessed images/WEDDING/DSC_4729.webp', category: 'WEDDINGS', title: 'Royal Heritage Wedding' },
+  { id: 'w-2', src: '/assets/comperessed images/WEDDING/DSC_4806.webp', category: 'WEDDINGS', title: 'Sacred Vows & Rituals' },
+  { id: 'w-3', src: '/assets/comperessed images/WEDDING/DSC_4811.webp', category: 'WEDDINGS', title: 'Bridal Elegance' },
+  { id: 'w-4', src: '/assets/comperessed images/WEDDING/DSC_4818.webp', category: 'WEDDINGS', title: 'Ceremonial Moments' },
+  { id: 'w-5', src: '/assets/comperessed images/WEDDING/DSC_4835.webp', category: 'WEDDINGS', title: 'Joyful Celebrations' },
+  { id: 'w-6', src: '/assets/comperessed images/WEDDING/DSC_4844.webp', category: 'WEDDINGS', title: 'Traditional Union' },
+  { id: 'w-7', src: '/assets/comperessed images/WEDDING/DSC_4858.webp', category: 'WEDDINGS', title: 'Ethereal Bridal Frame' },
+  { id: 'w-8', src: '/assets/comperessed images/WEDDING/DSC_4869.webp', category: 'WEDDINGS', title: 'Candid Couple Smiles' },
+  { id: 'w-9', src: '/assets/comperessed images/WEDDING/DSC_4873.webp', category: 'WEDDINGS', title: 'Blessings & Rituals' },
+  { id: 'w-10', src: '/assets/comperessed images/WEDDING/RAM_0100.webp', category: 'WEDDINGS', title: 'Grand Heritage Celebration' },
+  { id: 'w-11', src: '/assets/comperessed images/WEDDING/RAM_0103.webp', category: 'WEDDINGS', title: 'Sunset Couple Portrait' },
+  { id: 'w-12', src: '/assets/comperessed images/WEDDING/12 345680.webp', category: 'WEDDINGS', title: 'Timeless Wedding Story' },
+  { id: 'w-13', src: '/assets/comperessed images/WEDDING/CRT02 1.webp', category: 'WEDDINGS', title: 'Creative Editorial Frame 01' },
+  { id: 'w-14', src: '/assets/comperessed images/WEDDING/CRT03 1.webp', category: 'WEDDINGS', title: 'Creative Editorial Frame 02' },
+  { id: 'w-15', src: '/assets/comperessed images/WEDDING/CRT03 2.webp', category: 'WEDDINGS', title: 'Creative Editorial Frame 03' },
+  { id: 'w-16', src: '/assets/comperessed images/WEDDING/CRT12 1.webp', category: 'WEDDINGS', title: 'Creative Editorial Frame 04' },
 
   // PREVIEW ALBUMN
-  { id: 'pa-1', src: '/assets/image/PREVIEW ALBUMN/01.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 01' },
-  { id: 'pa-2', src: '/assets/image/PREVIEW ALBUMN/04.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 04' },
-  { id: 'pa-3', src: '/assets/image/PREVIEW ALBUMN/06.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 06' },
-  { id: 'pa-4', src: '/assets/image/PREVIEW ALBUMN/10.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 10' },
-  { id: 'pa-5', src: '/assets/image/PREVIEW ALBUMN/14.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 14' },
-  { id: 'pa-6', src: '/assets/image/PREVIEW ALBUMN/15.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 15' },
-  { id: 'pa-7', src: '/assets/image/PREVIEW ALBUMN/18.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 18' },
-  { id: 'pa-8', src: '/assets/image/PREVIEW ALBUMN/CRT08.webp', category: 'PREVIEW ALBUMN', title: 'Creative Layout 08' },
-  { id: 'pa-9', src: '/assets/image/PREVIEW ALBUMN/CRT10.webp', category: 'PREVIEW ALBUMN', title: 'Creative Layout 10' },
-  { id: 'pa-10', src: '/assets/image/PREVIEW ALBUMN/CRT12.webp', category: 'PREVIEW ALBUMN', title: 'Creative Layout 12' },
-  { id: 'pa-11', src: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0018.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 18' },
-  { id: 'pa-12', src: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0019.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 19' },
-  { id: 'pa-13', src: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0020.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 20' },
-  { id: 'pa-14', src: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0021.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 21' },
-  { id: 'pa-15', src: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0022.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 22' },
-  { id: 'pa-16', src: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0028.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 28' },
-  { id: 'pa-17', src: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0031.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 31' },
-  { id: 'pa-18', src: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0009.webp', category: 'PREVIEW ALBUMN', title: 'Luxury Album Showcase 09' },
-  { id: 'pa-19', src: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0014.webp', category: 'PREVIEW ALBUMN', title: 'Luxury Album Showcase 14' },
-  { id: 'pa-20', src: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0016.webp', category: 'PREVIEW ALBUMN', title: 'Luxury Album Showcase 16' },
-  { id: 'pa-21', src: '/assets/image/PREVIEW ALBUMN/SAVE_20250610_192917.webp', category: 'PREVIEW ALBUMN', title: 'Archival Print Spread 17' },
-  { id: 'pa-22', src: '/assets/image/PREVIEW ALBUMN/SAVE_20250610_192925.webp', category: 'PREVIEW ALBUMN', title: 'Archival Print Spread 25' },
+  { id: 'pa-1', src: '/assets/comperessed images/PREVIEW ALBUMN/01.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 01' },
+  { id: 'pa-2', src: '/assets/comperessed images/PREVIEW ALBUMN/04.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 04' },
+  { id: 'pa-3', src: '/assets/comperessed images/PREVIEW ALBUMN/06.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 06' },
+  { id: 'pa-4', src: '/assets/comperessed images/PREVIEW ALBUMN/10.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 10' },
+  { id: 'pa-5', src: '/assets/comperessed images/PREVIEW ALBUMN/14.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 14' },
+  { id: 'pa-6', src: '/assets/comperessed images/PREVIEW ALBUMN/15.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 15' },
+  { id: 'pa-7', src: '/assets/comperessed images/PREVIEW ALBUMN/18.webp', category: 'PREVIEW ALBUMN', title: 'Album Spread 18' },
+  { id: 'pa-8', src: '/assets/comperessed images/PREVIEW ALBUMN/CRT08.webp', category: 'PREVIEW ALBUMN', title: 'Creative Layout 08' },
+  { id: 'pa-9', src: '/assets/comperessed images/PREVIEW ALBUMN/CRT10.webp', category: 'PREVIEW ALBUMN', title: 'Creative Layout 10' },
+  { id: 'pa-10', src: '/assets/comperessed images/PREVIEW ALBUMN/CRT12.webp', category: 'PREVIEW ALBUMN', title: 'Creative Layout 12' },
+  { id: 'pa-11', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0018.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 18' },
+  { id: 'pa-12', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0019.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 19' },
+  { id: 'pa-13', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0020.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 20' },
+  { id: 'pa-14', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0021.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 21' },
+  { id: 'pa-15', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0022.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 22' },
+  { id: 'pa-16', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0028.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 28' },
+  { id: 'pa-17', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0031.webp', category: 'PREVIEW ALBUMN', title: 'Fine Art Storyboard 31' },
+  { id: 'pa-18', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0009.webp', category: 'PREVIEW ALBUMN', title: 'Luxury Album Showcase 09' },
+  { id: 'pa-19', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0014.webp', category: 'PREVIEW ALBUMN', title: 'Luxury Album Showcase 14' },
+  { id: 'pa-20', src: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0016.webp', category: 'PREVIEW ALBUMN', title: 'Luxury Album Showcase 16' },
+  { id: 'pa-21', src: '/assets/comperessed images/PREVIEW ALBUMN/SAVE_20250610_192917.webp', category: 'PREVIEW ALBUMN', title: 'Archival Print Spread 17' },
+  { id: 'pa-22', src: '/assets/comperessed images/PREVIEW ALBUMN/SAVE_20250610_192925.webp', category: 'PREVIEW ALBUMN', title: 'Archival Print Spread 25' },
 
   // BABYSHOWER
-  { id: 'bs-1', src: '/assets/image/BABYSHOWER/_DSC1749.webp', category: 'BABY SHOWER', title: 'Traditional Seemantham' },
-  { id: 'bs-2', src: '/assets/image/BABYSHOWER/_DSC1765.webp', category: 'BABY SHOWER', title: 'Blessings Ceremony' },
-  { id: 'bs-3', src: '/assets/image/BABYSHOWER/_DSC1775.webp', category: 'BABY SHOWER', title: 'Floral Offerings' },
-  { id: 'bs-4', src: '/assets/image/BABYSHOWER/_DSC1789.webp', category: 'BABY SHOWER', title: 'Family Happiness' },
-  { id: 'bs-5', src: '/assets/image/BABYSHOWER/_DSC1790.webp', category: 'BABY SHOWER', title: 'Warm Wishes' },
-  { id: 'bs-6', src: '/assets/image/BABYSHOWER/_DSC1817.webp', category: 'BABY SHOWER', title: 'Sacred Ritual' },
-  { id: 'bs-7', src: '/assets/image/BABYSHOWER/_DSC1829.webp', category: 'BABY SHOWER', title: 'Motherhood Glow' },
-  { id: 'bs-8', src: '/assets/image/BABYSHOWER/_DSC1834.webp', category: 'BABY SHOWER', title: 'Seemantham Celebration' },
-  { id: 'bs-9', src: '/assets/image/BABYSHOWER/_DSC1836.webp', category: 'BABY SHOWER', title: 'Joyful Moments' },
-  { id: 'bs-10', src: '/assets/image/BABYSHOWER/_DSC1895.webp', category: 'BABY SHOWER', title: 'Cherished Memories' },
-  { id: 'bs-11', src: '/assets/image/BABYSHOWER/_DSC1949.webp', category: 'BABY SHOWER', title: 'Family Gathering' },
-  { id: 'bs-12', src: '/assets/image/BABYSHOWER/_DSC2247.webp', category: 'BABY SHOWER', title: 'Golden Blessing' },
-  { id: 'bs-13', src: '/assets/image/BABYSHOWER/_DSC2351.webp', category: 'BABY SHOWER', title: 'Radiant Smile' },
-  { id: 'bs-14', src: '/assets/image/BABYSHOWER/0B6A8829 - Copy.webp', category: 'BABY SHOWER', title: 'Expectant Couple' },
-  { id: 'bs-15', src: '/assets/image/BABYSHOWER/0B6A8839 - Copy.webp', category: 'BABY SHOWER', title: 'Ceremonial Bangle Ritual' },
-  { id: 'bs-16', src: '/assets/image/BABYSHOWER/0B6A8860 - Copy.webp', category: 'BABY SHOWER', title: 'Festive Decoration' },
-  { id: 'bs-17', src: '/assets/image/BABYSHOWER/0B6A8930 - Copy.webp', category: 'BABY SHOWER', title: 'Happy Family' },
-  { id: 'bs-18', src: '/assets/image/BABYSHOWER/0B6A8937 - Copy.webp', category: 'BABY SHOWER', title: 'Warm Smiles' },
-  { id: 'bs-19', src: '/assets/image/BABYSHOWER/0B6A8943 - Copy.webp', category: 'BABY SHOWER', title: 'Blessings Portrait' },
-  { id: 'bs-20', src: '/assets/image/BABYSHOWER/0B6A8954 - Copy.webp', category: 'BABY SHOWER', title: 'Family Tradition' },
-  { id: 'bs-21', src: '/assets/image/BABYSHOWER/0B6A8972 - Copy.webp', category: 'BABY SHOWER', title: 'Floral Decor' },
-  { id: 'bs-22', src: '/assets/image/BABYSHOWER/0B6A8986 - Copy.webp', category: 'BABY SHOWER', title: 'Celebration Frame' },
-  { id: 'bs-23', src: '/assets/image/BABYSHOWER/0B6A9078 - Copy.webp', category: 'BABY SHOWER', title: 'Happy Moments' },
-  { id: 'bs-24', src: '/assets/image/BABYSHOWER/0B6A9195 - Copy.webp', category: 'BABY SHOWER', title: 'Grandparents Blessing' },
-  { id: 'bs-25', src: '/assets/image/BABYSHOWER/0B6A9217 - Copy.webp', category: 'BABY SHOWER', title: 'Sweet Laughter' },
-  { id: 'bs-26', src: '/assets/image/BABYSHOWER/0B6A9390.webp', category: 'BABY SHOWER', title: 'Traditional Elegance' },
-  { id: 'bs-27', src: '/assets/image/BABYSHOWER/0B6A9527.webp', category: 'BABY SHOWER', title: 'Precious Memories' },
-  { id: 'bs-28', src: '/assets/image/BABYSHOWER/1B9A4827.webp', category: 'BABY SHOWER', title: 'Family Heirloom' },
+  { id: 'bs-1', src: '/assets/comperessed images/BABYSHOWER/_DSC1749.webp', category: 'BABY SHOWER', title: 'Traditional Seemantham' },
+  { id: 'bs-2', src: '/assets/comperessed images/BABYSHOWER/_DSC1765.webp', category: 'BABY SHOWER', title: 'Blessings Ceremony' },
+  { id: 'bs-3', src: '/assets/comperessed images/BABYSHOWER/_DSC1775.webp', category: 'BABY SHOWER', title: 'Floral Offerings' },
+  { id: 'bs-4', src: '/assets/comperessed images/BABYSHOWER/_DSC1789.webp', category: 'BABY SHOWER', title: 'Family Happiness' },
+  { id: 'bs-5', src: '/assets/comperessed images/BABYSHOWER/_DSC1790.webp', category: 'BABY SHOWER', title: 'Warm Wishes' },
+  { id: 'bs-6', src: '/assets/comperessed images/BABYSHOWER/_DSC1817.webp', category: 'BABY SHOWER', title: 'Sacred Ritual' },
+  { id: 'bs-7', src: '/assets/comperessed images/BABYSHOWER/_DSC1829.webp', category: 'BABY SHOWER', title: 'Motherhood Glow' },
+  { id: 'bs-8', src: '/assets/comperessed images/BABYSHOWER/_DSC1834.webp', category: 'BABY SHOWER', title: 'Seemantham Celebration' },
+  { id: 'bs-9', src: '/assets/comperessed images/BABYSHOWER/_DSC1836.webp', category: 'BABY SHOWER', title: 'Joyful Moments' },
+  { id: 'bs-10', src: '/assets/comperessed images/BABYSHOWER/_DSC1895.webp', category: 'BABY SHOWER', title: 'Cherished Memories' },
+  { id: 'bs-11', src: '/assets/comperessed images/BABYSHOWER/_DSC1949.webp', category: 'BABY SHOWER', title: 'Family Gathering' },
+  { id: 'bs-12', src: '/assets/comperessed images/BABYSHOWER/_DSC2247.webp', category: 'BABY SHOWER', title: 'Golden Blessing' },
+  { id: 'bs-13', src: '/assets/comperessed images/BABYSHOWER/_DSC2351.webp', category: 'BABY SHOWER', title: 'Radiant Smile' },
+  { id: 'bs-14', src: '/assets/comperessed images/BABYSHOWER/0B6A8829 - Copy.webp', category: 'BABY SHOWER', title: 'Expectant Couple' },
+  { id: 'bs-15', src: '/assets/comperessed images/BABYSHOWER/0B6A8839 - Copy.webp', category: 'BABY SHOWER', title: 'Ceremonial Bangle Ritual' },
+  { id: 'bs-16', src: '/assets/comperessed images/BABYSHOWER/0B6A8860 - Copy.webp', category: 'BABY SHOWER', title: 'Festive Decoration' },
+  { id: 'bs-17', src: '/assets/comperessed images/BABYSHOWER/0B6A8930 - Copy.webp', category: 'BABY SHOWER', title: 'Happy Family' },
+  { id: 'bs-18', src: '/assets/comperessed images/BABYSHOWER/0B6A8937 - Copy.webp', category: 'BABY SHOWER', title: 'Warm Smiles' },
+  { id: 'bs-19', src: '/assets/comperessed images/BABYSHOWER/0B6A8943 - Copy.webp', category: 'BABY SHOWER', title: 'Blessings Portrait' },
+  { id: 'bs-20', src: '/assets/comperessed images/BABYSHOWER/0B6A8954 - Copy.webp', category: 'BABY SHOWER', title: 'Family Tradition' },
+  { id: 'bs-21', src: '/assets/comperessed images/BABYSHOWER/0B6A8972 - Copy.webp', category: 'BABY SHOWER', title: 'Floral Decor' },
+  { id: 'bs-22', src: '/assets/comperessed images/BABYSHOWER/0B6A8986 - Copy.webp', category: 'BABY SHOWER', title: 'Celebration Frame' },
+  { id: 'bs-23', src: '/assets/comperessed images/BABYSHOWER/0B6A9078 - Copy.webp', category: 'BABY SHOWER', title: 'Happy Moments' },
+  { id: 'bs-24', src: '/assets/comperessed images/BABYSHOWER/0B6A9195 - Copy.webp', category: 'BABY SHOWER', title: 'Grandparents Blessing' },
+  { id: 'bs-25', src: '/assets/comperessed images/BABYSHOWER/0B6A9217 - Copy.webp', category: 'BABY SHOWER', title: 'Sweet Laughter' },
+  { id: 'bs-26', src: '/assets/comperessed images/BABYSHOWER/0B6A9390.webp', category: 'BABY SHOWER', title: 'Traditional Elegance' },
+  { id: 'bs-27', src: '/assets/comperessed images/BABYSHOWER/0B6A9527.webp', category: 'BABY SHOWER', title: 'Precious Memories' },
+  { id: 'bs-28', src: '/assets/comperessed images/BABYSHOWER/1B9A4827.webp', category: 'BABY SHOWER', title: 'Family Heirloom' },
 
   // COUPLES
-  { id: 'c-1', src: '/assets/image/COUPLES/RAM_0599.webp', category: 'COUPLES', title: 'Sunset Coastal Romance' },
-  { id: 'c-2', src: '/assets/image/COUPLES/5I2A0403.webp', category: 'COUPLES', title: 'Golden Hour Embrace' },
-  { id: 'c-3', src: '/assets/image/COUPLES/0B6A0809.webp', category: 'COUPLES', title: 'Intimate Connection' },
-  { id: 'c-4', src: '/assets/image/COUPLES/0B6A0822.webp', category: 'COUPLES', title: 'Candid Laughter' },
-  { id: 'c-5', src: '/assets/image/COUPLES/0B6A0829.webp', category: 'COUPLES', title: 'Romantic Walk' },
-  { id: 'c-6', src: '/assets/image/COUPLES/0B6A0831.webp', category: 'COUPLES', title: 'Pre-Wedding Magic' },
-  { id: 'c-7', src: '/assets/image/COUPLES/0B6A0923.webp', category: 'COUPLES', title: 'Love & Warmth' },
-  { id: 'c-8', src: '/assets/image/COUPLES/0B6A0961.webp', category: 'COUPLES', title: 'Heritage Backdrop' },
-  { id: 'c-9', src: '/assets/image/COUPLES/0B6A0975.webp', category: 'COUPLES', title: 'Golden Light Portrait' },
-  { id: 'c-10', src: '/assets/image/COUPLES/0B6A0986.webp', category: 'COUPLES', title: 'Timeless Together' },
+  { id: 'c-1', src: '/assets/comperessed images/COUPLES/RAM_0599.webp', category: 'COUPLES', title: 'Sunset Coastal Romance' },
+  { id: 'c-2', src: '/assets/comperessed images/COUPLES/5I2A0403.webp', category: 'COUPLES', title: 'Golden Hour Embrace' },
+  { id: 'c-3', src: '/assets/comperessed images/COUPLES/0B6A0809.webp', category: 'COUPLES', title: 'Intimate Connection' },
+  { id: 'c-4', src: '/assets/comperessed images/COUPLES/0B6A0822.webp', category: 'COUPLES', title: 'Candid Laughter' },
+  { id: 'c-5', src: '/assets/comperessed images/COUPLES/0B6A0829.webp', category: 'COUPLES', title: 'Romantic Walk' },
+  { id: 'c-6', src: '/assets/comperessed images/COUPLES/0B6A0831.webp', category: 'COUPLES', title: 'Pre-Wedding Magic' },
+  { id: 'c-7', src: '/assets/comperessed images/COUPLES/0B6A0923.webp', category: 'COUPLES', title: 'Love & Warmth' },
+  { id: 'c-8', src: '/assets/comperessed images/COUPLES/0B6A0961.webp', category: 'COUPLES', title: 'Heritage Backdrop' },
+  { id: 'c-9', src: '/assets/comperessed images/COUPLES/0B6A0975.webp', category: 'COUPLES', title: 'Golden Light Portrait' },
+  { id: 'c-10', src: '/assets/comperessed images/COUPLES/0B6A0986.webp', category: 'COUPLES', title: 'Timeless Together' },
 
   // KIDS
-  { id: 'k-1', src: '/assets/image/BABY/03.webp', category: 'KIDS', title: 'Pure Joy & Innocence' },
-  { id: 'k-2', src: '/assets/image/BABY/0B6A8894 - Copy.webp', category: 'KIDS', title: 'Playful Milestones' },
-  { id: 'k-3', src: '/assets/image/BABY/0B6A8912 - Copy.webp', category: 'KIDS', title: 'Little Giggles' },
-  { id: 'k-4', src: '/assets/image/BABY/0B6A9417.webp', category: 'KIDS', title: 'Curious Eyes' },
-  { id: 'k-5', src: '/assets/image/BABY/0B6A9423.webp', category: 'KIDS', title: 'Adorable Expressions' },
-  { id: 'k-6', src: '/assets/image/BABY/0B6A9430.webp', category: 'KIDS', title: 'Studio Milestone' },
-  { id: 'k-7', src: '/assets/image/BABY/0B6A9434.webp', category: 'KIDS', title: 'Sweet Childhood' },
-  { id: 'k-8', src: '/assets/image/BABY/0B6A9436.webp', category: 'KIDS', title: 'Baby Smiles' },
-  { id: 'k-9', src: '/assets/image/BABY/1B9A6122.webp', category: 'KIDS', title: 'First Birthday Joy' },
-  { id: 'k-10', src: '/assets/image/BABY/1B9A6123.webp', category: 'KIDS', title: 'Playful Laughter' },
-  { id: 'k-11', src: '/assets/image/BABY/1B9A6266.webp', category: 'KIDS', title: 'Little Wonder' },
-  { id: 'k-12', src: '/assets/image/BABY/DSC_7961.webp', category: 'KIDS', title: 'Innocent Moments' },
-  { id: 'k-13', src: '/assets/image/BABY/DSC_8047.webp', category: 'KIDS', title: 'Childhood Treasures' },
-  { id: 'k-14', src: '/assets/image/BABY/DSC_8226.webp', category: 'KIDS', title: 'Warm Toddler Portrait' },
+  { id: 'k-1', src: '/assets/comperessed images/BABY/03.webp', category: 'KIDS', title: 'Pure Joy & Innocence' },
+  { id: 'k-2', src: '/assets/comperessed images/BABY/0B6A8894 - Copy.webp', category: 'KIDS', title: 'Playful Milestones' },
+  { id: 'k-3', src: '/assets/comperessed images/BABY/0B6A8912 - Copy.webp', category: 'KIDS', title: 'Little Giggles' },
+  { id: 'k-4', src: '/assets/comperessed images/BABY/0B6A9417.webp', category: 'KIDS', title: 'Curious Eyes' },
+  { id: 'k-5', src: '/assets/comperessed images/BABY/0B6A9423.webp', category: 'KIDS', title: 'Adorable Expressions' },
+  { id: 'k-6', src: '/assets/comperessed images/BABY/0B6A9430.webp', category: 'KIDS', title: 'Studio Milestone' },
+  { id: 'k-7', src: '/assets/comperessed images/BABY/0B6A9434.webp', category: 'KIDS', title: 'Sweet Childhood' },
+  { id: 'k-9', src: '/assets/comperessed images/BABY/1B9A6122.webp', category: 'KIDS', title: 'First Birthday Joy' },
+  { id: 'k-10', src: '/assets/comperessed images/BABY/1B9A6123.webp', category: 'KIDS', title: 'Playful Laughter' },
+  { id: 'k-11', src: '/assets/comperessed images/BABY/1B9A6266.webp', category: 'KIDS', title: 'Little Wonder' },
+  { id: 'k-12', src: '/assets/comperessed images/BABY/DSC_7961.webp', category: 'KIDS', title: 'Innocent Moments' },
+  { id: 'k-13', src: '/assets/comperessed images/BABY/DSC_8047.webp', category: 'KIDS', title: 'Childhood Treasures' },
+  { id: 'k-14', src: '/assets/comperessed images/BABY/DSC_8226.webp', category: 'KIDS', title: 'Warm Toddler Portrait' },
 ]
 
 // Create a pseudo-random interleaved order for the 'ALL' tab so different categories mix like Pinterest
@@ -232,7 +231,7 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
           <div className="flex items-center gap-4">
             <button
               onClick={onNavigateHome}
-              className={`inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.25em] uppercase px-6 py-3 border transition-all duration-300 rounded-full ${
+              className={`inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.25em] uppercase px-6 py-3 border transition-all duration-300 rounded-[12px] ${
                 isDark
                   ? 'border-[#D07A55]/60 text-[#D07A55] hover:bg-[#D07A55] hover:text-[#0c0b09]'
                   : 'border-[#A85532]/60 text-[#A85532] hover:bg-[#A85532] hover:text-[#ffffff]'
@@ -258,7 +257,7 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
                   setActiveCat(cat)
                   setLightboxIndex(null)
                 }}
-                className={`text-[11px] tracking-[0.2em] uppercase px-5 py-2.5 font-medium transition-all duration-300 rounded-full border flex items-center gap-2 ${
+                className={`text-[11px] tracking-[0.2em] uppercase px-5 py-2.5 font-medium transition-all duration-300 rounded-[12px] border flex items-center gap-2 ${
                   isActive
                     ? isDark
                       ? 'bg-[#D07A55] text-[#0c0b09] border-[#D07A55] shadow-lg shadow-[#D07A55]/20 font-bold scale-[1.02]'
@@ -270,7 +269,7 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
               >
                 <span>{cat}</span>
                 <span
-                  className={`text-[9px] px-2 py-0.5 rounded-full ${
+                  className={`text-[9px] px-2 py-0.5 rounded-[12px] ${
                     isActive
                       ? isDark
                         ? 'bg-[#0c0b09]/20 text-[#0c0b09]'
@@ -327,7 +326,7 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
           {/* Top Bar Controls */}
           <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10">
             <div className="flex items-center gap-3">
-              <span className="text-[10px] tracking-[0.25em] uppercase font-bold text-[#D07A55] bg-[#D07A55]/15 border border-[#D07A55]/30 px-3 py-1 rounded-full">
+              <span className="text-[10px] tracking-[0.25em] uppercase font-bold text-[#D07A55] bg-[#D07A55]/15 border border-[#D07A55]/30 px-3 py-1 rounded-[12px]">
                 {currentItems[lightboxIndex].category}
               </span>
               <span className="text-xs text-white/60 tracking-wider">
@@ -337,7 +336,7 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
 
             <button
               onClick={handleCloseLightbox}
-              className="text-white/70 hover:text-white text-xs tracking-widest font-semibold px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md border border-white/10 transition-all duration-300"
+              className="text-white/70 hover:text-white text-xs tracking-widest font-semibold px-4 py-2 bg-white/10 hover:bg-white/20 rounded-[12px] backdrop-blur-md border border-white/10 transition-all duration-300"
             >
               ✕ ESC CLOSE
             </button>

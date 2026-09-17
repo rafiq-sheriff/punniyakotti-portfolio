@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type ReactNode, type CSSProperties } from 'react'
+import { useState, useEffect, useRef, useMemo, type ReactNode, type CSSProperties } from 'react'
 import InteractiveHero from './components/InteractiveHero'
 import HeroAnimation from './components/HeroAnimation'
 import DistortedTypography from './components/DistortedTypography'
@@ -172,7 +172,7 @@ function Nav({ currentPath, onNavigate, onNavigateWithFlash, introPhase, navLogo
           <a
             href="/#contact"
             onClick={(e) => handleClick(e, '/#contact')}
-            className="hidden lg:block text-[11px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border transition-all duration-350 shadow-sm border-[#A85532] text-[#A85532] hover:bg-[#A85532] hover:text-[#ffffff]"
+            className="hidden lg:block text-[11px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border transition-all duration-350 shadow-sm rounded-[12px] border-[#A85532] text-[#A85532] hover:bg-[#A85532] hover:text-[#ffffff]"
           >
             Book a Session
           </a>
@@ -216,7 +216,7 @@ function Nav({ currentPath, onNavigate, onNavigateWithFlash, introPhase, navLogo
           <a
             href="/#contact"
             onClick={(e) => handleClick(e, '/#contact')}
-            className={`self-start text-[11px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border ${isDark ? 'border-[#D07A55] text-[#D07A55]' : 'border-[#A85532] text-[#A85532]'
+            className={`self-start text-[11px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border rounded-[12px] ${isDark ? 'border-[#D07A55] text-[#D07A55]' : 'border-[#A85532] text-[#A85532]'
               }`}
           >
             Book a Session
@@ -285,12 +285,6 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
         style={{
           opacity: isPortfolioVisible ? 1 : 0,
           transform: isPortfolioVisible ? 'scale(1)' : 'scale(0.92)',
-          WebkitMaskImage: isDark
-            ? 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 32%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 62%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%)'
-            : 'none',
-          maskImage: isDark
-            ? 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 32%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 62%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%)'
-            : 'none',
         }}
       >
         <DistortedTypography theme={theme} text="PORTFOLIO" />
@@ -317,7 +311,7 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
         <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:justify-between w-full">
           {/* TOP LEFT: Studio Tag */}
           <div
-            className={`pointer-events-auto inline-flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2 rounded-full backdrop-blur-md shadow-lg ${isDark
+            className={`pointer-events-auto inline-flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2 rounded-[12px] backdrop-blur-md shadow-lg ${isDark
               ? 'border border-[#D07A55]/35 bg-black/75'
               : 'border border-[#A85532]/35 bg-white/85'
               }`}
@@ -343,7 +337,7 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
 
           {/* TOP RIGHT: People · Emotion · Moments */}
           <div
-            className={`pointer-events-auto inline-flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4.5 py-2 rounded-full backdrop-blur-md shadow-lg ${isDark
+            className={`pointer-events-auto inline-flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4.5 py-2 rounded-[12px] backdrop-blur-md shadow-lg ${isDark
               ? 'border border-[#f2ece0]/20 bg-black/75 text-[#f2ece0]/90'
               : 'border border-[#1c1917]/15 bg-white/85 text-[#1c1917]'
               }`}
@@ -395,7 +389,7 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
                   doNavigate('/projects', e.currentTarget)
                 }
               }}
-              className={`group inline-flex items-center justify-center gap-3 text-[14px] sm:text-[14px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 transition-all duration-350 shadow-xl w-full sm:w-auto whitespace-nowrap ${isDark
+              className={`group inline-flex items-center justify-center gap-3 text-[14px] sm:text-[14px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 transition-all duration-350 shadow-xl rounded-[12px] w-full sm:w-auto whitespace-nowrap ${isDark
                 ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
                 : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
                 }`}
@@ -409,7 +403,7 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
                 e.preventDefault()
                 document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
               }}
-              className={`inline-flex items-center justify-center text-[14px] sm:text-[14px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 border transition-all duration-350 backdrop-blur-sm shadow-md w-full sm:w-auto whitespace-nowrap ${isDark
+              className={`inline-flex items-center justify-center text-[14px] sm:text-[14px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 border transition-all duration-350 backdrop-blur-sm shadow-md rounded-[12px] w-full sm:w-auto whitespace-nowrap ${isDark
                 ? 'border-[#f2ece0]/30 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
                 : 'border-[#1c1917]/25 bg-white/60 text-[#1c1917] hover:border-[#A85532] hover:text-[#A85532]'
                 }`}
@@ -439,7 +433,7 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
         {/* Left Column: Text & Bio Content */}
         <Reveal>
           <div>
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6 ${isDark ? 'bg-[#D07A55]/10 border border-[#D07A55]/30' : 'bg-[#A85532]/10 border border-[#A85532]/30'
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-[12px] mb-6 ${isDark ? 'bg-[#D07A55]/10 border border-[#D07A55]/30' : 'bg-[#A85532]/10 border border-[#A85532]/30'
               }`}>
               <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#D07A55]' : 'bg-[#A85532]'}`} />
               <span className={`text-[11px] tracking-[0.3em] uppercase font-semibold ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>About Me</span>
@@ -464,15 +458,15 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
 
             {/* Key Expertise Grid */}
             <div className={`grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 mt-10 border-t ${isDark ? 'border-[#f2ece0]/10' : 'border-[#1c1917]/10'}`}>
-              <div className={`p-4 rounded-lg border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
+              <div className={`p-4 rounded-xl border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
                 <p className={`font-['Cormorant_Garamond'] font-bold text-2xl ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>7 Years</p>
                 <p className={`text-[11px] font-['Manrope'] tracking-[0.15em] uppercase mt-1 font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/65'}`}>Photography</p>
               </div>
-              <div className={`p-4 rounded-lg border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
+              <div className={`p-4 rounded-xl border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
                 <p className={`font-['Cormorant_Garamond'] font-bold text-2xl ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>5 Years</p>
                 <p className={`text-[11px] font-['Manrope'] tracking-[0.15em] uppercase mt-1 font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/65'}`}>Event Planning</p>
               </div>
-              <div className={`p-4 rounded-lg border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
+              <div className={`p-4 rounded-xl border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
                 <p className={`font-['Cormorant_Garamond'] font-bold text-2xl ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>B.Tech IT</p>
                 <p className={`text-[11px] font-['Manrope'] tracking-[0.15em] uppercase mt-1 font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/65'}`}>Tech & Precision</p>
               </div>
@@ -485,7 +479,7 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
                   e.preventDefault()
                   document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
                 }}
-                className={`text-[11px] font-semibold tracking-[0.22em] uppercase px-7 py-3.5 transition-colors duration-300 rounded-sm shadow-md ${isDark ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]' : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
+                className={`text-[11px] font-semibold tracking-[0.22em] uppercase px-7 py-3.5 transition-colors duration-300 rounded-[12px] shadow-md ${isDark ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]' : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
                   }`}
               >
                 Get In Touch
@@ -515,7 +509,7 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
               }`} />
 
             {/* Main Portrait Container */}
-            <div className={`relative rounded-xl overflow-hidden border shadow-xl ${isDark ? 'border-[#f2ece0]/10 bg-[#14120e]' : 'border-[#e7e2d7] bg-white'
+            <div className={`relative rounded-2xl overflow-hidden border shadow-xl ${isDark ? 'border-[#f2ece0]/10 bg-[#14120e]' : 'border-[#e7e2d7] bg-white'
               }`}>
               <img
                 src={puniyakottiImg}
@@ -529,10 +523,10 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
             </div>
 
             {/* Floating Experience Badge */}
-            <div className={`absolute -bottom-6 -left-4 sm:left-6 border p-4 sm:p-5 rounded-xl shadow-xl backdrop-blur-md ${isDark ? 'bg-[#161410] border-[#D07A55]/40 text-[#f2ece0]' : 'bg-white border-[#A85532]/40 text-[#1c1917]'
+            <div className={`absolute -bottom-6 -left-4 sm:left-6 border p-4 sm:p-5 rounded-2xl shadow-xl backdrop-blur-md ${isDark ? 'bg-[#161410] border-[#D07A55]/40 text-[#f2ece0]' : 'bg-white border-[#A85532]/40 text-[#1c1917]'
               }`}>
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-[#D07A55]/15 border border-[#D07A55]/30 text-[#D07A55]' : 'bg-[#A85532]/15 border border-[#A85532]/30 text-[#A85532]'
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-[#D07A55]/15 border border-[#D07A55]/30 text-[#D07A55]' : 'bg-[#A85532]/15 border border-[#A85532]/30 text-[#A85532]'
                   }`}>
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -631,132 +625,185 @@ const CATS = ['ALL', 'WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KI
 
 // Selected top highlights for the "ALL" tab (Exactly 12 images)
 const FEATURED_ALL = [
-  { title: 'Royal Heritage Wedding', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4729.webp', wide: true, tall: true },
-  { title: 'Fine Art Album Spread', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/01.webp', wide: true, tall: false },
-  { title: 'Golden Blessing Ritual', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1749.webp', wide: false, tall: true },
-  { title: 'Romantic Sunset Portraits', cat: 'COUPLES', img: '/assets/image/COUPLES/RAM_0599.webp', wide: true, tall: true },
-  { title: 'Pure Joy & Innocence', cat: 'KIDS', img: '/assets/image/BABY/03.webp', wide: false, tall: true },
-  { title: 'Sacred Ceremonial Vows', cat: 'WEDDINGS', img: '/assets/image/WEDDING/RAM_0100.webp', wide: false, tall: false },
-  { title: 'Luxury Leather Album Spreads', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/10.webp', wide: false, tall: true },
-  { title: 'Traditional Seemantham Celebrations', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1834.webp', wide: true, tall: false },
-  { title: 'Candid Love Story', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0809.webp', wide: false, tall: false },
-  { title: 'Playful Childhood Milestones', cat: 'KIDS', img: '/assets/image/BABY/0B6A8894 - Copy.webp', wide: true, tall: false },
-  { title: 'Ethereal Bridal Elegance', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4811.webp', wide: false, tall: true },
-  { title: 'Emotions & Celebrations', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0822.webp', wide: false, tall: false },
+  { title: 'Royal Heritage Wedding', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4729.webp', wide: true, tall: true },
+  { title: 'Fine Art Album Spread', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/01.webp', wide: true, tall: false },
+  { title: 'Golden Blessing Ritual', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1749.webp', wide: false, tall: true },
+  { title: 'Romantic Sunset Portraits', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/RAM_0599.webp', wide: true, tall: true },
+  { title: 'Pure Joy & Innocence', cat: 'KIDS', img: '/assets/comperessed images/BABY/03.webp', wide: false, tall: true },
+  { title: 'Sacred Ceremonial Vows', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/RAM_0100.webp', wide: false, tall: false },
+  { title: 'Luxury Leather Album Spreads', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/10.webp', wide: false, tall: true },
+  { title: 'Traditional Seemantham Celebrations', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1834.webp', wide: true, tall: false },
+  { title: 'Candid Love Story', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0809.webp', wide: false, tall: false },
+  { title: 'Playful Childhood Milestones', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A8894 - Copy.webp', wide: true, tall: false },
+  { title: 'Ethereal Bridal Elegance', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4811.webp', wide: false, tall: true },
+  { title: 'Emotions & Celebrations', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0822.webp', wide: false, tall: false },
 ]
 
 // All images per folder category
 const CATEGORIES_ALL_IMAGES: Record<string, { title: string; cat: string; img: string; wide?: boolean; tall?: boolean }[]> = {
   WEDDINGS: [
-    { title: 'Royal Wedding Frame 1', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4729.webp', wide: true, tall: true },
-    { title: 'Ceremonial Moments 2', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4806.webp', wide: false, tall: false },
-    { title: 'Bridal Portraiture 3', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4811.webp', wide: false, tall: true },
-    { title: 'Sacred Vows 4', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4818.webp', wide: true, tall: false },
-    { title: 'Wedding Festivities 5', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4835.webp', wide: false, tall: false },
-    { title: 'Traditional Rituals 6', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4844.webp', wide: false, tall: true },
-    { title: 'Ethereal Bridal Frame 7', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4858.webp', wide: true, tall: false },
-    { title: 'Candid Couple Smiles 8', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4869.webp', wide: false, tall: false },
-    { title: 'Blessings Ceremony 9', cat: 'WEDDINGS', img: '/assets/image/WEDDING/DSC_4873.webp', wide: false, tall: false },
-    { title: 'Grand Heritage Union 10', cat: 'WEDDINGS', img: '/assets/image/WEDDING/RAM_0100.webp', wide: true, tall: true },
-    { title: 'Sunset Couple Portrait 11', cat: 'WEDDINGS', img: '/assets/image/WEDDING/RAM_0103.webp', wide: false, tall: false },
-    { title: 'Timeless Emotion 12', cat: 'WEDDINGS', img: '/assets/image/WEDDING/12 345680.webp', wide: true, tall: false },
-    { title: 'Creative Editorial Frame 13', cat: 'WEDDINGS', img: '/assets/image/WEDDING/CRT02 1.webp', wide: false, tall: true },
-    { title: 'Creative Editorial Frame 14', cat: 'WEDDINGS', img: '/assets/image/WEDDING/CRT03 1.webp', wide: false, tall: false },
-    { title: 'Creative Editorial Frame 15', cat: 'WEDDINGS', img: '/assets/image/WEDDING/CRT03 2.webp', wide: true, tall: false },
-    { title: 'Creative Editorial Frame 16', cat: 'WEDDINGS', img: '/assets/image/WEDDING/CRT12 1.webp', wide: false, tall: true },
+    { title: 'Royal Wedding Frame 1', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4729.webp', wide: true, tall: true },
+    { title: 'Ceremonial Moments 2', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4806.webp', wide: false, tall: false },
+    { title: 'Bridal Portraiture 3', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4811.webp', wide: false, tall: true },
+    { title: 'Sacred Vows 4', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4818.webp', wide: true, tall: false },
+    { title: 'Wedding Festivities 5', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4835.webp', wide: false, tall: false },
+    { title: 'Traditional Rituals 6', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4844.webp', wide: false, tall: true },
+    { title: 'Ethereal Bridal Frame 7', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4858.webp', wide: true, tall: false },
+    { title: 'Candid Couple Smiles 8', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4869.webp', wide: false, tall: false },
+    { title: 'Blessings Ceremony 9', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4873.webp', wide: false, tall: false },
+    { title: 'Grand Heritage Union 10', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/RAM_0100.webp', wide: true, tall: true },
+    { title: 'Sunset Couple Portrait 11', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/RAM_0103.webp', wide: false, tall: false },
+    { title: 'Timeless Emotion 12', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/12 345680.webp', wide: true, tall: false },
+    { title: 'Creative Editorial Frame 13', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/CRT02 1.webp', wide: false, tall: true },
+    { title: 'Creative Editorial Frame 14', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/CRT03 1.webp', wide: false, tall: false },
+    { title: 'Creative Editorial Frame 15', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/CRT03 2.webp', wide: true, tall: false },
+    { title: 'Creative Editorial Frame 16', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/CRT12 1.webp', wide: false, tall: true },
   ],
   'PREVIEW ALBUMN': [
-    { title: 'Album Spread 1', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/01.webp', wide: true, tall: true },
-    { title: 'Album Spread 2', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/04.webp', wide: false, tall: false },
-    { title: 'Album Spread 3', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/06.webp', wide: false, tall: true },
-    { title: 'Album Spread 4', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/10.webp', wide: true, tall: false },
-    { title: 'Album Spread 5', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/14.webp', wide: false, tall: false },
-    { title: 'Album Spread 6', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/15.webp', wide: false, tall: true },
-    { title: 'Album Spread 7', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/18.webp', wide: true, tall: false },
-    { title: 'Album Spread 8', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/CRT08.webp', wide: false, tall: false },
-    { title: 'Album Spread 9', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/CRT10.webp', wide: false, tall: false },
-    { title: 'Album Spread 10', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/CRT12.webp', wide: true, tall: true },
-    { title: 'Album Spread 11', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0018.webp', wide: false, tall: false },
-    { title: 'Album Spread 12', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0019.webp', wide: false, tall: true },
-    { title: 'Album Spread 13', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0020.webp', wide: true, tall: false },
-    { title: 'Album Spread 14', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0021.webp', wide: false, tall: false },
-    { title: 'Album Spread 15', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0022.webp', wide: false, tall: false },
-    { title: 'Album Spread 16', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0028.webp', wide: true, tall: false },
-    { title: 'Album Spread 17', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240213-WA0031.webp', wide: false, tall: true },
-    { title: 'Album Spread 18', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0009.webp', wide: false, tall: false },
-    { title: 'Album Spread 19', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0014.webp', wide: true, tall: false },
-    { title: 'Album Spread 20', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/IMG-20240717-WA0016.webp', wide: false, tall: false },
-    { title: 'Album Spread 21', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/SAVE_20250610_192917.webp', wide: false, tall: true },
-    { title: 'Album Spread 22', cat: 'PREVIEW ALBUMN', img: '/assets/image/PREVIEW ALBUMN/SAVE_20250610_192925.webp', wide: true, tall: false },
+    { title: 'Album Spread 1', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/01.webp', wide: true, tall: true },
+    { title: 'Album Spread 2', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/04.webp', wide: false, tall: false },
+    { title: 'Album Spread 3', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/06.webp', wide: false, tall: true },
+    { title: 'Album Spread 4', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/10.webp', wide: true, tall: false },
+    { title: 'Album Spread 5', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/14.webp', wide: false, tall: false },
+    { title: 'Album Spread 6', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/15.webp', wide: false, tall: true },
+    { title: 'Album Spread 7', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/18.webp', wide: true, tall: false },
+    { title: 'Album Spread 8', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/CRT08.webp', wide: false, tall: false },
+    { title: 'Album Spread 9', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/CRT10.webp', wide: false, tall: false },
+    { title: 'Album Spread 10', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/CRT12.webp', wide: true, tall: true },
+    { title: 'Album Spread 11', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0018.webp', wide: false, tall: false },
+    { title: 'Album Spread 12', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0019.webp', wide: false, tall: true },
+    { title: 'Album Spread 13', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0020.webp', wide: true, tall: false },
+    { title: 'Album Spread 14', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0021.webp', wide: false, tall: false },
+    { title: 'Album Spread 15', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0022.webp', wide: false, tall: false },
+    { title: 'Album Spread 16', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0028.webp', wide: true, tall: false },
+    { title: 'Album Spread 17', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0031.webp', wide: false, tall: true },
+    { title: 'Album Spread 18', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0009.webp', wide: false, tall: false },
+    { title: 'Album Spread 19', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0014.webp', wide: true, tall: false },
+    { title: 'Album Spread 20', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0016.webp', wide: false, tall: false },
+    { title: 'Album Spread 21', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/SAVE_20250610_192917.webp', wide: false, tall: true },
+    { title: 'Album Spread 22', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/SAVE_20250610_192925.webp', wide: true, tall: false },
   ],
   'BABY SHOWER': [
-    { title: 'Baby Shower Frame 1', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8829 - Copy.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 2', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8839 - Copy.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 3', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8860 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 4', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8930 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 5', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8937 - Copy.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 6', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8943 - Copy.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 7', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8954 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 8', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8972 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 9', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A8986 - Copy.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 10', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9078 - Copy.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 11', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9195 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 12', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9217 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 13', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9390.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 14', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/0B6A9527.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 15', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/1B9A4827.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 16', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1749.webp', wide: true, tall: true },
-    { title: 'Baby Shower Frame 17', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1765.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 18', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1775.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 19', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1789.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 20', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1790.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 21', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1817.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 22', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1829.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 23', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1834.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 24', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1836.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 25', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1895.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 26', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC1949.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 27', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC2247.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 28', cat: 'BABY SHOWER', img: '/assets/image/BABYSHOWER/_DSC2351.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 1', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8829 - Copy.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 2', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8839 - Copy.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 3', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8860 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 4', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8930 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 5', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8937 - Copy.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 6', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8943 - Copy.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 7', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8954 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 8', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8972 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 9', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8986 - Copy.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 10', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9078 - Copy.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 11', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9195 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 12', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9217 - Copy.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 13', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9390.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 14', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9527.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 15', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/1B9A4827.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 16', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1749.webp', wide: true, tall: true },
+    { title: 'Baby Shower Frame 17', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1765.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 18', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1775.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 19', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1789.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 20', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1790.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 21', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1817.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 22', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1829.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 23', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1834.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 24', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1836.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 25', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1895.webp', wide: false, tall: false },
+    { title: 'Baby Shower Frame 26', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1949.webp', wide: false, tall: true },
+    { title: 'Baby Shower Frame 27', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC2247.webp', wide: true, tall: false },
+    { title: 'Baby Shower Frame 28', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC2351.webp', wide: false, tall: false },
   ],
   COUPLES: [
-    { title: 'Couple Portrait 1', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0809.webp', wide: true, tall: false },
-    { title: 'Couple Portrait 2', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0822.webp', wide: false, tall: true },
-    { title: 'Couple Portrait 3', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0829.webp', wide: false, tall: false },
-    { title: 'Couple Portrait 4', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0831.webp', wide: true, tall: false },
-    { title: 'Couple Portrait 5', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0923.webp', wide: false, tall: false },
-    { title: 'Couple Portrait 6', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0961.webp', wide: false, tall: true },
-    { title: 'Couple Portrait 7', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0975.webp', wide: true, tall: false },
-    { title: 'Couple Portrait 8', cat: 'COUPLES', img: '/assets/image/COUPLES/0B6A0986.webp', wide: false, tall: false },
-    { title: 'Couple Portrait 9', cat: 'COUPLES', img: '/assets/image/COUPLES/5I2A0403.webp', wide: false, tall: false },
-    { title: 'Couple Portrait 10', cat: 'COUPLES', img: '/assets/image/COUPLES/RAM_0599.webp', wide: true, tall: true },
+    { title: 'Couple Portrait 1', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0809.webp', wide: true, tall: false },
+    { title: 'Couple Portrait 2', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0822.webp', wide: false, tall: true },
+    { title: 'Couple Portrait 3', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0829.webp', wide: false, tall: false },
+    { title: 'Couple Portrait 4', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0831.webp', wide: true, tall: false },
+    { title: 'Couple Portrait 5', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0923.webp', wide: false, tall: false },
+    { title: 'Couple Portrait 6', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0961.webp', wide: false, tall: true },
+    { title: 'Couple Portrait 7', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0975.webp', wide: true, tall: false },
+    { title: 'Couple Portrait 8', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0986.webp', wide: false, tall: false },
+    { title: 'Couple Portrait 9', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/5I2A0403.webp', wide: false, tall: false },
+    { title: 'Couple Portrait 10', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/RAM_0599.webp', wide: true, tall: true },
   ],
   KIDS: [
-    { title: 'Kids Moment 1', cat: 'KIDS', img: '/assets/image/BABY/03.webp', wide: true, tall: true },
-    { title: 'Kids Moment 2', cat: 'KIDS', img: '/assets/image/BABY/0B6A8894 - Copy.webp', wide: false, tall: true },
-    { title: 'Kids Moment 3', cat: 'KIDS', img: '/assets/image/BABY/0B6A8912 - Copy.webp', wide: false, tall: false },
-    { title: 'Kids Moment 4', cat: 'KIDS', img: '/assets/image/BABY/0B6A9417.webp', wide: true, tall: false },
-    { title: 'Kids Moment 5', cat: 'KIDS', img: '/assets/image/BABY/0B6A9423.webp', wide: false, tall: false },
-    { title: 'Kids Moment 6', cat: 'KIDS', img: '/assets/image/BABY/0B6A9430.webp', wide: false, tall: true },
-    { title: 'Kids Moment 7', cat: 'KIDS', img: '/assets/image/BABY/0B6A9434.webp', wide: true, tall: false },
-    { title: 'Kids Moment 9', cat: 'KIDS', img: '/assets/image/BABY/1B9A6122.webp', wide: false, tall: false },
-    { title: 'Kids Moment 10', cat: 'KIDS', img: '/assets/image/BABY/1B9A6123.webp', wide: true, tall: true },
-    { title: 'Kids Moment 11', cat: 'KIDS', img: '/assets/image/BABY/1B9A6266.webp', wide: false, tall: false },
-    { title: 'Kids Moment 12', cat: 'KIDS', img: '/assets/image/BABY/DSC_7961.webp', wide: false, tall: false },
-    { title: 'Kids Moment 13', cat: 'KIDS', img: '/assets/image/BABY/DSC_8047.webp', wide: true, tall: false },
-    { title: 'Kids Moment 14', cat: 'KIDS', img: '/assets/image/BABY/DSC_8226.webp', wide: false, tall: true },
+    { title: 'Kids Moment 1', cat: 'KIDS', img: '/assets/comperessed images/BABY/03.webp', wide: true, tall: true },
+    { title: 'Kids Moment 2', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A8894 - Copy.webp', wide: false, tall: true },
+    { title: 'Kids Moment 3', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A8912 - Copy.webp', wide: false, tall: false },
+    { title: 'Kids Moment 4', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A9417.webp', wide: true, tall: false },
+    { title: 'Kids Moment 5', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A9423.webp', wide: false, tall: false },
+    { title: 'Kids Moment 6', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A9430.webp', wide: false, tall: true },
+    { title: 'Kids Moment 7', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A9434.webp', wide: true, tall: false },
+    { title: 'Kids Moment 9', cat: 'KIDS', img: '/assets/comperessed images/BABY/1B9A6122.webp', wide: false, tall: false },
+    { title: 'Kids Moment 10', cat: 'KIDS', img: '/assets/comperessed images/BABY/1B9A6123.webp', wide: true, tall: true },
+    { title: 'Kids Moment 11', cat: 'KIDS', img: '/assets/comperessed images/BABY/1B9A6266.webp', wide: false, tall: false },
+    { title: 'Kids Moment 12', cat: 'KIDS', img: '/assets/comperessed images/BABY/DSC_7961.webp', wide: false, tall: false },
+    { title: 'Kids Moment 13', cat: 'KIDS', img: '/assets/comperessed images/BABY/DSC_8047.webp', wide: true, tall: false },
+    { title: 'Kids Moment 14', cat: 'KIDS', img: '/assets/comperessed images/BABY/DSC_8226.webp', wide: false, tall: true },
   ],
+}
+
+// Interleave images for the "ALL" tab to create a balanced Pinterest feed
+const FEATURED_ALL_INTERLEAVED = (() => {
+  const result: { title: string; cat: string; img: string }[] = []
+  const keys = ['WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KIDS']
+  const catBuckets: Record<string, { title: string; cat: string; img: string }[]> = {
+    WEDDINGS: CATEGORIES_ALL_IMAGES['WEDDINGS'] || [],
+    'PREVIEW ALBUMN': CATEGORIES_ALL_IMAGES['PREVIEW ALBUMN'] || [],
+    'BABY SHOWER': CATEGORIES_ALL_IMAGES['BABY SHOWER'] || [],
+    COUPLES: CATEGORIES_ALL_IMAGES['COUPLES'] || [],
+    KIDS: CATEGORIES_ALL_IMAGES['KIDS'] || [],
+  }
+
+  let index = 0
+  let added = true
+
+  while (added) {
+    added = false
+    const order = [...keys].sort(
+      (a, b) => (a.charCodeAt(index % a.length) % 5) - (b.charCodeAt(index % b.length) % 5)
+    )
+    for (const key of order) {
+      if (catBuckets[key][index]) {
+        result.push(catBuckets[key][index])
+        added = true
+      }
+    }
+    index++
+  }
+  return result
+})()
+
+// Helper function to pick up to 12 random items from an array
+function getRandom12Images(items: { title: string; cat: string; img: string }[]) {
+  if (items.length <= 12) return items
+  const shuffled = [...items]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, 12)
 }
 
 function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?: (path: string, el?: HTMLElement | null) => void }) {
   const [cat, setCat] = useState('ALL')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [randomSeed, setRandomSeed] = useState(0)
 
   const isDark = theme === 'dark'
-  const rawShown = cat === 'ALL' ? FEATURED_ALL : (CATEGORIES_ALL_IMAGES[cat] || [])
-  const shown = rawShown.slice(0, 12)
+
+  // Pick 12 random images whenever category tab changes
+  const shown = useMemo(() => {
+    const fullList = cat === 'ALL' ? FEATURED_ALL_INTERLEAVED : (CATEGORIES_ALL_IMAGES[cat] || [])
+    return getRandom12Images(fullList)
+  }, [cat, randomSeed])
 
   const activePhoto = lightboxIndex !== null ? shown[lightboxIndex] : null
+
+  const handleTabSelect = (c: string) => {
+    setCat(c)
+    setLightboxIndex(null)
+    setRandomSeed((prev) => prev + 1)
+  }
 
   // Body scroll lock & Keyboard navigation for Portfolio Lightbox
   useEffect(() => {
@@ -781,82 +828,124 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
   }, [lightboxIndex, shown.length])
 
   return (
-    <section className={`py-24 lg:py-40 max-w-[1440px] mx-auto px-8 lg:px-16 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
-      <Reveal className="mb-14">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+    <section className={`py-24 lg:py-36 max-w-[1536px] mx-auto px-6 sm:px-10 lg:px-16 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
+      <Reveal className="mb-12">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b pb-8 border-neutral-200 dark:border-neutral-800">
           <div>
-            <p className={`text-[11px] tracking-[0.35em] uppercase font-semibold mb-4 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Selected Work</p>
+            <div
+              className={`inline-flex items-center gap-2.5 text-[11px] tracking-[0.35em] uppercase mb-3 font-semibold ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'
+                }`}
+            >
+              <span className={`w-2 h-2 rounded-full animate-pulse ${isDark ? 'bg-[#D07A55]' : 'bg-[#A85532]'}`} />
+              Selected Work
+            </div>
             <h2
               className={`font-['DM_Serif_Display'] ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 3.2rem)' }}
+              style={{ fontSize: 'clamp(2.2rem, 4vw, 3.6rem)' }}
             >
               Featured Portfolio
             </h2>
-            {cat !== 'ALL' && (
-              <p className={`text-xs mt-2 font-medium ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
-                Showing all {shown.length} photos from {cat}
-              </p>
-            )}
+            <p className={`text-xs mt-2 font-medium ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
+              Showing 12 random highlights from {cat} archive
+            </p>
           </div>
-          <div className="flex flex-wrap gap-7">
-            {CATS.map((c) => (
-              <button
-                key={c}
-                onClick={() => { setCat(c); setLightboxIndex(null); }}
-                className="text-[10px] tracking-[0.28em] uppercase transition-all duration-300 pb-0.5 font-medium cursor-pointer"
-                style={{
-                  color: cat === c ? (isDark ? '#D07A55' : '#A85532') : isDark ? 'rgba(242,236,224,0.4)' : 'rgba(28,25,23,0.5)',
-                  borderBottom: cat === c ? (isDark ? '2px solid #D07A55' : '2px solid #A85532') : '2px solid transparent',
-                }}
-              >
-                {c}
-              </button>
-            ))}
+
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            {CATS.map((c) => {
+              const isActive = cat === c
+              const count = c === 'ALL'
+                ? FEATURED_ALL_INTERLEAVED.length
+                : (CATEGORIES_ALL_IMAGES[c] || []).length
+
+              return (
+                <button
+                  key={c}
+                  onClick={() => handleTabSelect(c)}
+                  className={`text-[11px] tracking-[0.2em] uppercase px-4 py-2.5 font-medium transition-all duration-300 rounded-[12px] border flex items-center gap-2 cursor-pointer ${isActive
+                    ? isDark
+                      ? 'bg-[#D07A55] text-[#0c0b09] border-[#D07A55] shadow-lg shadow-[#D07A55]/20 font-bold scale-[1.02]'
+                      : 'bg-[#A85532] text-[#ffffff] border-[#A85532] shadow-md shadow-[#A85532]/20 font-bold scale-[1.02]'
+                    : isDark
+                      ? 'bg-[#14120e]/80 text-[#f2ece0]/70 border-[#f2ece0]/12 hover:border-[#D07A55]/50 hover:text-[#f2ece0]'
+                      : 'bg-neutral-50 text-[#1c1917]/75 border-[#1c1917]/12 hover:border-[#A85532]/50 hover:text-[#1c1917]'
+                    }`}
+                >
+                  <span>{c}</span>
+                  <span
+                    className={`text-[9px] px-2 py-0.5 rounded-[12px] ${isActive
+                      ? isDark
+                        ? 'bg-[#0c0b09]/20 text-[#0c0b09]'
+                        : 'bg-white/20 text-white'
+                      : isDark
+                        ? 'bg-[#f2ece0]/10 text-[#f2ece0]/60'
+                        : 'bg-[#1c1917]/08 text-[#1c1917]/60'
+                      }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
+
+            <a
+              href="/projects"
+              onClick={(e) => {
+                e.preventDefault()
+                if (onNavigate) onNavigate('/projects', e.currentTarget)
+              }}
+              className={`text-[11px] tracking-[0.18em] uppercase px-4 py-2.5 font-bold transition-all duration-300 rounded-[12px] border flex items-center gap-2 cursor-pointer group shadow-sm ${isDark
+                ? 'bg-[#D07A55] text-[#0c0b09] border-[#D07A55] hover:bg-[#f2ece0]'
+                : 'bg-[#A85532] text-[#ffffff] border-[#A85532] hover:bg-[#1c1917]'
+                }`}
+            >
+              <span>EXPLORE FULL GALLERY ARCHIVE</span>
+              <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+            </a>
           </div>
         </div>
       </Reveal>
 
-      <div
-        className="grid gap-3"
-        style={{ gridTemplateColumns: 'repeat(4, 1fr)', gridAutoRows: '220px' }}
-      >
+      {/* ─── PINTEREST MASONRY GALLERY (FLUID UNCROPPED IMAGES FOR ALL TABS) ─── */}
+      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 xl:gap-6 space-y-4 xl:space-y-6">
         {shown.map((item, i) => (
           <Reveal
             key={item.img + i}
-            delay={Math.min(i * 35, 400)}
-            className={`relative overflow-hidden group cursor-pointer rounded-sm shadow-sm border ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'
-              }`}
-            style={{
-              gridColumn: item.wide ? 'span 2' : 'span 1',
-              gridRow: item.tall ? 'span 2' : 'span 1',
-            }}
+            delay={Math.min(i * 30, 300)}
+            className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5"
           >
             <div className="w-full h-full" onClick={() => setLightboxIndex(i)}>
               <img
                 src={item.img.startsWith('/') ? item.img : unsplash(item.img, 800, 600)}
                 alt={item.title}
                 decoding="async"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                 loading="lazy"
+                className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              />
+              {/* Clean hover highlight (No text on image hover) */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                style={{
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.15)',
+                }}
               />
             </div>
           </Reveal>
         ))}
       </div>
 
-      <div className="mt-14 text-center">
+      <div className="mt-16 text-center">
         <a
           href="/projects"
           onClick={(e) => {
             e.preventDefault()
             if (onNavigate) onNavigate('/projects', e.currentTarget)
           }}
-          className={`group inline-flex items-center gap-3 text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 transition-all duration-350 shadow-lg ${isDark
-              ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
-              : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
+          className={`group inline-flex items-center gap-3 text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 transition-all duration-350 shadow-lg rounded-[12px] ${isDark
+            ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
+            : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
             }`}
         >
-          <span>EXPLORE ALL PROJECTS</span>
+          <span>EXPLORE FULL GALLERY ARCHIVE</span>
           <span className="transition-transform duration-300 group-hover:translate-x-1.5">→</span>
         </a>
       </div>
@@ -864,36 +953,42 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
       {/* Lightbox Photo Preview Modal */}
       {activePhoto && (
         <div
-          className="fixed inset-0 z-[120] bg-black/92 backdrop-blur-md flex items-center justify-center p-4"
+          className="fixed inset-0 z-[120] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-8 animate-fadeIn"
           onClick={() => setLightboxIndex(null)}
         >
           <div
-            className="relative max-w-5xl w-full flex flex-col items-center"
+            className="relative max-w-6xl w-full flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Bar */}
             <div className="w-full flex items-center justify-between text-white mb-4 px-2">
-              <div>
-                <span className="text-[10px] tracking-[0.25em] uppercase text-[#D07A55] font-semibold block">{activePhoto.cat}</span>
-                <h3 className="font-['DM_Serif_Display'] text-xl">{activePhoto.title}</h3>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] tracking-[0.25em] uppercase text-[#D07A55] font-semibold bg-[#D07A55]/15 border border-[#D07A55]/30 px-3 py-1 rounded-[12px]">
+                  {activePhoto.cat}
+                </span>
+                <h3 className="font-['DM_Serif_Display'] text-lg sm:text-xl text-white/90 hidden sm:block">
+                  {activePhoto.title}
+                </h3>
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-xs text-white/60">{lightboxIndex! + 1} / {shown.length}</span>
+                <span className="text-xs text-white/60 font-mono tracking-wider">
+                  {lightboxIndex! + 1} / {shown.length}
+                </span>
                 <button
                   onClick={() => setLightboxIndex(null)}
-                  className="text-white/80 hover:text-white text-2xl font-bold p-1 cursor-pointer"
+                  className="text-white/80 hover:text-white text-xs tracking-widest font-semibold px-4 py-2 bg-white/10 hover:bg-white/20 rounded-[12px] backdrop-blur-md border border-white/10 transition-all cursor-pointer"
                 >
-                  ✕
+                  ✕ ESC CLOSE
                 </button>
               </div>
             </div>
 
             {/* Main Image */}
-            <div className="relative w-full max-h-[80vh] flex justify-center items-center overflow-hidden rounded border border-white/10 shadow-2xl bg-black">
+            <div className="relative w-full max-h-[85vh] flex justify-center items-center overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-black/50">
               <img
                 src={activePhoto.img}
                 alt={activePhoto.title}
-                className="max-h-[80vh] w-auto max-w-full object-contain"
+                className="max-h-[85vh] w-auto max-w-full object-contain rounded-lg select-none"
               />
 
               {/* Prev Arrow */}
@@ -903,7 +998,8 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
                     e.stopPropagation()
                     setLightboxIndex((lightboxIndex! - 1 + shown.length) % shown.length)
                   }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-3 transition-colors backdrop-blur-sm cursor-pointer"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#D07A55] text-white transition-all backdrop-blur-md border border-white/15 shadow-xl hover:scale-110 cursor-pointer"
+                  aria-label="Previous photo"
                 >
                   ←
                 </button>
@@ -916,7 +1012,8 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
                     e.stopPropagation()
                     setLightboxIndex((lightboxIndex! + 1) % shown.length)
                   }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-3 transition-colors backdrop-blur-sm cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#D07A55] text-white transition-all backdrop-blur-md border border-white/15 shadow-xl hover:scale-110 cursor-pointer"
+                  aria-label="Next photo"
                 >
                   →
                 </button>
@@ -932,32 +1029,7 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
 // ─── VIDEO SECTION ───────────────────────────────────────────────────────────
 function VideoSection({ theme }: { theme: 'dark' | 'light' }) {
   const isDark = theme === 'dark'
-  const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [showControls, setShowControls] = useState(false)
-  const hasStartedPlaying = useRef(false)
-
-  const togglePlay = () => {
-    if (!videoRef.current) return
-    if (isPlaying) {
-      videoRef.current.pause()
-      setIsPlaying(false)
-    } else {
-      if (!hasStartedPlaying.current) {
-        videoRef.current.currentTime = 0
-        hasStartedPlaying.current = true
-      }
-      videoRef.current.play()
-      setIsPlaying(true)
-    }
-  }
-
-  const toggleMute = () => {
-    if (!videoRef.current) return
-    videoRef.current.muted = !isMuted
-    setIsMuted(!isMuted)
-  }
 
   return (
     <section className={`py-24 lg:py-36 transition-colors duration-400 ${isDark ? 'bg-black' : 'bg-white'}`}>
@@ -970,99 +1042,93 @@ function VideoSection({ theme }: { theme: 'dark' | 'light' }) {
           >
             Every Frame Tells a Story.
           </h2>
-          <p className={`text-sm max-w-[440px] mx-auto leading-[1.85] ${isDark ? 'text-[#f2ece0]/55' : 'text-[#1c1917]/65'}`}>
+          <p className={`text-sm max-w-[500px] mx-auto leading-[1.85] ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/70'}`}>
             From emotional wedding films to brand stories and event highlights — cinematic narratives that move people.
           </p>
         </Reveal>
 
         <Reveal delay={160}>
           <div
-            className={`relative w-full overflow-hidden cursor-pointer group rounded-lg shadow-xl border ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'
+            className={`relative w-full overflow-hidden group rounded-2xl shadow-2xl border ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'
               }`}
             style={{ aspectRatio: '16/9' }}
-            onMouseEnter={() => setShowControls(true)}
-            onMouseLeave={() => setShowControls(false)}
-            onClick={togglePlay}
           >
-            <video
-              ref={videoRef}
-              src="/assets/video/MONTAGE.mp4#t=14"
-              loop
-              muted={isMuted}
-              playsInline
-              preload="metadata"
-              onLoadedMetadata={(e) => {
-                if (!hasStartedPlaying.current) {
-                  e.currentTarget.currentTime = 14
-                }
-              }}
-              className="w-full h-full object-cover"
-            />
-
-            {/* Dark gradient overlay for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-
-            {/* Center Play/Pause Indicator Button */}
-            <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${!isPlaying || showControls ? 'opacity-100' : 'opacity-0'}`}>
-              <div
-                className="flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-2xl backdrop-blur-md cursor-pointer"
-                style={{
-                  width: 84,
-                  height: 84,
-                  borderRadius: '50%',
-                  border: '1px solid rgba(255,255,255,0.4)',
-                  background: isPlaying ? 'rgba(0,0,0,0.5)' : isDark ? 'rgba(208,122,85,0.9)' : 'rgba(168,85,50,0.9)',
-                }}
-              >
-                {isPlaying ? (
-                  <div className="flex gap-2">
-                    <div className="w-2 h-7 bg-white rounded-full" />
-                    <div className="w-2 h-7 bg-white rounded-full" />
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      width: 0,
-                      height: 0,
-                      marginLeft: 6,
-                      borderTop: '12px solid transparent',
-                      borderBottom: '12px solid transparent',
-                      borderLeft: '20px solid #ffffff',
-                    }}
-                  />
-                )}
-              </div>
-              {!isPlaying && (
-                <span className="mt-4 text-xs font-semibold tracking-[0.25em] uppercase text-white/90 drop-shadow-md">
-                  Click To Play Video
-                </span>
-              )}
-            </div>
-
-            {/* Bottom Info Bar & Audio Toggle */}
-            <div className="absolute bottom-6 left-6 right-6 lg:bottom-10 lg:left-10 lg:right-10 flex items-end justify-between pointer-events-none">
-              <div>
-                <p className="font-['Cormorant_Garamond'] font-bold text-2xl lg:text-3xl text-[#ffffff] drop-shadow-md mb-1">
-                  Cinematic Montage Film
-                </p>
-                <p className={`text-[11px] font-['Manrope'] tracking-[0.22em] uppercase font-semibold drop-shadow-sm ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
-                  Frame &amp; Soul Official Showreel
-                </p>
-              </div>
-
-              {/* Sound Toggle Button */}
-              {isPlaying && (
+            {isPlaying ? (
+              <div className="relative w-full h-full">
+                <iframe
+                  src="https://www.youtube.com/embed/b68HETiNO98?autoplay=1&rel=0&modestbranding=1"
+                  title="Cinematic Wedding Film"
+                  className="w-full h-full border-0 rounded-2xl"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    toggleMute()
-                  }}
-                  className="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-semibold tracking-wider border border-white/20 transition-all cursor-pointer shadow-lg"
+                  onClick={() => setIsPlaying(false)}
+                  className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2 rounded-[12px] bg-black/80 hover:bg-black text-white text-xs font-semibold tracking-wider backdrop-blur-md border border-white/20 transition-all cursor-pointer shadow-lg"
                 >
-                  {isMuted ? '🔇 Muted' : '🔊 Sound On'}
+                  ✕ Close Video
                 </button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div
+                className="relative w-full h-full cursor-pointer group"
+                onClick={() => setIsPlaying(true)}
+              >
+                {/* Cover Image */}
+                <img
+                  src="/assets/image/services/Wedding.webp"
+                  alt="Cinematic Wedding Film Cover"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                />
+
+                {/* Dark gradient overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/30 transition-opacity duration-300 group-hover:opacity-90" />
+
+                {/* Center Play Indicator Button */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div
+                    className="flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-2xl backdrop-blur-md cursor-pointer"
+                    style={{
+                      width: 88,
+                      height: 88,
+                      borderRadius: '50%',
+                      border: '1px solid rgba(255,255,255,0.4)',
+                      background: isDark ? 'rgba(208,122,85,0.9)' : 'rgba(168,85,50,0.9)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 0,
+                        height: 0,
+                        marginLeft: 6,
+                        borderTop: '13px solid transparent',
+                        borderBottom: '13px solid transparent',
+                        borderLeft: '22px solid #ffffff',
+                      }}
+                    />
+                  </div>
+                  <span className="mt-5 text-xs font-semibold tracking-[0.25em] uppercase text-white/90 drop-shadow-md">
+                    Play Cinematic Film
+                  </span>
+                </div>
+
+                {/* Bottom Info Bar */}
+                <div className="absolute bottom-6 left-6 right-6 lg:bottom-10 lg:left-10 lg:right-10 flex items-end justify-between pointer-events-none">
+                  <div>
+                    <p className="font-['Cormorant_Garamond'] font-bold text-2xl lg:text-3xl text-[#ffffff] drop-shadow-md mb-1">
+                      Cinematic Wedding Film
+                    </p>
+                    <p className={`text-[11px] font-['Manrope'] tracking-[0.22em] uppercase font-semibold drop-shadow-sm ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
+                      Punniyakotti Photography &amp; Film Studio
+                    </p>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-[12px] bg-black/50 backdrop-blur-md border border-white/15 text-white/90 text-xs font-mono tracking-wider">
+                    <span>▶ YouTube HD</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </Reveal>
       </div>
@@ -1111,7 +1177,7 @@ function DroneSection({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark
                 doNavigate('/projects', e.currentTarget)
               }
             }}
-            className={`inline-block text-[11px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 border transition-all duration-350 shadow-md ${isDark
+            className={`inline-block text-[11px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 border transition-all duration-350 shadow-md rounded-[12px] ${isDark
               ? 'border-[#D07A55] text-[#D07A55] bg-[#0c0b09]/60 hover:bg-[#D07A55] hover:text-[#0c0b09]'
               : 'border-[#A85532] text-[#A85532] bg-[#ffffff]/80 backdrop-blur-md hover:bg-[#A85532] hover:text-[#ffffff]'
               }`}
@@ -1163,7 +1229,7 @@ function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
                 className="flex-shrink-0 group"
                 style={{ width: widths[i] }}
               >
-                <div className={`overflow-hidden border rounded-sm shadow-sm ${isDark ? 'border-[#f2ece0]/10 bg-[#1a1814]' : 'border-[#e7e2d7] bg-white'}`} style={{ aspectRatio: aspects[i] }}>
+                <div className={`overflow-hidden border rounded-2xl shadow-sm ${isDark ? 'border-[#f2ece0]/10 bg-[#1a1814]' : 'border-[#e7e2d7] bg-white'}`} style={{ aspectRatio: aspects[i] }}>
                   <img
                     src={item.src}
                     alt={item.label}
@@ -1208,12 +1274,12 @@ function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
         </h2>
       </Reveal>
 
-      <div className="grid grid-cols-3 lg:grid-cols-9 gap-1 mb-9">
+      <div className="grid grid-cols-3 lg:grid-cols-9 gap-1.5 mb-9">
         {INSTA.map((imgSrc, i) => (
           <Reveal
             key={imgSrc}
             delay={i * 35}
-            className={`relative overflow-hidden group cursor-pointer border ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'}`}
+            className={`relative overflow-hidden group cursor-pointer border rounded-xl ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'}`}
             style={{ aspectRatio: '1/1' }}
           >
             <img
@@ -1235,7 +1301,7 @@ function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
           href="https://instagram.com"
           target="_blank"
           rel="noopener noreferrer"
-          className={`inline-block text-[11px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 border transition-all duration-350 shadow-sm ${isDark
+          className={`inline-block text-[11px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-9 py-4 border transition-all duration-350 shadow-sm rounded-[12px] ${isDark
             ? 'border-[#f2ece0]/20 text-[#f2ece0]/70 hover:border-[#D07A55] hover:text-[#D07A55]'
             : 'border-[#1c1917]/18 text-[#1c1917]/70 hover:border-[#A85532] hover:text-[#A85532]'
             }`}
@@ -1275,7 +1341,7 @@ function FinalCTA({ theme }: { theme: 'dark' | 'light' }) {
           <div className="flex flex-wrap justify-center gap-4">
             <a
               href="mailto:punniyakottistudio@gmail.com"
-              className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 transition-all duration-350 shadow-md ${isDark
+              className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 transition-all duration-350 shadow-md rounded-[12px] ${isDark
                 ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
                 : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
                 }`}
@@ -1284,7 +1350,7 @@ function FinalCTA({ theme }: { theme: 'dark' | 'light' }) {
             </a>
             <a
               href="tel:+919876543210"
-              className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 border transition-all duration-350 shadow-sm ${isDark
+              className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 border transition-all duration-350 shadow-sm rounded-[12px] ${isDark
                 ? 'border-[#f2ece0]/35 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
                 : 'border-[#1c1917]/35 text-[#1c1917] bg-[#ffffff]/60 hover:border-[#A85532] hover:text-[#A85532]'
                 }`}

@@ -286,17 +286,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
       />
 
       {/* Centered Interactive WebGL Distorted PORTFOLIO Typography */}
-      <div
-        className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-auto select-none overflow-hidden px-2"
-        style={{
-          WebkitMaskImage: isDark
-            ? 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 32%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 62%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%)'
-            : 'none',
-          maskImage: isDark
-            ? 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 32%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 62%, rgba(0,0,0,1) 70%, rgba(0,0,0,1) 100%)'
-            : 'none',
-        }}
-      >
+      <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-auto select-none overflow-hidden px-2">
         <DistortedTypography theme={theme} text="PORTFOLIO" />
       </div>
 
@@ -323,7 +313,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
         <div className="flex items-start justify-between w-full">
           {/* TOP LEFT (Left Side Up): Studio Tag */}
           <div
-            className={`pointer-events-auto inline-flex items-center gap-3 px-4 py-2 rounded-full backdrop-blur-md shadow-lg ${
+            className={`pointer-events-auto inline-flex items-center gap-3 px-4 py-2 rounded-[12px] backdrop-blur-md shadow-lg ${
               isDark
                 ? 'border border-[#D07A55]/35 bg-[#0c0b09]/65'
                 : 'border border-[#A85532]/35 bg-[#ffffff]/85'
@@ -353,7 +343,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
 
           {/* TOP RIGHT (Right Side Up): People · Emotion · Moments */}
           <div
-            className={`pointer-events-auto inline-flex items-center gap-3 px-4.5 py-2 rounded-full backdrop-blur-md shadow-lg ${
+            className={`pointer-events-auto inline-flex items-center gap-3 px-4.5 py-2 rounded-[12px] backdrop-blur-md shadow-lg ${
               isDark
                 ? 'border border-[#f2ece0]/20 bg-[#0c0b09]/65 text-[#f2ece0]/90'
                 : 'border border-[#1c1917]/15 bg-[#ffffff]/85 text-[#1c1917]'
@@ -409,7 +399,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
                   navFn('/projects', e.currentTarget)
                 }
               }}
-              className={`group inline-flex items-center gap-3 text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 transition-all duration-350 shadow-xl ${
+              className={`group inline-flex items-center gap-3 text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 transition-all duration-350 shadow-xl rounded-[12px] ${
                 isDark
                   ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
                   : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
@@ -420,7 +410,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
             </a>
             <a
               href="#contact"
-              className={`inline-flex items-center text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 border transition-all duration-350 backdrop-blur-sm shadow-md ${
+              className={`inline-flex items-center text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 border transition-all duration-350 backdrop-blur-sm shadow-md rounded-[12px] ${
                 isDark
                   ? 'border-[#f2ece0]/30 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
                   : 'border-[#1c1917]/25 bg-[#ffffff]/60 text-[#1c1917] hover:border-[#A85532] hover:text-[#A85532]'
