@@ -5,6 +5,10 @@ import DistortedTypography from './components/DistortedTypography'
 import ProjectsPage from './components/ProjectsPage'
 import Preloader, { type IntroPhase } from './components/Preloader'
 import puniyakottiImg from '../assets/image/puniyakotti (2).webp'
+import { CMSProvider, useCMS } from './context/CMSContext'
+import AdminLayout from './admin/AdminLayout'
+import AdminDashboard from './admin/AdminDashboard'
+import { extractYouTubeId, type CinematicFilm } from './lib/supabase'
 
 const unsplash = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&auto=format&q=85`
@@ -223,19 +227,6 @@ function Nav({ currentPath, onNavigate, onNavigateWithFlash, introPhase, navLogo
           </a>
         </div>
       )}
-
-      <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scrollDrop {
-          0%   { top: -40%; opacity: 0; }
-          20%  { opacity: 1; }
-          80%  { opacity: 1; }
-          100% { top: 140%; opacity: 0; }
-        }
-      `}</style>
     </nav>
   )
 }
@@ -260,16 +251,17 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
   const isHeroImageVisible = introPhase === 'hero_image_reveal' || introPhase === 'full_reveal' || introPhase === 'done'
   const isHeroContentVisible = introPhase === 'full_reveal' || introPhase === 'done'
 
+  const heroAssetSrc = '/assets/image/hero/hero.webp'
+
   return (
     <section
       className={`relative w-full overflow-hidden select-none transition-colors duration-700 ease-in-out ${isDark ? 'bg-black' : 'bg-white'
         }`}
       style={{ height: '100svh', minHeight: 680 }}
     >
-      {/* Hero Image */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <img
-          src="/assets/image/hero/hero.webp"
+          src={heroAssetSrc}
           alt="Punniyakotti Photography Studio Hero"
           decoding="async"
           className="w-[500px] h-[500px] max-w-[92vw] max-h-[70vh] object-cover md:w-full md:h-full md:max-w-none md:max-h-none md:object-cover transition-all duration-700 ease-in-out pointer-events-none origin-center"
@@ -279,7 +271,6 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
         />
       </div>
 
-      {/* Centered Interactive WebGL Distorted PORTFOLIO Typography */}
       <div
         className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-auto select-none overflow-hidden px-2 transition-all duration-700 ease-out"
         style={{
@@ -290,7 +281,6 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
         <DistortedTypography theme={theme} text="PORTFOLIO" />
       </div>
 
-      {/* Subtle Gradient Overlay for visual polish */}
       <div
         className={`absolute inset-0 z-[6] pointer-events-none transition-all duration-700 ease-in-out ${isDark
           ? 'bg-gradient-to-t from-black/60 via-transparent to-black/30'
@@ -298,7 +288,6 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
           }`}
       />
 
-      {/* 4-Corner Layout Overlay */}
       <div
         className="relative z-10 h-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-16 pt-24 pb-12 flex flex-col justify-between pointer-events-none transition-all duration-800 ease-out"
         style={{
@@ -306,10 +295,7 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
           transform: isHeroContentVisible ? 'translateY(0)' : 'translateY(24px)',
         }}
       >
-
-        {/* TOP ROW */}
         <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:justify-between w-full">
-          {/* TOP LEFT: Studio Tag */}
           <div
             className={`pointer-events-auto inline-flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2 rounded-[12px] backdrop-blur-md shadow-lg ${isDark
               ? 'border border-[#D07A55]/35 bg-black/75'
@@ -335,7 +321,6 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
             </span>
           </div>
 
-          {/* TOP RIGHT: People · Emotion · Moments */}
           <div
             className={`pointer-events-auto inline-flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4.5 py-2 rounded-[12px] backdrop-blur-md shadow-lg ${isDark
               ? 'border border-[#f2ece0]/20 bg-black/75 text-[#f2ece0]/90'
@@ -349,9 +334,7 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
           </div>
         </div>
 
-        {/* BOTTOM ROW */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between w-full gap-5 sm:gap-8">
-          {/* BOTTOM LEFT: Headline */}
           <div className="pointer-events-auto max-w-none sm:max-w-2xl lg:max-w-4xl">
             <h1
               className="leading-[0.95] drop-shadow-md"
@@ -376,7 +359,6 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
             </h1>
           </div>
 
-          {/* BOTTOM RIGHT: CTA Buttons */}
           <div
             className="pointer-events-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto sm:justify-end sm:mb-1"
             style={{ animation: 'fadeUp 0.9s ease 0.7s both' }}
@@ -412,7 +394,6 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
             </a>
           </div>
         </div>
-
       </div>
     </section>
   )
@@ -420,17 +401,18 @@ function Hero({ onNavigate, onNavigateWithFlash, theme, heroMode, introPhase }: 
 
 // ─── ABOUT SECTION ────────────────────────────────────────────────────────────
 function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
+  const { getSectionAsset } = useCMS()
   const isDark = theme === 'dark'
+  const aboutAsset = getSectionAsset('about_portrait', puniyakottiImg)
+
   return (
     <section id="about" className={`py-28 lg:py-40 relative overflow-hidden transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
-      {/* Background Subtle Accent Glow */}
       <div
         className="absolute top-1/2 -right-48 w-96 h-96 rounded-full blur-[140px] pointer-events-none opacity-20"
         style={{ background: `radial-gradient(circle, ${isDark ? '#D07A55' : '#A85532'} 0%, transparent 70%)` }}
       />
 
       <div className="max-w-[1440px] mx-auto px-8 lg:px-16 grid lg:grid-cols-[1.15fr_1fr] gap-16 lg:gap-24 items-center relative z-10">
-        {/* Left Column: Text & Bio Content */}
         <Reveal>
           <div>
             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-[12px] mb-6 ${isDark ? 'bg-[#D07A55]/10 border border-[#D07A55]/30' : 'bg-[#A85532]/10 border border-[#A85532]/30'
@@ -456,7 +438,6 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
               </p>
             </div>
 
-            {/* Key Expertise Grid */}
             <div className={`grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 mt-10 border-t ${isDark ? 'border-[#f2ece0]/10' : 'border-[#1c1917]/10'}`}>
               <div className={`p-4 rounded-xl border shadow-sm ${isDark ? 'bg-[#14120e]/60 border-[#f2ece0]/08' : 'bg-white border-[#e7e2d7]'}`}>
                 <p className={`font-['Cormorant_Garamond'] font-bold text-2xl ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>7 Years</p>
@@ -501,18 +482,15 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
           </div>
         </Reveal>
 
-        {/* Right Column: Image Portrait & Badge */}
         <Reveal delay={180}>
           <div className="relative mx-auto lg:mx-0 max-w-[500px]">
-            {/* Outer Decorative Gold Border Frame */}
             <div className={`absolute -inset-4 border rounded-2xl pointer-events-none hidden sm:block ${isDark ? 'border-[#D07A55]/25' : 'border-[#A85532]/30'
               }`} />
 
-            {/* Main Portrait Container */}
             <div className={`relative rounded-2xl overflow-hidden border shadow-xl ${isDark ? 'border-[#f2ece0]/10 bg-[#14120e]' : 'border-[#e7e2d7] bg-white'
               }`}>
               <img
-                src={puniyakottiImg}
+                src={aboutAsset.src}
                 alt="Punniyakotti - Photographer & Event Planner"
                 decoding="async"
                 className="w-full h-auto object-cover object-center transition-transform duration-700 hover:scale-[1.03]"
@@ -522,7 +500,6 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
                 }`} />
             </div>
 
-            {/* Floating Experience Badge */}
             <div className={`absolute -bottom-6 -left-4 sm:left-6 border p-4 sm:p-5 rounded-2xl shadow-xl backdrop-blur-md ${isDark ? 'bg-[#161410] border-[#D07A55]/40 text-[#f2ece0]' : 'bg-white border-[#A85532]/40 text-[#1c1917]'
               }`}>
               <div className="flex items-center gap-4">
@@ -547,16 +524,17 @@ function AboutSection({ theme }: { theme: 'dark' | 'light' }) {
 }
 
 // ─── SERVICES ────────────────────────────────────────────────────────────────
-const SERVICES = [
-  { title: 'Wedding Photography', desc: 'Every emotion, every glance — preserved in frames that outlast time.', img: '1735052712464-9d24b69be5f5' },
-  { title: 'Wedding Films', desc: 'Cinematic wedding films that relive your love story with every viewing.', img: '1519741196428-6a2175fa2557' },
-  { title: 'Pre-Wedding Photography', desc: 'Editorial pre-wedding shoots that tell your story before the ceremony.', img: '1633104502699-b2ecf0fee294' },
-  { title: 'Event Photography', desc: 'From concerts to cultural celebrations — we document the energy.', img: '1764255510960-deee566a91f0' },
-  { title: 'Event Videography', desc: 'High-production highlight reels for every event, large or intimate.', img: '1768508947605-8c7a50aed683' },
-  { title: 'Drone & Aerial Cinematography', desc: 'Sweeping aerial perspectives that transform how your story is told.', img: '1767050248602-26b7386901ce' },
+const DEFAULT_SERVICES = [
+  { id: 'service_1', title: 'Wedding Photography', desc: 'Every emotion, every glance — preserved in frames that outlast time.', defaultImg: unsplash('1735052712464-9d24b69be5f5', 640, 480) },
+  { id: 'service_2', title: 'Wedding Films', desc: 'Cinematic wedding films that relive your love story with every viewing.', defaultImg: unsplash('1519741196428-6a2175fa2557', 640, 480) },
+  { id: 'service_3', title: 'Pre-Wedding Photography', desc: 'Editorial pre-wedding shoots that tell your story before the ceremony.', defaultImg: unsplash('1633104502699-b2ecf0fee294', 640, 480) },
+  { id: 'service_4', title: 'Event Photography', desc: 'From concerts to cultural celebrations — we document the energy.', defaultImg: unsplash('1764255510960-deee566a91f0', 640, 480) },
+  { id: 'service_5', title: 'Event Videography', desc: 'High-production highlight reels for every event, large or intimate.', defaultImg: unsplash('1768508947605-8c7a50aed683', 640, 480) },
+  { id: 'service_6', title: 'Drone & Aerial Cinematography', desc: 'Sweeping aerial perspectives that transform how your story is told.', defaultImg: unsplash('1767050248602-26b7386901ce', 640, 480) },
 ]
 
 function Services({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 'light'; onNavigate?: (path: string, el?: HTMLElement | null) => void; onNavigateWithFlash?: (path: string, el?: HTMLElement | null) => void }) {
+  const { getSectionAsset } = useCMS()
   const [hov, setHov] = useState<number | null>(null)
   const isDark = theme === 'dark'
   const doNavigate = onNavigate || onNavigateWithFlash
@@ -575,237 +553,125 @@ function Services({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 
         </Reveal>
 
         <div className={`grid sm:grid-cols-2 lg:grid-cols-3 gap-px ${isDark ? 'bg-[#f2ece0]/10' : 'bg-[#1c1917]/10'}`}>
-          {SERVICES.map((svc, i) => (
-            <div
-              key={svc.title}
-              className={`relative overflow-hidden cursor-pointer ${isDark ? 'bg-[#0f0e0c]' : 'bg-white'}`}
-              style={{ aspectRatio: '4/3' }}
-              onMouseEnter={() => setHov(i)}
-              onMouseLeave={() => setHov(null)}
-              onClick={(e) => {
-                if (doNavigate) {
-                  doNavigate('/projects', e.currentTarget)
-                }
-              }}
-            >
-              <img
-                src={unsplash(svc.img, 640, 480)}
-                alt={svc.title}
-                decoding="async"
-                className="w-full h-full object-cover transition-transform duration-700"
-                style={{ transform: hov === i ? 'scale(1.07)' : 'scale(1)', filter: isDark ? 'brightness(0.55)' : 'brightness(0.65)' }}
-              />
+          {DEFAULT_SERVICES.map((svc, i) => {
+            const assetState = getSectionAsset(svc.id, svc.defaultImg)
+            if (assetState.isDisabled) return null
+
+            return (
               <div
-                className="absolute inset-0 flex flex-col justify-end p-7 lg:p-8"
-                style={{ background: isDark ? 'linear-gradient(to top, rgba(12,11,9,0.92) 0%, transparent 60%)' : 'linear-gradient(to top, rgba(28,25,23,0.9) 0%, transparent 60%)' }}
+                key={svc.title}
+                className={`relative overflow-hidden cursor-pointer ${isDark ? 'bg-[#0f0e0c]' : 'bg-white'}`}
+                style={{ aspectRatio: '4/3' }}
+                onMouseEnter={() => setHov(i)}
+                onMouseLeave={() => setHov(null)}
+                onClick={(e) => {
+                  if (doNavigate) {
+                    doNavigate('/projects', e.currentTarget)
+                  }
+                }}
               >
-                <h3 className="font-['Cormorant_Garamond'] font-bold text-[1.35rem] text-[#ffffff] mb-2">{svc.title}</h3>
+                <img
+                  src={assetState.src}
+                  alt={svc.title}
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-700"
+                  style={{ transform: hov === i ? 'scale(1.07)' : 'scale(1)', filter: isDark ? 'brightness(0.55)' : 'brightness(0.65)' }}
+                />
                 <div
-                  style={{
-                    maxHeight: hov === i ? 80 : 0,
-                    opacity: hov === i ? 1 : 0,
-                    overflow: 'hidden',
-                    transition: 'max-height 0.45s ease, opacity 0.4s ease',
-                  }}
+                  className="absolute inset-0 flex flex-col justify-end p-7 lg:p-8"
+                  style={{ background: isDark ? 'linear-gradient(to top, rgba(12,11,9,0.92) 0%, transparent 60%)' : 'linear-gradient(to top, rgba(28,25,23,0.9) 0%, transparent 60%)' }}
                 >
-                  <p className="text-[12px] text-[#ffffff]/80 leading-relaxed mb-3">{svc.desc}</p>
-                  <span className={`text-[10px] tracking-[0.22em] uppercase font-semibold ${isDark ? 'text-[#D07A55]' : 'text-[#d4b06a]'}`}>View Work →</span>
+                  <h3 className="font-['Cormorant_Garamond'] font-bold text-[1.35rem] text-[#ffffff] mb-2">{svc.title}</h3>
+                  <div
+                    style={{
+                      maxHeight: hov === i ? 80 : 0,
+                      opacity: hov === i ? 1 : 0,
+                      overflow: 'hidden',
+                      transition: 'max-height 0.45s ease, opacity 0.4s ease',
+                    }}
+                  >
+                    <p className="text-[12px] text-[#ffffff]/80 leading-relaxed mb-3">{svc.desc}</p>
+                    <span className={`text-[10px] tracking-[0.22em] uppercase font-semibold ${isDark ? 'text-[#D07A55]' : 'text-[#d4b06a]'}`}>View Work →</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>
   )
 }
 
-// ─── PORTFOLIO ───────────────────────────────────────────────────────────────
-const CATS = ['ALL', 'WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KIDS']
-
-// Selected top highlights for the "ALL" tab (Exactly 12 images)
-const FEATURED_ALL = [
-  { title: 'Royal Heritage Wedding', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4729.webp', wide: true, tall: true },
-  { title: 'Fine Art Album Spread', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/01.webp', wide: true, tall: false },
-  { title: 'Golden Blessing Ritual', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1749.webp', wide: false, tall: true },
-  { title: 'Romantic Sunset Portraits', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/RAM_0599.webp', wide: true, tall: true },
-  { title: 'Pure Joy & Innocence', cat: 'KIDS', img: '/assets/comperessed images/BABY/03.webp', wide: false, tall: true },
-  { title: 'Sacred Ceremonial Vows', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/RAM_0100.webp', wide: false, tall: false },
-  { title: 'Luxury Leather Album Spreads', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/10.webp', wide: false, tall: true },
-  { title: 'Traditional Seemantham Celebrations', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1834.webp', wide: true, tall: false },
-  { title: 'Candid Love Story', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0809.webp', wide: false, tall: false },
-  { title: 'Playful Childhood Milestones', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A8894 - Copy.webp', wide: true, tall: false },
-  { title: 'Ethereal Bridal Elegance', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4811.webp', wide: false, tall: true },
-  { title: 'Emotions & Celebrations', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0822.webp', wide: false, tall: false },
-]
-
-// All images per folder category
-const CATEGORIES_ALL_IMAGES: Record<string, { title: string; cat: string; img: string; wide?: boolean; tall?: boolean }[]> = {
-  WEDDINGS: [
-    { title: 'Royal Wedding Frame 1', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4729.webp', wide: true, tall: true },
-    { title: 'Ceremonial Moments 2', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4806.webp', wide: false, tall: false },
-    { title: 'Bridal Portraiture 3', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4811.webp', wide: false, tall: true },
-    { title: 'Sacred Vows 4', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4818.webp', wide: true, tall: false },
-    { title: 'Wedding Festivities 5', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4835.webp', wide: false, tall: false },
-    { title: 'Traditional Rituals 6', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4844.webp', wide: false, tall: true },
-    { title: 'Ethereal Bridal Frame 7', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4858.webp', wide: true, tall: false },
-    { title: 'Candid Couple Smiles 8', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4869.webp', wide: false, tall: false },
-    { title: 'Blessings Ceremony 9', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/DSC_4873.webp', wide: false, tall: false },
-    { title: 'Grand Heritage Union 10', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/RAM_0100.webp', wide: true, tall: true },
-    { title: 'Sunset Couple Portrait 11', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/RAM_0103.webp', wide: false, tall: false },
-    { title: 'Timeless Emotion 12', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/12 345680.webp', wide: true, tall: false },
-    { title: 'Creative Editorial Frame 13', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/CRT02 1.webp', wide: false, tall: true },
-    { title: 'Creative Editorial Frame 14', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/CRT03 1.webp', wide: false, tall: false },
-    { title: 'Creative Editorial Frame 15', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/CRT03 2.webp', wide: true, tall: false },
-    { title: 'Creative Editorial Frame 16', cat: 'WEDDINGS', img: '/assets/comperessed images/WEDDING/CRT12 1.webp', wide: false, tall: true },
-  ],
-  'PREVIEW ALBUMN': [
-    { title: 'Album Spread 1', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/01.webp', wide: true, tall: true },
-    { title: 'Album Spread 2', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/04.webp', wide: false, tall: false },
-    { title: 'Album Spread 3', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/06.webp', wide: false, tall: true },
-    { title: 'Album Spread 4', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/10.webp', wide: true, tall: false },
-    { title: 'Album Spread 5', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/14.webp', wide: false, tall: false },
-    { title: 'Album Spread 6', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/15.webp', wide: false, tall: true },
-    { title: 'Album Spread 7', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/18.webp', wide: true, tall: false },
-    { title: 'Album Spread 8', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/CRT08.webp', wide: false, tall: false },
-    { title: 'Album Spread 9', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/CRT10.webp', wide: false, tall: false },
-    { title: 'Album Spread 10', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/CRT12.webp', wide: true, tall: true },
-    { title: 'Album Spread 11', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0018.webp', wide: false, tall: false },
-    { title: 'Album Spread 12', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0019.webp', wide: false, tall: true },
-    { title: 'Album Spread 13', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0020.webp', wide: true, tall: false },
-    { title: 'Album Spread 14', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0021.webp', wide: false, tall: false },
-    { title: 'Album Spread 15', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0022.webp', wide: false, tall: false },
-    { title: 'Album Spread 16', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0028.webp', wide: true, tall: false },
-    { title: 'Album Spread 17', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240213-WA0031.webp', wide: false, tall: true },
-    { title: 'Album Spread 18', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0009.webp', wide: false, tall: false },
-    { title: 'Album Spread 19', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0014.webp', wide: true, tall: false },
-    { title: 'Album Spread 20', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/IMG-20240717-WA0016.webp', wide: false, tall: false },
-    { title: 'Album Spread 21', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/SAVE_20250610_192917.webp', wide: false, tall: true },
-    { title: 'Album Spread 22', cat: 'PREVIEW ALBUMN', img: '/assets/comperessed images/PREVIEW ALBUMN/SAVE_20250610_192925.webp', wide: true, tall: false },
-  ],
-  'BABY SHOWER': [
-    { title: 'Baby Shower Frame 1', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8829 - Copy.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 2', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8839 - Copy.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 3', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8860 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 4', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8930 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 5', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8937 - Copy.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 6', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8943 - Copy.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 7', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8954 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 8', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8972 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 9', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A8986 - Copy.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 10', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9078 - Copy.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 11', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9195 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 12', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9217 - Copy.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 13', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9390.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 14', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/0B6A9527.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 15', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/1B9A4827.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 16', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1749.webp', wide: true, tall: true },
-    { title: 'Baby Shower Frame 17', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1765.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 18', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1775.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 19', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1789.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 20', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1790.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 21', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1817.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 22', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1829.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 23', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1834.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 24', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1836.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 25', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1895.webp', wide: false, tall: false },
-    { title: 'Baby Shower Frame 26', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC1949.webp', wide: false, tall: true },
-    { title: 'Baby Shower Frame 27', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC2247.webp', wide: true, tall: false },
-    { title: 'Baby Shower Frame 28', cat: 'BABY SHOWER', img: '/assets/comperessed images/BABYSHOWER/_DSC2351.webp', wide: false, tall: false },
-  ],
-  COUPLES: [
-    { title: 'Couple Portrait 1', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0809.webp', wide: true, tall: false },
-    { title: 'Couple Portrait 2', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0822.webp', wide: false, tall: true },
-    { title: 'Couple Portrait 3', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0829.webp', wide: false, tall: false },
-    { title: 'Couple Portrait 4', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0831.webp', wide: true, tall: false },
-    { title: 'Couple Portrait 5', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0923.webp', wide: false, tall: false },
-    { title: 'Couple Portrait 6', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0961.webp', wide: false, tall: true },
-    { title: 'Couple Portrait 7', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0975.webp', wide: true, tall: false },
-    { title: 'Couple Portrait 8', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/0B6A0986.webp', wide: false, tall: false },
-    { title: 'Couple Portrait 9', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/5I2A0403.webp', wide: false, tall: false },
-    { title: 'Couple Portrait 10', cat: 'COUPLES', img: '/assets/comperessed images/COUPLES/RAM_0599.webp', wide: true, tall: true },
-  ],
-  KIDS: [
-    { title: 'Kids Moment 1', cat: 'KIDS', img: '/assets/comperessed images/BABY/03.webp', wide: true, tall: true },
-    { title: 'Kids Moment 2', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A8894 - Copy.webp', wide: false, tall: true },
-    { title: 'Kids Moment 3', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A8912 - Copy.webp', wide: false, tall: false },
-    { title: 'Kids Moment 4', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A9417.webp', wide: true, tall: false },
-    { title: 'Kids Moment 5', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A9423.webp', wide: false, tall: false },
-    { title: 'Kids Moment 6', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A9430.webp', wide: false, tall: true },
-    { title: 'Kids Moment 7', cat: 'KIDS', img: '/assets/comperessed images/BABY/0B6A9434.webp', wide: true, tall: false },
-    { title: 'Kids Moment 9', cat: 'KIDS', img: '/assets/comperessed images/BABY/1B9A6122.webp', wide: false, tall: false },
-    { title: 'Kids Moment 10', cat: 'KIDS', img: '/assets/comperessed images/BABY/1B9A6123.webp', wide: true, tall: true },
-    { title: 'Kids Moment 11', cat: 'KIDS', img: '/assets/comperessed images/BABY/1B9A6266.webp', wide: false, tall: false },
-    { title: 'Kids Moment 12', cat: 'KIDS', img: '/assets/comperessed images/BABY/DSC_7961.webp', wide: false, tall: false },
-    { title: 'Kids Moment 13', cat: 'KIDS', img: '/assets/comperessed images/BABY/DSC_8047.webp', wide: true, tall: false },
-    { title: 'Kids Moment 14', cat: 'KIDS', img: '/assets/comperessed images/BABY/DSC_8226.webp', wide: false, tall: true },
-  ],
-}
-
-// Interleave images for the "ALL" tab to create a balanced Pinterest feed
-const FEATURED_ALL_INTERLEAVED = (() => {
-  const result: { title: string; cat: string; img: string }[] = []
-  const keys = ['WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KIDS']
-  const catBuckets: Record<string, { title: string; cat: string; img: string }[]> = {
-    WEDDINGS: CATEGORIES_ALL_IMAGES['WEDDINGS'] || [],
-    'PREVIEW ALBUMN': CATEGORIES_ALL_IMAGES['PREVIEW ALBUMN'] || [],
-    'BABY SHOWER': CATEGORIES_ALL_IMAGES['BABY SHOWER'] || [],
-    COUPLES: CATEGORIES_ALL_IMAGES['COUPLES'] || [],
-    KIDS: CATEGORIES_ALL_IMAGES['KIDS'] || [],
-  }
-
-  let index = 0
-  let added = true
-
-  while (added) {
-    added = false
-    const order = [...keys].sort(
-      (a, b) => (a.charCodeAt(index % a.length) % 5) - (b.charCodeAt(index % b.length) % 5)
-    )
-    for (const key of order) {
-      if (catBuckets[key][index]) {
-        result.push(catBuckets[key][index])
-        added = true
-      }
-    }
-    index++
-  }
-  return result
-})()
-
-// Helper function to pick up to 12 random items from an array
-function getRandom12Images(items: { title: string; cat: string; img: string }[]) {
-  if (items.length <= 12) return items
-  const shuffled = [...items]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled.slice(0, 12)
-}
-
+// ─── PORTFOLIO (HOME FEATURED) ────────────────────────────────────────────────
 function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?: (path: string, el?: HTMLElement | null) => void }) {
+  const { projects: cmsProjects, categories: cmsCategories } = useCMS()
   const [cat, setCat] = useState('ALL')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
-  const [randomSeed, setRandomSeed] = useState(0)
-
   const isDark = theme === 'dark'
 
-  // Pick 12 random images whenever category tab changes
+  const categoryTabs = useMemo(() => {
+    if (cmsCategories && cmsCategories.length > 0) {
+      return ['ALL', ...cmsCategories.map((c) => c.name)]
+    }
+    return ['ALL', 'WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KIDS']
+  }, [cmsCategories])
+
+  const activeProjects = useMemo(() => {
+    return cmsProjects.filter((p) => p.is_active !== false)
+  }, [cmsProjects])
+
   const shown = useMemo(() => {
-    const fullList = cat === 'ALL' ? FEATURED_ALL_INTERLEAVED : (CATEGORIES_ALL_IMAGES[cat] || [])
-    return getRandom12Images(fullList)
-  }, [cat, randomSeed])
+    let list: typeof activeProjects = []
+    if (cat.trim().toUpperCase() === 'ALL') {
+      const catKeys = categoryTabs.filter((c) => c !== 'ALL')
+      const catBuckets: Record<string, typeof activeProjects> = {}
+
+      catKeys.forEach((key) => {
+        catBuckets[key] = activeProjects.filter((p) => p.category.trim().toUpperCase() === key.trim().toUpperCase())
+      })
+
+      let index = 0
+      let added = true
+
+      while (added) {
+        added = false
+        for (const key of catKeys) {
+          if (catBuckets[key] && catBuckets[key][index]) {
+            list.push(catBuckets[key][index])
+            added = true
+          }
+        }
+        index++
+      }
+
+      // Add remaining active projects
+      activeProjects.forEach((p) => {
+        if (!list.some((item) => item.id === p.id)) {
+          list.push(p)
+        }
+      })
+    } else {
+      list = activeProjects.filter(
+        (p) => p.category.trim().toUpperCase() === cat.trim().toUpperCase()
+      )
+    }
+
+    return list.slice(0, 12).map((p) => ({
+      id: p.id,
+      title: p.title,
+      cat: p.category,
+      img: p.custom_src || p.default_src,
+    }))
+  }, [activeProjects, cat, categoryTabs])
 
   const activePhoto = lightboxIndex !== null ? shown[lightboxIndex] : null
 
   const handleTabSelect = (c: string) => {
     setCat(c)
     setLightboxIndex(null)
-    setRandomSeed((prev) => prev + 1)
   }
 
-  // Body scroll lock & Keyboard navigation for Portfolio Lightbox
   useEffect(() => {
     if (lightboxIndex !== null) {
       document.body.style.overflow = 'hidden'
@@ -846,16 +712,16 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
               Featured Portfolio
             </h2>
             <p className={`text-xs mt-2 font-medium ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
-              Showing 12 random highlights from {cat} archive
+              Showing 12 highlights from {cat} archive
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-            {CATS.map((c) => {
-              const isActive = cat === c
-              const count = c === 'ALL'
-                ? FEATURED_ALL_INTERLEAVED.length
-                : (CATEGORIES_ALL_IMAGES[c] || []).length
+            {categoryTabs.map((c) => {
+              const isActive = cat.trim().toUpperCase() === c.trim().toUpperCase()
+              const count = c.trim().toUpperCase() === 'ALL'
+                ? activeProjects.length
+                : activeProjects.filter((p) => p.category.trim().toUpperCase() === c.trim().toUpperCase()).length
 
               return (
                 <button
@@ -905,23 +771,21 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
         </div>
       </Reveal>
 
-      {/* ─── PINTEREST MASONRY GALLERY (FLUID UNCROPPED IMAGES FOR ALL TABS) ─── */}
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 xl:gap-6 space-y-4 xl:space-y-6">
         {shown.map((item, i) => (
           <Reveal
-            key={item.img + i}
+            key={item.id + i}
             delay={Math.min(i * 30, 300)}
             className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5"
           >
             <div className="w-full h-full" onClick={() => setLightboxIndex(i)}>
               <img
-                src={item.img.startsWith('/') ? item.img : unsplash(item.img, 800, 600)}
+                src={item.img}
                 alt={item.title}
                 decoding="async"
                 loading="lazy"
                 className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
               />
-              {/* Clean hover highlight (No text on image hover) */}
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                 style={{
@@ -950,7 +814,6 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
         </a>
       </div>
 
-      {/* Lightbox Photo Preview Modal */}
       {activePhoto && (
         <div
           className="fixed inset-0 z-[120] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-8 animate-fadeIn"
@@ -960,7 +823,6 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
             className="relative max-w-6xl w-full flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Top Bar */}
             <div className="w-full flex items-center justify-between text-white mb-4 px-2">
               <div className="flex items-center gap-3">
                 <span className="text-[10px] tracking-[0.25em] uppercase text-[#D07A55] font-semibold bg-[#D07A55]/15 border border-[#D07A55]/30 px-3 py-1 rounded-[12px]">
@@ -983,7 +845,6 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
               </div>
             </div>
 
-            {/* Main Image */}
             <div className="relative w-full max-h-[85vh] flex justify-center items-center overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-black/50">
               <img
                 src={activePhoto.img}
@@ -991,7 +852,6 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
                 className="max-h-[85vh] w-auto max-w-full object-contain rounded-lg select-none"
               />
 
-              {/* Prev Arrow */}
               {shown.length > 1 && (
                 <button
                   onClick={(e) => {
@@ -1005,7 +865,6 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
                 </button>
               )}
 
-              {/* Next Arrow */}
               {shown.length > 1 && (
                 <button
                   onClick={(e) => {
@@ -1026,10 +885,15 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
   )
 }
 
-// ─── VIDEO SECTION ───────────────────────────────────────────────────────────
+// ─── VIDEO SECTION (CINEMATIC FILMS) ──────────────────────────────────────────
 function VideoSection({ theme }: { theme: 'dark' | 'light' }) {
+  const { cinematicFilms } = useCMS()
   const isDark = theme === 'dark'
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [playingFilmId, setPlayingFilmId] = useState<string | null>(null)
+
+  const activeFilms = useMemo(() => {
+    return cinematicFilms.filter((f) => f.is_active !== false).slice(0, 4)
+  }, [cinematicFilms])
 
   return (
     <section className={`py-24 lg:py-36 transition-colors duration-400 ${isDark ? 'bg-black' : 'bg-white'}`}>
@@ -1047,90 +911,104 @@ function VideoSection({ theme }: { theme: 'dark' | 'light' }) {
           </p>
         </Reveal>
 
-        <Reveal delay={160}>
-          <div
-            className={`relative w-full overflow-hidden group rounded-2xl shadow-2xl border ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'
-              }`}
-            style={{ aspectRatio: '16/9' }}
-          >
-            {isPlaying ? (
-              <div className="relative w-full h-full">
-                <iframe
-                  src="https://www.youtube.com/embed/b68HETiNO98?autoplay=1&rel=0&modestbranding=1"
-                  title="Cinematic Wedding Film"
-                  className="w-full h-full border-0 rounded-2xl"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
-                <button
-                  onClick={() => setIsPlaying(false)}
-                  className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2 rounded-[12px] bg-black/80 hover:bg-black text-white text-xs font-semibold tracking-wider backdrop-blur-md border border-white/20 transition-all cursor-pointer shadow-lg"
+        {/* Dynamic Grid for Up to 4 Cinematic Film Containers */}
+        <div className={`grid gap-8 ${
+          activeFilms.length === 1
+            ? 'grid-cols-1'
+            : activeFilms.length === 2
+            ? 'grid-cols-1 lg:grid-cols-2'
+            : 'grid-cols-1 md:grid-cols-2'
+        }`}>
+          {activeFilms.map((film, i) => {
+            const ytId = extractYouTubeId(film.youtube_url)
+            const coverUrl = film.custom_cover_url || film.default_cover_url || '/assets/image/services/Wedding.webp'
+            const isPlaying = playingFilmId === film.id
+
+            return (
+              <Reveal key={film.id} delay={i * 120}>
+                <div
+                  className={`relative w-full overflow-hidden group rounded-2xl shadow-2xl border ${
+                    isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'
+                  }`}
+                  style={{ aspectRatio: '16/9' }}
                 >
-                  ✕ Close Video
-                </button>
-              </div>
-            ) : (
-              <div
-                className="relative w-full h-full cursor-pointer group"
-                onClick={() => setIsPlaying(true)}
-              >
-                {/* Cover Image */}
-                <img
-                  src="/assets/image/services/Wedding.webp"
-                  alt="Cinematic Wedding Film Cover"
-                  decoding="async"
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                />
-
-                {/* Dark gradient overlay for text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/30 transition-opacity duration-300 group-hover:opacity-90" />
-
-                {/* Center Play Indicator Button */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div
-                    className="flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-2xl backdrop-blur-md cursor-pointer"
-                    style={{
-                      width: 88,
-                      height: 88,
-                      borderRadius: '50%',
-                      border: '1px solid rgba(255,255,255,0.4)',
-                      background: isDark ? 'rgba(208,122,85,0.9)' : 'rgba(168,85,50,0.9)',
-                    }}
-                  >
+                  {isPlaying ? (
+                    <div className="relative w-full h-full">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
+                        title={film.title}
+                        className="w-full h-full border-0 rounded-2xl"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                      <button
+                        onClick={() => setPlayingFilmId(null)}
+                        className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2 rounded-[12px] bg-black/80 hover:bg-black text-white text-xs font-semibold tracking-wider backdrop-blur-md border border-white/20 transition-all cursor-pointer shadow-lg"
+                      >
+                        ✕ Close Video
+                      </button>
+                    </div>
+                  ) : (
                     <div
-                      style={{
-                        width: 0,
-                        height: 0,
-                        marginLeft: 6,
-                        borderTop: '13px solid transparent',
-                        borderBottom: '13px solid transparent',
-                        borderLeft: '22px solid #ffffff',
-                      }}
-                    />
-                  </div>
-                  <span className="mt-5 text-xs font-semibold tracking-[0.25em] uppercase text-white/90 drop-shadow-md">
-                    Play Cinematic Film
-                  </span>
-                </div>
+                      className="relative w-full h-full cursor-pointer group"
+                      onClick={() => setPlayingFilmId(film.id)}
+                    >
+                      <img
+                        src={coverUrl}
+                        alt={film.title}
+                        decoding="async"
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                      />
 
-                {/* Bottom Info Bar */}
-                <div className="absolute bottom-6 left-6 right-6 lg:bottom-10 lg:left-10 lg:right-10 flex items-end justify-between pointer-events-none">
-                  <div>
-                    <p className="font-['Cormorant_Garamond'] font-bold text-2xl lg:text-3xl text-[#ffffff] drop-shadow-md mb-1">
-                      Cinematic Wedding Film
-                    </p>
-                    <p className={`text-[11px] font-['Manrope'] tracking-[0.22em] uppercase font-semibold drop-shadow-sm ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
-                      Punniyakotti Photography &amp; Film Studio
-                    </p>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-[12px] bg-black/50 backdrop-blur-md border border-white/15 text-white/90 text-xs font-mono tracking-wider">
-                    <span>▶ YouTube HD</span>
-                  </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/30 transition-opacity duration-300 group-hover:opacity-90" />
+
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <div
+                          className="flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-2xl backdrop-blur-md cursor-pointer"
+                          style={{
+                            width: 80,
+                            height: 80,
+                            borderRadius: '50%',
+                            border: '1px solid rgba(255,255,255,0.4)',
+                            background: isDark ? 'rgba(208,122,85,0.9)' : 'rgba(168,85,50,0.9)',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 0,
+                              height: 0,
+                              marginLeft: 6,
+                              borderTop: '12px solid transparent',
+                              borderBottom: '12px solid transparent',
+                              borderLeft: '20px solid #ffffff',
+                            }}
+                          />
+                        </div>
+                        <span className="mt-4 text-[11px] font-semibold tracking-[0.25em] uppercase text-white/90 drop-shadow-md">
+                          Play Cinematic Film
+                        </span>
+                      </div>
+
+                      <div className="absolute bottom-5 left-5 right-5 lg:bottom-8 lg:left-8 lg:right-8 flex items-end justify-between pointer-events-none">
+                        <div>
+                          <p className="font-['Cormorant_Garamond'] font-bold text-xl lg:text-2xl text-[#ffffff] drop-shadow-md mb-1">
+                            {film.title}
+                          </p>
+                          <p className={`text-[10px] sm:text-[11px] font-['Manrope'] tracking-[0.22em] uppercase font-semibold drop-shadow-sm ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>
+                            {film.subtitle || 'Punniyakotti Photography & Film Studio'}
+                          </p>
+                        </div>
+                        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-[10px] bg-black/50 backdrop-blur-md border border-white/15 text-white/90 text-[10px] font-mono tracking-wider">
+                          <span>▶ YouTube HD</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-        </Reveal>
+              </Reveal>
+            )
+          })}
+        </div>
       </div>
     </section>
   )
@@ -1138,12 +1016,15 @@ function VideoSection({ theme }: { theme: 'dark' | 'light' }) {
 
 // ─── DRONE SECTION ───────────────────────────────────────────────────────────
 function DroneSection({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 'light'; onNavigate?: (path: string, el?: HTMLElement | null) => void; onNavigateWithFlash?: (path: string, el?: HTMLElement | null) => void }) {
+  const { getSectionAsset } = useCMS()
   const isDark = theme === 'dark'
   const doNavigate = onNavigate || onNavigateWithFlash
+  const droneBg = getSectionAsset('drone_bg', '/assets/image/WEDDING/RAM_0100.webp').src
+
   return (
     <section className="relative w-full flex items-center overflow-hidden" style={{ minHeight: '85vh' }}>
       <img
-        src="/assets/image/WEDDING/RAM_0100.webp"
+        src={droneBg}
         alt="Aerial Cinematography - Wedding Details"
         decoding="async"
         className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
@@ -1191,16 +1072,17 @@ function DroneSection({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark
 }
 
 // ─── WEDDING STORY ───────────────────────────────────────────────────────────
-const WEDDING_IMGS = [
-  { src: '/assets/image/Wedding Photography/First Look.webp', label: 'First Look' },
-  { src: '/assets/image/Wedding Photography/Candid Emotion.webp', label: 'Candid Emotion' },
-  { src: '/assets/image/Wedding Photography/The Ceremony.webp', label: 'The Ceremony' },
-  { src: '/assets/image/Wedding Photography/Family Moments.webp', label: 'Family Moments' },
-  { src: '/assets/image/Wedding Photography/Couple Portraits.webp', label: 'Couple Portraits' },
-  { src: '/assets/image/Wedding Photography/The Celebration.webp', label: 'The Celebration' },
+const DEFAULT_WEDDING_IMGS = [
+  { id: 'wedding_story_1', defaultSrc: '/assets/image/Wedding Photography/First Look.webp', label: 'First Look' },
+  { id: 'wedding_story_2', defaultSrc: '/assets/image/Wedding Photography/Candid Emotion.webp', label: 'Candid Emotion' },
+  { id: 'wedding_story_3', defaultSrc: '/assets/image/Wedding Photography/The Ceremony.webp', label: 'The Ceremony' },
+  { id: 'wedding_story_4', defaultSrc: '/assets/image/Wedding Photography/Family Moments.webp', label: 'Family Moments' },
+  { id: 'wedding_story_5', defaultSrc: '/assets/image/Wedding Photography/Couple Portraits.webp', label: 'Couple Portraits' },
+  { id: 'wedding_story_6', defaultSrc: '/assets/image/Wedding Photography/The Celebration.webp', label: 'The Celebration' },
 ]
 
 function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
+  const { getSectionAsset } = useCMS()
   const isDark = theme === 'dark'
   return (
     <section className={`py-24 lg:py-36 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
@@ -1219,7 +1101,10 @@ function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
           className="flex gap-4 lg:gap-6 overflow-x-auto pb-3"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {WEDDING_IMGS.map((item, i) => {
+          {DEFAULT_WEDDING_IMGS.map((item, i) => {
+            const assetState = getSectionAsset(item.id, item.defaultSrc)
+            if (assetState.isDisabled) return null
+
             const widths = [280, 220, 200, 260, 240, 210]
             const aspects = ['3/4', '4/5', '2/3', '3/4', '4/5', '3/4']
             return (
@@ -1231,7 +1116,7 @@ function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
               >
                 <div className={`overflow-hidden border rounded-2xl shadow-sm ${isDark ? 'border-[#f2ece0]/10 bg-[#1a1814]' : 'border-[#e7e2d7] bg-white'}`} style={{ aspectRatio: aspects[i] }}>
                   <img
-                    src={item.src}
+                    src={assetState.src}
                     alt={item.label}
                     decoding="async"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
@@ -1248,20 +1133,22 @@ function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
 }
 
 // ─── INSTAGRAM GRID ──────────────────────────────────────────────────────────
-const INSTA = [
-  '/assets/image/WEDDING/DSC_4811.webp',
-  '/assets/image/BABYSHOWER/_DSC1789.webp',
-  '/assets/image/COUPLES/RAM_0599.webp',
-  '/assets/image/BABYSHOWER/_DSC1834.webp',
-  '/assets/image/WEDDING/RAM_0103.webp',
-  '/assets/image/BABYSHOWER/_DSC2247.webp',
-  '/assets/image/BABY/0B6A9436.webp',
-  '/assets/image/BABYSHOWER/0B6A8954 - Copy.webp',
-  '/assets/image/BABYSHOWER/_DSC2351.webp',
+const DEFAULT_INSTA = [
+  { id: 'insta_1', defaultSrc: '/assets/image/WEDDING/DSC_4811.webp' },
+  { id: 'insta_2', defaultSrc: '/assets/image/BABYSHOWER/_DSC1789.webp' },
+  { id: 'insta_3', defaultSrc: '/assets/image/COUPLES/RAM_0599.webp' },
+  { id: 'insta_4', defaultSrc: '/assets/image/BABYSHOWER/_DSC1834.webp' },
+  { id: 'insta_5', defaultSrc: '/assets/image/WEDDING/RAM_0103.webp' },
+  { id: 'insta_6', defaultSrc: '/assets/image/BABYSHOWER/_DSC2247.webp' },
+  { id: 'insta_7', defaultSrc: '/assets/image/BABY/0B6A9436.webp' },
+  { id: 'insta_8', defaultSrc: '/assets/image/BABYSHOWER/0B6A8954 - Copy.webp' },
+  { id: 'insta_9', defaultSrc: '/assets/image/BABYSHOWER/_DSC2351.webp' },
 ]
 
 function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
+  const { getSectionAsset } = useCMS()
   const isDark = theme === 'dark'
+
   return (
     <section className={`py-24 lg:py-36 max-w-[1440px] mx-auto px-8 lg:px-16 transition-colors duration-400 ${isDark ? 'bg-[#0c0b09]' : 'bg-white'}`}>
       <Reveal className="text-center mb-12">
@@ -1275,25 +1162,30 @@ function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
       </Reveal>
 
       <div className="grid grid-cols-3 lg:grid-cols-9 gap-1.5 mb-9">
-        {INSTA.map((imgSrc, i) => (
-          <Reveal
-            key={imgSrc}
-            delay={i * 35}
-            className={`relative overflow-hidden group cursor-pointer border rounded-xl ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'}`}
-            style={{ aspectRatio: '1/1' }}
-          >
-            <img
-              src={imgSrc}
-              alt="Studio photography story"
-              decoding="async"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-            <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-350 flex items-center justify-center ${isDark ? 'bg-[#0c0b09]/60' : 'bg-white/75'
-              }`}>
-              <span className={`text-xl font-bold ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>♡</span>
-            </div>
-          </Reveal>
-        ))}
+        {DEFAULT_INSTA.map((item, i) => {
+          const assetState = getSectionAsset(item.id, item.defaultSrc)
+          if (assetState.isDisabled) return null
+
+          return (
+            <Reveal
+              key={item.id}
+              delay={i * 35}
+              className={`relative overflow-hidden group cursor-pointer border rounded-xl ${isDark ? 'bg-[#1a1814] border-[#f2ece0]/10' : 'bg-white border-[#e7e2d7]'}`}
+              style={{ aspectRatio: '1/1' }}
+            >
+              <img
+                src={assetState.src}
+                alt="Studio photography story"
+                decoding="async"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-350 flex items-center justify-center ${isDark ? 'bg-[#0c0b09]/60' : 'bg-white/75'
+                }`}>
+                <span className={`text-xl font-bold ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>♡</span>
+              </div>
+            </Reveal>
+          )
+        })}
       </div>
 
       <Reveal className="text-center">
@@ -1315,11 +1207,14 @@ function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
 
 // ─── FINAL CTA ───────────────────────────────────────────────────────────────
 function FinalCTA({ theme }: { theme: 'dark' | 'light' }) {
+  const { getSectionAsset } = useCMS()
   const isDark = theme === 'dark'
+  const contactBg = getSectionAsset('contact_bg', '/assets/image/COUPLES/RAM_0599.webp').src
+
   return (
     <section id="contact" className="relative w-full flex items-center justify-center overflow-hidden" style={{ minHeight: '85vh' }}>
       <img
-        src="/assets/image/COUPLES/RAM_0599.webp"
+        src={contactBg}
         alt="Couple silhouette — Get in Touch"
         decoding="async"
         className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
@@ -1485,8 +1380,8 @@ function Footer({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 'l
   )
 }
 
-// ─── APP ─────────────────────────────────────────────────────────────────────
-export default function App() {
+// ─── MAIN APP CONTENT (INSIDE CMS PROVIDER) ─────────────────────────
+function MainContent() {
   const [currentPath, setCurrentPath] = useState<string>(() => window.location.pathname || '/')
   const [heroMode, setHeroMode] = useState<'image' | 'animation'>('image')
   const [introPhase, setIntroPhase] = useState<IntroPhase>('loading')
@@ -1522,6 +1417,15 @@ export default function App() {
     } else {
       window.scrollTo({ top: 0, behavior: 'instant' })
     }
+  }
+
+  // ─── ADMIN ROUTE HANDLER ──────────────────────────────────────
+  if (currentPath.startsWith('/admin')) {
+    return (
+      <AdminLayout onNavigateHome={() => handleNavigate('/')}>
+        {() => <AdminDashboard />}
+      </AdminLayout>
+    )
   }
 
   return (
@@ -1567,5 +1471,13 @@ export default function App() {
       )}
       <Footer theme="light" onNavigate={handleNavigate} onNavigateWithFlash={handleNavigate} />
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <CMSProvider>
+      <MainContent />
+    </CMSProvider>
   )
 }
