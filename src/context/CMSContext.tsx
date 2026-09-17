@@ -2,12 +2,22 @@ import React, { createContext, useContext, useState, useEffect, useCallback, typ
 import { supabase, type SiteSectionAsset, type CMSProject, type CinematicFilm, type ProjectCategory } from '../lib/supabase'
 
 export const DEFAULT_CATEGORIES: ProjectCategory[] = [
-  { id: 'cat-1', name: 'WEDDINGS', display_order: 1 },
-  { id: 'cat-2', name: 'PREVIEW ALBUMN', display_order: 2 },
-  { id: 'cat-3', name: 'BABY SHOWER', display_order: 3 },
-  { id: 'cat-4', name: 'COUPLES', display_order: 4 },
-  { id: 'cat-5', name: 'KIDS', display_order: 5 },
+  { id: 'cat-1', name: 'WEDDINGS', display_order: 1, is_active: true, is_default: true },
+  { id: 'cat-2', name: 'PREVIEW ALBUMN', display_order: 2, is_active: true, is_default: true },
+  { id: 'cat-3', name: 'BABY SHOWER', display_order: 3, is_active: true, is_default: true },
+  { id: 'cat-4', name: 'COUPLES', display_order: 4, is_active: true, is_default: true },
+  { id: 'cat-5', name: 'KIDS', display_order: 5, is_active: true, is_default: true },
 ]
+
+const DEFAULT_CAT_IDS = new Set(['cat-1', 'cat-2', 'cat-3', 'cat-4', 'cat-5'])
+const DEFAULT_CAT_NAMES = new Set(['WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KIDS'])
+
+export function isDefaultCategory(cat: ProjectCategory): boolean {
+  if (cat.is_default) return true
+  if (DEFAULT_CAT_IDS.has(cat.id)) return true
+  if (DEFAULT_CAT_NAMES.has(cat.name.trim().toUpperCase())) return true
+  return false
+}
 
 // All 89 default photography images across all 5 folders in public/assets/comperessed images
 export const DEFAULT_PROJECTS: CMSProject[] = [
@@ -145,6 +155,8 @@ interface CMSContextType {
   // Dynamic Category Tab Methods
   addCategory: (name: string) => Promise<void>
   updateCategoryName: (id: string, newName: string) => Promise<void>
+  toggleCategoryActive: (id: string) => Promise<void>
+  reorderCategories: (reorderedList: ProjectCategory[]) => Promise<void>
   deleteCategory: (id: string) => Promise<void>
 
   // Cinematic Films Methods
@@ -158,10 +170,35 @@ interface CMSContextType {
 
 const CMSContext = createContext<CMSContextType | undefined>(undefined)
 
+const LOCAL_STORAGE_CAT_KEY = 'puniyakotti_cms_categories'
+
+function getStoredCategories(): ProjectCategory[] | null {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_CAT_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch (e) {
+    console.warn('Could not read stored categories:', e)
+  }
+  return null
+}
+
+function saveStoredCategories(cats: ProjectCategory[]) {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_CAT_KEY, JSON.stringify(cats))
+  } catch (e) {
+    console.warn('Could not save stored categories:', e)
+  }
+}
+
 export function CMSProvider({ children }: { children: ReactNode }) {
   const [sectionAssets, setSectionAssets] = useState<Record<string, SiteSectionAsset>>({})
   const [projects, setProjects] = useState<CMSProject[]>(DEFAULT_PROJECTS)
-  const [categories, setCategories] = useState<ProjectCategory[]>(DEFAULT_CATEGORIES)
+  const [categories, setCategories] = useState<ProjectCategory[]>(() => {
+    return getStoredCategories() || DEFAULT_CATEGORIES
+  })
   const [cinematicFilms, setCinematicFilms] = useState<CinematicFilm[]>(DEFAULT_FILMS)
   const [loading, setLoading] = useState(true)
 
@@ -183,16 +220,56 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       }
 
       // 2. Fetch categories
-      const { data: catData, error: catErr } = await supabase
+      const { data: catData } = await supabase
         .from('project_categories')
         .select('*')
         .order('display_order', { ascending: true })
 
-      if (!catErr && catData && catData.length > 0) {
-        setCategories(catData)
-      } else {
-        setCategories(DEFAULT_CATEGORIES)
-      }
+      const localSaved = getStoredCategories()
+      const dbCatMap = new Map((catData || []).map((c: ProjectCategory) => [c.id, c]))
+      const dbCatNameMap = new Map((catData || []).map((c: ProjectCategory) => [c.name.trim().toUpperCase(), c]))
+      const localCatMap = new Map((localSaved || []).map((c: ProjectCategory) => [c.id, c]))
+      const localCatNameMap = new Map((localSaved || []).map((c: ProjectCategory) => [c.name.trim().toUpperCase(), c]))
+
+      const mergedCats = DEFAULT_CATEGORIES.map((def) => {
+        const localItem = localCatMap.get(def.id) || localCatNameMap.get(def.name.trim().toUpperCase())
+        const dbItem = dbCatMap.get(def.id) || dbCatNameMap.get(def.name.trim().toUpperCase())
+
+        const isActive = localItem?.is_active !== undefined
+          ? localItem.is_active
+          : dbItem?.is_active !== undefined
+          ? dbItem.is_active
+          : true
+
+        const displayOrder = localItem?.display_order !== undefined
+          ? localItem.display_order
+          : dbItem?.display_order !== undefined
+          ? dbItem.display_order
+          : def.display_order
+
+        const name = localItem?.name || dbItem?.name || def.name
+
+        return {
+          ...def,
+          name,
+          display_order: displayOrder,
+          is_active: isActive,
+        }
+      })
+
+      const allCustoms = [...(localSaved || []), ...(catData || [])]
+      allCustoms.forEach((c: ProjectCategory) => {
+        if (!mergedCats.some((m) => m.id === c.id || m.name.trim().toUpperCase() === c.name.trim().toUpperCase())) {
+          mergedCats.push({
+            ...c,
+            is_active: c.is_active !== undefined ? c.is_active : true,
+          })
+        }
+      })
+
+      mergedCats.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+      setCategories(mergedCats)
+      saveStoredCategories(mergedCats)
 
       // 3. Fetch projects
       const { data: projectsData, error: projectsError } = await supabase
@@ -290,7 +367,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   const addCategory = async (name: string) => {
     const trimmed = name.trim().toUpperCase()
     if (!trimmed) return
-    if (categories.some((c) => c.name === trimmed)) {
+    if (categories.some((c) => c.name.toUpperCase() === trimmed)) {
       throw new Error(`Category "${trimmed}" already exists.`)
     }
 
@@ -299,12 +376,18 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       id: newId,
       name: trimmed,
       display_order: categories.length + 1,
+      is_active: true,
+      is_default: false,
     }
 
     const { error } = await supabase.from('project_categories').insert(newCat)
-    if (error) throw new Error(error.message)
+    if (error) console.warn('Add category Supabase notice:', error.message)
 
-    setCategories((prev) => [...prev, newCat])
+    setCategories((prev) => {
+      const updated = [...prev, newCat]
+      saveStoredCategories(updated)
+      return updated
+    })
   }
 
   const updateCategoryName = async (id: string, newName: string) => {
@@ -315,7 +398,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     if (!categoryToUpdate) return
 
     const oldName = categoryToUpdate.name
-    if (oldName === trimmed) return
+    if (oldName.toUpperCase() === trimmed) return
 
     // 1. Update Category table
     const { error: catErr } = await supabase
@@ -323,7 +406,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       .update({ name: trimmed, updated_at: new Date().toISOString() })
       .eq('id', id)
 
-    if (catErr) throw new Error(catErr.message)
+    if (catErr) console.warn('Category update name notice:', catErr.message)
 
     // 2. Update existing projects that had old category name
     const { error: projErr } = await supabase
@@ -334,19 +417,77 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     if (projErr) console.warn('Could not update project categories in DB:', projErr)
 
     // Update local state
-    setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, name: trimmed } : c)))
+    setCategories((prev) => {
+      const updated = prev.map((c) => (c.id === id ? { ...c, name: trimmed } : c))
+      saveStoredCategories(updated)
+      return updated
+    })
     setProjects((prev) => prev.map((p) => (p.category === oldName ? { ...p, category: trimmed } : p)))
+  }
+
+  const toggleCategoryActive = async (id: string) => {
+    const target = categories.find((c) => c.id === id)
+    if (!target) return
+
+    const nextActive = target.is_active === false ? true : false
+    const updatedCat: ProjectCategory = {
+      ...target,
+      is_active: nextActive,
+      updated_at: new Date().toISOString(),
+    }
+
+    setCategories((prev) => {
+      const updatedList = prev.map((c) => (c.id === id ? updatedCat : c))
+      saveStoredCategories(updatedList)
+      return updatedList
+    })
+
+    try {
+      const { error } = await supabase
+        .from('project_categories')
+        .upsert(updatedCat, { onConflict: 'id' })
+
+      if (error) {
+        console.warn('Category active state toggle Supabase notice:', error.message)
+      }
+    } catch (err) {
+      console.warn('Error saving category active state:', err)
+    }
+  }
+
+  const reorderCategories = async (reorderedList: ProjectCategory[]) => {
+    const updatedList = reorderedList.map((cat, idx) => ({
+      ...cat,
+      display_order: idx + 1,
+      updated_at: new Date().toISOString(),
+    }))
+
+    setCategories(updatedList)
+    saveStoredCategories(updatedList)
+
+    const { error } = await supabase
+      .from('project_categories')
+      .upsert(updatedList, { onConflict: 'id' })
+
+    if (error) console.warn('Reorder category save warning:', error.message)
   }
 
   const deleteCategory = async (id: string) => {
     const target = categories.find((c) => c.id === id)
     if (!target) return
 
-    // Delete category row
-    const { error } = await supabase.from('project_categories').delete().eq('id', id)
-    if (error) throw new Error(error.message)
+    if (isDefaultCategory(target)) {
+      throw new Error(`Default category tab "${target.name}" cannot be deleted. You can disable it instead.`)
+    }
 
-    setCategories((prev) => prev.filter((c) => c.id !== id))
+    const { error } = await supabase.from('project_categories').delete().eq('id', id)
+    if (error) console.warn('Delete category notice:', error.message)
+
+    setCategories((prev) => {
+      const updated = prev.filter((c) => c.id !== id)
+      saveStoredCategories(updated)
+      return updated
+    })
   }
 
   // Project Handlers
@@ -457,6 +598,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         resetProjectImage,
         addCategory,
         updateCategoryName,
+        toggleCategoryActive,
+        reorderCategories,
         deleteCategory,
         addFilm,
         updateFilm,

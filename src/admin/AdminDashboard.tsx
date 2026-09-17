@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useCMS, DEFAULT_PROJECTS } from '../context/CMSContext'
+import { useCMS, DEFAULT_PROJECTS, isDefaultCategory } from '../context/CMSContext'
 import ImageUploader from './ImageUploader'
 import { type CMSProject, type CinematicFilm, uploadWebsiteAsset, extractYouTubeId } from '../lib/supabase'
 
@@ -11,6 +11,8 @@ export default function AdminDashboard() {
     categories,
     addCategory,
     updateCategoryName,
+    toggleCategoryActive,
+    reorderCategories,
     deleteCategory,
     addProject,
     updateProject,
@@ -23,6 +25,8 @@ export default function AdminDashboard() {
     resetFilmCover,
     refreshCMS,
   } = useCMS()
+
+  const [draggedCatIndex, setDraggedCatIndex] = useState<number | null>(null)
 
   const [activeTab, setActiveTab] = useState<
     'overview' | 'about' | 'services' | 'video_drone' | 'cinematic_films' | 'wedding_story' | 'instagram' | 'projects'
@@ -688,70 +692,213 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Individual Category Sub-Tabs (No "ALL" tab in admin) */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-stone-200 shadow-xs">
+          {/* Individual Category Sub-Tabs with Drag & Drop Reordering (No "ALL" tab in admin) */}
+          <div className="flex flex-col gap-3 bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
+              <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">
+                <span>✋ Drag &amp; Drop or use arrows to reorder tabs</span>
+                <span className="text-stone-300">|</span>
+                <span>Click a tab to select</span>
+              </span>
+              <span className="text-[10px] text-stone-400 font-mono">
+                {categories.length} Category Tabs Total
+              </span>
+            </div>
+
             <div className="flex flex-wrap items-center gap-2">
-              {categories.map((cat) => {
+              {categories.map((cat, idx) => {
                 const isSelected = selectedCategoryName.toUpperCase() === cat.name.toUpperCase()
                 const count = projects.filter((p) => p.category.toUpperCase() === cat.name.toUpperCase()).length
+                const isDisabled = cat.is_active === false
 
                 return (
-                  <button
+                  <div
                     key={cat.id}
-                    onClick={() => setSelectedCategoryName(cat.name)}
-                    className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    draggable
+                    onDragStart={(e) => {
+                      setDraggedCatIndex(idx)
+                      e.dataTransfer.setData('text/plain', String(idx))
+                      e.dataTransfer.effectAllowed = 'move'
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      e.dataTransfer.dropEffect = 'move'
+                    }}
+                    onDragEnter={(e) => {
+                      e.preventDefault()
+                    }}
+                    onDrop={async (e) => {
+                      e.preventDefault()
+                      const rawIndex = e.dataTransfer.getData('text/plain')
+                      const fromIdx = draggedCatIndex !== null ? draggedCatIndex : (rawIndex !== '' ? parseInt(rawIndex, 10) : null)
+                      setDraggedCatIndex(null)
+                      if (fromIdx === null || isNaN(fromIdx) || fromIdx === idx) return
+                      const newList = [...categories]
+                      const [moved] = newList.splice(fromIdx, 1)
+                      newList.splice(idx, 0, moved)
+                      await reorderCategories(newList)
+                    }}
+                    className={`inline-flex items-center rounded-xl transition-all border ${
                       isSelected
-                        ? 'bg-[#A85532] text-white shadow-sm'
-                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900'
+                        ? 'bg-[#A85532] text-white border-[#A85532] shadow-sm'
+                        : isDisabled
+                        ? 'bg-amber-50/60 text-stone-400 border-amber-200/80'
+                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200 border-stone-200'
                     }`}
                   >
-                    <span>{cat.name}</span>
+                    {/* Drag Grip Handle */}
                     <span
-                      className={`text-[9.5px] px-2 py-0.5 rounded-full ${
-                        isSelected ? 'bg-white/20 text-white' : 'bg-stone-200 text-stone-700'
+                      className={`px-2 py-2 cursor-grab active:cursor-grabbing text-xs select-none ${
+                        isSelected ? 'text-white/70' : 'text-stone-400 hover:text-stone-600'
                       }`}
+                      title="Drag to reorder tab position"
                     >
-                      {count}
+                      ⠿
                     </span>
-                  </button>
+
+                    {/* Category Tab Button */}
+                    <button
+                      onClick={() => setSelectedCategoryName(cat.name)}
+                      className="py-2 pr-2 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <span>{cat.name}</span>
+                      {isDisabled && <span className="text-[9px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-md">Off</span>}
+                      <span
+                        className={`text-[9.5px] px-2 py-0.5 rounded-full ${
+                          isSelected ? 'bg-white/20 text-white' : 'bg-stone-200 text-stone-700'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+
+                    {/* Move Left / Right Buttons */}
+                    <div className="flex items-center pr-1 gap-0.5">
+                      {idx > 0 && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            const newList = [...categories]
+                            const [moved] = newList.splice(idx, 1)
+                            newList.splice(idx - 1, 0, moved)
+                            await reorderCategories(newList)
+                          }}
+                          className={`p-1 rounded text-[10px] cursor-pointer ${
+                            isSelected ? 'text-white/80 hover:bg-white/20' : 'text-stone-400 hover:bg-stone-200'
+                          }`}
+                          title="Move Left"
+                        >
+                          ←
+                        </button>
+                      )}
+                      {idx < categories.length - 1 && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            const newList = [...categories]
+                            const [moved] = newList.splice(idx, 1)
+                            newList.splice(idx + 1, 0, moved)
+                            await reorderCategories(newList)
+                          }}
+                          className={`p-1 rounded text-[10px] cursor-pointer ${
+                            isSelected ? 'text-white/80 hover:bg-white/20' : 'text-stone-400 hover:bg-stone-200'
+                          }`}
+                          title="Move Right"
+                        >
+                          →
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 )
               })}
             </div>
 
-            {/* Category Tab Actions: Edit Name & Delete Tab */}
-            {categories.some((c) => c.name.toUpperCase() === selectedCategoryName.toUpperCase()) && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    const catObj = categories.find((c) => c.name.toUpperCase() === selectedCategoryName.toUpperCase())
-                    if (catObj) {
-                      setEditingCatId(catObj.id)
-                      setEditingCatNameText(catObj.name)
-                    }
-                  }}
-                  className="text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded-xl border border-stone-200 transition-all cursor-pointer"
-                  title="Edit current tab name"
-                >
-                  ✏️ Edit Tab Name
-                </button>
-                {categories.length > 1 && (
-                  <button
-                    onClick={async () => {
-                      const catObj = categories.find((c) => c.name.toUpperCase() === selectedCategoryName.toUpperCase())
-                      if (catObj && confirm(`Delete category tab "${catObj.name}"?`)) {
-                        await deleteCategory(catObj.id)
-                        const remaining = categories.filter((c) => c.id !== catObj.id)
-                        if (remaining.length > 0) setSelectedCategoryName(remaining[0].name)
-                      }
-                    }}
-                    className="text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl border border-red-200 transition-all cursor-pointer"
-                    title="Delete current tab"
-                  >
-                    🗑️ Delete Tab
-                  </button>
-                )}
-              </div>
-            )}
+            {/* Selected Category Tab Actions Bar */}
+            {(() => {
+              const catObj = categories.find((c) => c.name.toUpperCase() === selectedCategoryName.toUpperCase())
+              if (!catObj) return null
+
+              const isDef = isDefaultCategory(catObj)
+              const isDisabled = catObj.is_active === false
+
+              return (
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-stone-700">
+                      Tab Options for <span className="text-[#A85532]">{catObj.name}</span>:
+                    </span>
+                    {isDef ? (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-0.5 rounded-md">
+                        🔒 Default Category
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800 bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-md">
+                        ✨ Custom Added Category
+                      </span>
+                    )}
+                    {isDisabled && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-md">
+                        👁️ Hidden from Website
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Edit Tab Name */}
+                    <button
+                      onClick={() => {
+                        setEditingCatId(catObj.id)
+                        setEditingCatNameText(catObj.name)
+                      }}
+                      className="text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded-xl border border-stone-200 transition-all cursor-pointer"
+                      title="Edit current tab name"
+                    >
+                      ✏️ Edit Tab Name
+                    </button>
+
+                    {/* Enable / Disable Tab Toggle */}
+                    <button
+                      onClick={async () => {
+                        await toggleCategoryActive(catObj.id)
+                      }}
+                      className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                        isDisabled
+                          ? 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                          : 'text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-200'
+                      }`}
+                      title={isDisabled ? 'Enable tab on website' : 'Disable tab on website'}
+                    >
+                      {isDisabled ? '👁️ Enable Tab' : '👁️ Disable Tab'}
+                    </button>
+
+                    {/* Delete Tab: Only allowed for Custom Tabs. Default tabs cannot be deleted. */}
+                    {isDef ? (
+                      <span
+                        className="text-xs font-semibold text-stone-400 bg-stone-100 px-3 py-1.5 rounded-xl border border-stone-200 cursor-not-allowed select-none"
+                        title="Default category tabs (WEDDINGS, PREVIEW ALBUMN, BABY SHOWER, COUPLES, KIDS) cannot be deleted. You can disable them instead."
+                      >
+                        🔒 Default Tab (Cannot Delete)
+                      </span>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          if (confirm(`Delete category tab "${catObj.name}"?`)) {
+                            await deleteCategory(catObj.id)
+                            const remaining = categories.filter((c) => c.id !== catObj.id)
+                            if (remaining.length > 0) setSelectedCategoryName(remaining[0].name)
+                          }
+                        }}
+                        className="text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl border border-red-200 transition-all cursor-pointer"
+                        title="Delete custom tab"
+                      >
+                        🗑️ Delete Tab
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
 
           {/* Current Category Projects Table */}

@@ -30,6 +30,8 @@ export interface ProjectCategory {
   id: string
   name: string
   display_order: number
+  is_active?: boolean
+  is_default?: boolean
   created_at?: string
   updated_at?: string
 }

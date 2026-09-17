@@ -124,37 +124,55 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
 
   const isDark = theme === 'dark'
 
-  // Dynamic category names with 'ALL' as default first tab
+  // Disabled category names set (uppercase)
+  const disabledCategoryNames = useMemo(() => {
+    if (!cmsCategories) return new Set<string>()
+    return new Set(
+      cmsCategories
+        .filter((c) => c.is_active === false)
+        .map((c) => c.name.trim().toUpperCase())
+    )
+  }, [cmsCategories])
+
+  // Dynamic category names with 'ALL' as default first tab (only active categories)
   const categoryTabs = useMemo(() => {
     if (cmsCategories && cmsCategories.length > 0) {
-      return ['ALL', ...cmsCategories.map((c) => c.name)]
+      const activeCats = cmsCategories.filter((c) => c.is_active !== false)
+      return ['ALL', ...activeCats.map((c) => c.name)]
     }
     return ['ALL', 'WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KIDS']
   }, [cmsCategories])
 
-  // Map CMS projects to GalleryItem list with custom upload overrides
+  // Map CMS projects to GalleryItem list with custom upload overrides (excluding disabled categories)
   const galleryData: GalleryItem[] = useMemo(() => {
-    if (cmsProjects && cmsProjects.length > 0) {
-      return cmsProjects
-        .filter((p) => p.is_active !== false)
-        .map((p) => ({
-          id: p.id,
-          title: p.title,
-          category: p.category as GalleryItem['category'],
-          src: p.custom_src || p.default_src,
-        }))
-    }
-    return DEFAULT_GALLERY_DATA
-  }, [cmsProjects])
+    const rawList = cmsProjects && cmsProjects.length > 0 ? cmsProjects : DEFAULT_GALLERY_DATA.map((d) => ({
+      id: d.id,
+      title: d.title,
+      category: d.category,
+      default_src: d.src,
+      custom_src: null,
+      display_order: 1,
+      is_active: true,
+    }))
 
-  // Create an interleaved order for the 'ALL' tab
+    return rawList
+      .filter((p) => p.is_active !== false && !disabledCategoryNames.has(p.category.trim().toUpperCase()))
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        category: p.category as GalleryItem['category'],
+        src: p.custom_src || p.default_src,
+      }))
+  }, [cmsProjects, disabledCategoryNames])
+
+  // Create an interleaved order for the 'ALL' tab (only active categories)
   const allInterleavedData: GalleryItem[] = useMemo(() => {
     const result: GalleryItem[] = []
     const catKeys = categoryTabs.filter((c) => c !== 'ALL')
     const catBuckets: Record<string, GalleryItem[]> = {}
 
     catKeys.forEach((key) => {
-      catBuckets[key] = galleryData.filter((i) => i.category.toUpperCase() === key.toUpperCase())
+      catBuckets[key] = galleryData.filter((i) => i.category.trim().toUpperCase() === key.trim().toUpperCase())
     })
 
     let index = 0
@@ -170,13 +188,6 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
       }
       index++
     }
-
-    // Add any remaining items from unbucketed categories
-    galleryData.forEach((item) => {
-      if (!result.some((r) => r.id === item.id)) {
-        result.push(item)
-      }
-    })
 
     return result
   }, [galleryData, categoryTabs])

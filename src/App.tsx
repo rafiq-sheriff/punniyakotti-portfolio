@@ -610,16 +610,28 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const isDark = theme === 'dark'
 
+  const disabledCategoryNames = useMemo(() => {
+    if (!cmsCategories) return new Set<string>()
+    return new Set(
+      cmsCategories
+        .filter((c) => c.is_active === false)
+        .map((c) => c.name.trim().toUpperCase())
+    )
+  }, [cmsCategories])
+
   const categoryTabs = useMemo(() => {
     if (cmsCategories && cmsCategories.length > 0) {
-      return ['ALL', ...cmsCategories.map((c) => c.name)]
+      const activeCats = cmsCategories.filter((c) => c.is_active !== false)
+      return ['ALL', ...activeCats.map((c) => c.name)]
     }
     return ['ALL', 'WEDDINGS', 'PREVIEW ALBUMN', 'BABY SHOWER', 'COUPLES', 'KIDS']
   }, [cmsCategories])
 
   const activeProjects = useMemo(() => {
-    return cmsProjects.filter((p) => p.is_active !== false)
-  }, [cmsProjects])
+    return cmsProjects.filter(
+      (p) => p.is_active !== false && !disabledCategoryNames.has(p.category.trim().toUpperCase())
+    )
+  }, [cmsProjects, disabledCategoryNames])
 
   const shown = useMemo(() => {
     let list: typeof activeProjects = []
@@ -644,13 +656,6 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
         }
         index++
       }
-
-      // Add remaining active projects
-      activeProjects.forEach((p) => {
-        if (!list.some((item) => item.id === p.id)) {
-          list.push(p)
-        }
-      })
     } else {
       list = activeProjects.filter(
         (p) => p.category.trim().toUpperCase() === cat.trim().toUpperCase()
