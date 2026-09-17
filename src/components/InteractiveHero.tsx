@@ -56,6 +56,16 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
     animating: true,
   })
 
+  // Cache bounds to avoid layout thrashing during mousemove and 60fps render loop
+  const cachedBoundsRef = useRef({ left: 0, width: 0, height: 0 })
+
+  const updateCachedBounds = () => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      cachedBoundsRef.current = { left: rect.left, width: rect.width, height: rect.height }
+    }
+  }
+
   // State and ref for viewport visibility & active rendering loop
   const isInViewRef = useRef(true)
   const isLoopRunningRef = useRef(false)
@@ -71,6 +81,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
       stateRef.current.img = img
       stateRef.current.activeConfig = CONFIG_24FPS_GRID
       setLoaded(true)
+      updateCachedBounds()
       requestRender()
     }
 
@@ -85,12 +96,36 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
         stateRef.current.targetFrame = 24
         stateRef.current.currentFrame = 24
         setLoaded(true)
+        updateCachedBounds()
         requestRender()
       }
     }
 
     return () => {
       mounted = false
+    }
+  }, [])
+
+  // ResizeObserver & window resize listener for cached bounds
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    updateCachedBounds()
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateCachedBounds()
+    })
+    resizeObserver.observe(el)
+
+    const handleResize = () => updateCachedBounds()
+    window.addEventListener('resize', handleResize, { passive: true })
+    window.addEventListener('scroll', handleResize, { passive: true })
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('scroll', handleResize)
     }
   }, [])
 
@@ -116,79 +151,87 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
         const ctx = canvas.getContext('2d')
         if (ctx) {
           const dpr = Math.min(window.devicePixelRatio || 1, 2)
-          const rect = container.getBoundingClientRect()
-          const width = rect.width
-          const height = rect.height
-          const displayWidth = Math.floor(width * dpr)
-          const displayHeight = Math.floor(height * dpr)
+          let width = cachedBoundsRef.current.width
+          let height = cachedBoundsRef.current.height
 
-          if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-            canvas.width = displayWidth
-            canvas.height = displayHeight
+          if (width === 0 || height === 0) {
+            updateCachedBounds()
+            width = cachedBoundsRef.current.width
+            height = cachedBoundsRef.current.height
           }
 
-          // Smooth interpolation towards target frame
-          const diff = stateRef.current.targetFrame - stateRef.current.currentFrame
-          if (Math.abs(diff) > 0.001) {
-            stateRef.current.currentFrame += diff * 0.085
-            needsNextFrame = true
-          } else {
-            stateRef.current.currentFrame = stateRef.current.targetFrame
+          if (width > 0 && height > 0) {
+            const displayWidth = Math.floor(width * dpr)
+            const displayHeight = Math.floor(height * dpr)
+
+            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+              canvas.width = displayWidth
+              canvas.height = displayHeight
+            }
+
+            // Smooth interpolation towards target frame
+            const diff = stateRef.current.targetFrame - stateRef.current.currentFrame
+            if (Math.abs(diff) > 0.001) {
+              stateRef.current.currentFrame += diff * 0.085
+              needsNextFrame = true
+            } else {
+              stateRef.current.currentFrame = stateRef.current.targetFrame
+            }
+
+            const frameIndex = Math.min(
+              Math.max(Math.round(stateRef.current.currentFrame), 0),
+              activeConfig.totalFrames - 1
+            )
+
+            let sx = 0
+            let sy = 0
+
+            if (activeConfig.isHorizontal) {
+              sx = frameIndex * activeConfig.frameWidth
+              sy = 0
+            } else {
+              const col = frameIndex % activeConfig.cols
+              const row = Math.floor(frameIndex / activeConfig.cols)
+              sx = col * activeConfig.frameWidth
+              sy = row * activeConfig.frameHeight
+            }
+
+            const frameAspect = activeConfig.frameWidth / activeConfig.frameHeight
+            const canvasAspect = width / height
+
+            let drawWidth = width
+            let drawHeight = height
+            let dx = 0
+            let dy = 0
+
+            if (canvasAspect > frameAspect) {
+              drawHeight = width / frameAspect
+              dy = (height - drawHeight) / 2
+            } else {
+              drawWidth = height * frameAspect
+              dx = (width - drawWidth) / 2
+            }
+
+            ctx.imageSmoothingEnabled = true
+            ctx.imageSmoothingQuality = 'high'
+
+            ctx.save()
+            ctx.scale(dpr, dpr)
+            ctx.clearRect(0, 0, width, height)
+
+            ctx.drawImage(
+              img,
+              sx,
+              sy,
+              activeConfig.frameWidth,
+              activeConfig.frameHeight,
+              dx,
+              dy,
+              drawWidth,
+              drawHeight
+            )
+            ctx.restore()
           }
-
-          const frameIndex = Math.min(
-            Math.max(Math.round(stateRef.current.currentFrame), 0),
-            activeConfig.totalFrames - 1
-          )
-
-          let sx = 0
-          let sy = 0
-
-          if (activeConfig.isHorizontal) {
-            sx = frameIndex * activeConfig.frameWidth
-            sy = 0
-          } else {
-            const col = frameIndex % activeConfig.cols
-            const row = Math.floor(frameIndex / activeConfig.cols)
-            sx = col * activeConfig.frameWidth
-            sy = row * activeConfig.frameHeight
-          }
-
-          const frameAspect = activeConfig.frameWidth / activeConfig.frameHeight
-          const canvasAspect = width / height
-
-          let drawWidth = width
-          let drawHeight = height
-          let dx = 0
-          let dy = 0
-
-          if (canvasAspect > frameAspect) {
-            drawHeight = width / frameAspect
-            dy = (height - drawHeight) / 2
-          } else {
-            drawWidth = height * frameAspect
-            dx = (width - drawWidth) / 2
-          }
-
-          ctx.imageSmoothingEnabled = true
-          ctx.imageSmoothingQuality = 'high'
-
-          ctx.save()
-          ctx.scale(dpr, dpr)
-          ctx.clearRect(0, 0, width, height)
-
-          ctx.drawImage(
-            img,
-            sx,
-            sy,
-            activeConfig.frameWidth,
-            activeConfig.frameHeight,
-            dx,
-            dy,
-            drawWidth,
-            drawHeight
-          )
-          ctx.restore()
         }
       }
 
@@ -212,6 +255,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
       ([entry]) => {
         isInViewRef.current = entry.isIntersecting
         if (entry.isIntersecting) {
+          updateCachedBounds()
           requestRender()
         } else {
           if (animationFrameIdRef.current) {
@@ -235,11 +279,10 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
 
   // Pointer Movement Handlers
   const handlePointerMove = (clientX: number) => {
-    const container = containerRef.current
-    if (!container) return
+    const { left, width } = cachedBoundsRef.current
+    if (width <= 0) return
 
-    const rect = container.getBoundingClientRect()
-    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    const ratio = Math.max(0, Math.min(1, (clientX - left) / width))
 
     const { activeConfig } = stateRef.current
     const newTarget = Math.round((1 - ratio) * (activeConfig.totalFrames - 1))

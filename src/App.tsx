@@ -44,11 +44,12 @@ function Reveal({
   return (
     <div
       ref={ref}
-      className={className}
+      className={`${className} transform-gpu`}
       style={{
         ...style,
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(28px)',
+        transform: visible ? 'translate3d(0, 0, 0)' : 'translate3d(0, 24px, 0)',
+        willChange: visible ? 'auto' : 'opacity, transform',
         transition: `opacity 0.85s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.85s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
       }}
     >
@@ -73,7 +74,16 @@ function Nav({ currentPath, onNavigate, onNavigateWithFlash, introPhase, navLogo
   const isDark = false
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 50)
+    let ticking = false
+    const fn = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 40)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
@@ -110,15 +120,16 @@ function Nav({ currentPath, onNavigate, onNavigateWithFlash, introPhase, navLogo
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
+      className="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 transform-gpu"
       style={{
-        background: scrolled
-          ? 'rgba(255,255,255,0.96)'
-          : 'transparent',
+        backgroundColor: scrolled
+          ? 'rgba(255,255,255,0.95)'
+          : 'rgba(255,255,255,0)',
         borderBottom: scrolled
           ? '1px solid rgba(28,25,23,0.08)'
-          : 'none',
-        backdropFilter: scrolled ? 'blur(16px)' : 'none',
+          : '1px solid rgba(28,25,23,0)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
       }}
     >
       <div
@@ -783,7 +794,7 @@ function Portfolio({ theme, onNavigate }: { theme: 'dark' | 'light'; onNavigate?
           <Reveal
             key={item.id + i}
             delay={Math.min(i * 30, 300)}
-            className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5"
+            className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5 transform-gpu"
           >
             <div className="w-full h-full relative" onClick={() => setLightboxIndex(i)}>
               <img

@@ -344,7 +344,7 @@ export default function ProjectsPage({ onNavigateHome, theme = 'light' }: Projec
             return (
               <div
                 key={item.id + i}
-                className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5"
+                className="break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-1.5 transform-gpu"
                 onClick={() => setLightboxIndex(i)}
               >
                 <img

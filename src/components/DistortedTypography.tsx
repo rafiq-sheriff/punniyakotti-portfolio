@@ -328,10 +328,28 @@ export default function DistortedTypography({
     let isInView = true
     let animationFrameId: number | null = null
 
+    // Cached container rectangle to avoid forced reflows during mousemove and 60fps render loop
+    let cachedRect = container.getBoundingClientRect()
+    const updateCachedRect = () => {
+      if (container) {
+        cachedRect = container.getBoundingClientRect()
+      }
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateCachedRect()
+    })
+    resizeObserver.observe(container)
+
+    window.addEventListener('resize', updateCachedRect, { passive: true })
+    window.addEventListener('scroll', updateCachedRect, { passive: true })
+
     // Pointer Event Listeners — active only when element is in view
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
       if (!container || !isInView) return
-      const rect = container.getBoundingClientRect()
+      const rect = cachedRect
+      if (rect.width === 0 || rect.height === 0) return
+
       let clientX = 0
       let clientY = 0
 
@@ -388,7 +406,7 @@ export default function DistortedTypography({
         return
       }
 
-      const rect = container.getBoundingClientRect()
+      const rect = cachedRect
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
       const width = Math.floor(rect.width * dpr)
       const height = Math.floor(rect.height * dpr)
@@ -484,9 +502,12 @@ export default function DistortedTypography({
 
     return () => {
       observer.disconnect()
+      resizeObserver.disconnect()
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId)
       }
+      window.removeEventListener('resize', updateCachedRect)
+      window.removeEventListener('scroll', updateCachedRect)
       window.removeEventListener('mousemove', handlePointerMove)
       window.removeEventListener('mouseleave', handlePointerLeave)
       window.removeEventListener('touchmove', handlePointerMove)
