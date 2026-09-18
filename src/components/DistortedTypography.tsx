@@ -264,10 +264,13 @@ export default function DistortedTypography({
       const currentText = stateRef.current.text
 
       // Dynamic font size and tracking matching PORTFOLIO design
-      const isMobile = width < 640
-      const fontSize = isMobile
-        ? Math.min(Math.max(width * 0.11, 32), 68)
-        : Math.min(Math.max(width * 0.165, 120), 260)
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const cssWidth = width / dpr
+      const isMobile = cssWidth < 640
+      const cssFontSize = isMobile
+        ? Math.min(Math.max(cssWidth * 0.105, 24), 54)
+        : Math.min(Math.max(cssWidth * 0.13, 72), 220)
+      const fontSize = cssFontSize * dpr
       const letterSpacingPx = fontSize * 0.08
 
       offscreenCtx.save()
@@ -541,7 +544,7 @@ export default function DistortedTypography({
             className={`font-['Manrope'] font-extrabold uppercase transition-colors duration-700 whitespace-nowrap text-center ${isDark ? 'text-[#f2ece0]/22' : 'text-[#1c1917]/12'
               }`}
             style={{
-              fontSize: 'clamp(32px, 11vw, 260px)',
+              fontSize: 'clamp(24px, 9.5vw, 220px)',
               letterSpacing: '0.08em',
               paddingLeft: '0.08em',
             }}

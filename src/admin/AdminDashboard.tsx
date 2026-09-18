@@ -1,7 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useCMS, DEFAULT_PROJECTS, isDefaultCategory } from '../context/CMSContext'
 import ImageUploader from './ImageUploader'
-import { type CMSProject, type CinematicFilm, uploadWebsiteAsset, extractYouTubeId } from '../lib/supabase'
+import {
+  type CMSProject,
+  type CinematicFilm,
+  type ContactInquiry,
+  uploadWebsiteAsset,
+  extractYouTubeId,
+  fetchContactInquiries,
+  updateInquiryStatus,
+  deleteInquiry,
+} from '../lib/supabase'
 
 export default function AdminDashboard() {
   const {
@@ -29,8 +38,52 @@ export default function AdminDashboard() {
   const [draggedCatIndex, setDraggedCatIndex] = useState<number | null>(null)
 
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'about' | 'services' | 'video_drone' | 'cinematic_films' | 'wedding_story' | 'instagram' | 'projects'
+    'overview' | 'inquiries' | 'about' | 'services' | 'video_drone' | 'cinematic_films' | 'wedding_story' | 'instagram' | 'projects'
   >('overview')
+
+  // Inquiries State
+  const [inquiries, setInquiries] = useState<ContactInquiry[]>([])
+  const [loadingInquiries, setLoadingInquiries] = useState(false)
+  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'new' | 'contacted' | 'booked' | 'archived'>('all')
+  const [inquirySearch, setInquirySearch] = useState('')
+  const [selectedInquiry, setSelectedInquiry] = useState<ContactInquiry | null>(null)
+
+  const loadInquiries = async () => {
+    setLoadingInquiries(true)
+    try {
+      const data = await fetchContactInquiries()
+      setInquiries(data)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoadingInquiries(false)
+    }
+  }
+
+  useEffect(() => {
+    loadInquiries()
+  }, [])
+
+  const handleUpdateInquiryStatus = async (id: string, status: 'new' | 'contacted' | 'booked' | 'archived') => {
+    const success = await updateInquiryStatus(id, status)
+    if (success) {
+      setInquiries((prev) => prev.map((inq) => (inq.id === id ? { ...inq, status } : inq)))
+      if (selectedInquiry && selectedInquiry.id === id) {
+        setSelectedInquiry((prev) => (prev ? { ...prev, status } : null))
+      }
+    }
+  }
+
+  const handleDeleteInquiry = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this inquiry?')) return
+    const success = await deleteInquiry(id)
+    if (success) {
+      setInquiries((prev) => prev.filter((inq) => inq.id !== id))
+      if (selectedInquiry?.id === id) setSelectedInquiry(null)
+    }
+  }
+
+  const newInquiriesCount = inquiries.filter((inq) => inq.status === 'new').length
 
   // Selected Category Sub-tab in Portfolio Projects (Default to first available category)
   const [selectedCategoryName, setSelectedCategoryName] = useState<string>('WEDDINGS')
@@ -365,6 +418,7 @@ export default function AdminDashboard() {
       <div className="flex flex-wrap items-center gap-2 border-b border-stone-200 pb-4">
         {[
           { id: 'overview', label: '📊 Overview' },
+          { id: 'inquiries', label: `📩 Client Inquiries (${inquiries.length}${newInquiriesCount > 0 ? ` • ${newInquiriesCount} NEW` : ''})` },
           { id: 'about', label: '👤 About Section' },
           { id: 'services', label: '✨ Services (6)' },
           { id: 'cinematic_films', label: `🎬 Cinematic Films (${cinematicFilms.length}/4)` },
@@ -376,7 +430,7 @@ export default function AdminDashboard() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-['Manrope'] font-bold tracking-wider uppercase transition-all cursor-pointer ${
+            className={`px-4.5 py-2.5 rounded-xl text-xs font-['Manrope'] font-bold tracking-wider uppercase transition-all cursor-pointer relative ${
               activeTab === tab.id
                 ? 'bg-[#A85532] text-white shadow-md'
                 : 'bg-white text-stone-600 border border-stone-200 hover:border-stone-300 hover:text-stone-900 hover:bg-stone-50'
@@ -390,16 +444,38 @@ export default function AdminDashboard() {
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div
+              onClick={() => setActiveTab('inquiries')}
+              className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-6 rounded-2xl shadow-sm cursor-pointer hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-amber-800 text-xs font-mono font-bold uppercase tracking-wider block">
+                  Client Inquiries
+                </span>
+                {newInquiriesCount > 0 && (
+                  <span className="bg-[#A85532] text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+                    {newInquiriesCount} NEW
+                  </span>
+                )}
+              </div>
+              <p className="font-['Cormorant_Garamond'] text-4xl font-bold text-[#A85532] group-hover:scale-105 transition-transform">
+                {inquiries.length}
+              </p>
+              <p className="text-amber-700/80 text-xs mt-2 font-medium flex items-center gap-1">
+                View &amp; respond to leads →
+              </p>
+            </div>
+
             <div className="bg-white border border-stone-200 p-6 rounded-2xl shadow-sm">
               <span className="text-stone-500 text-xs font-mono font-bold uppercase tracking-wider block mb-2">
                 Managed Website Sections
               </span>
-              <p className="font-['Cormorant_Garamond'] text-4xl font-bold text-[#A85532]">
+              <p className="font-['Cormorant_Garamond'] text-4xl font-bold text-[#1c1917]">
                 {totalSections}
               </p>
               <p className="text-stone-500 text-xs mt-2 font-medium">
-                About, Services, Cinematic Films, Drone, Wedding Story, Instagram, Contact
+                About, Services, Films, Drone, Contact
               </p>
             </div>
 
@@ -423,7 +499,7 @@ export default function AdminDashboard() {
                 {projects.length}
               </p>
               <p className="text-stone-500 text-xs mt-2 font-medium">
-                Weddings, Albums, Baby Shower, Couples &amp; Kids items
+                Weddings, Albums, Couples &amp; Kids
               </p>
             </div>
 
@@ -435,7 +511,7 @@ export default function AdminDashboard() {
                 {totalCustomSectionImages}
               </p>
               <p className="text-stone-500 text-xs mt-2 font-medium">
-                Uploaded images replacing default assets
+                Uploaded custom images active
               </p>
             </div>
           </div>
@@ -472,6 +548,245 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB: INQUIRIES MANAGEMENT */}
+      {activeTab === 'inquiries' && (
+        <div className="space-y-6 font-sans">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4">
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <h3 className="font-['Cormorant_Garamond'] font-bold text-2xl text-[#1c1917] uppercase tracking-wide">
+                  Client Inquiries &amp; Leads
+                </h3>
+                <span className="bg-[#A85532]/10 text-[#A85532] text-xs font-bold px-3 py-1 rounded-full font-mono border border-[#A85532]/20">
+                  {inquiries.length} Total Received
+                </span>
+              </div>
+              <p className="text-stone-500 text-xs font-medium">
+                Review website inquiries, track booking status, and connect directly with prospective clients via WhatsApp or Call.
+              </p>
+            </div>
+
+            <button
+              onClick={loadInquiries}
+              disabled={loadingInquiries}
+              className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <span>{loadingInquiries ? 'Refreshing...' : '🔄 Refresh Inquiries'}</span>
+            </button>
+          </div>
+
+          {/* Filters & Search Header */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+            {/* Filter Tabs */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {(['all', 'new', 'contacted', 'booked', 'archived'] as const).map((st) => {
+                const count = st === 'all' ? inquiries.length : inquiries.filter((i) => i.status === st).length
+                return (
+                  <button
+                    key={st}
+                    onClick={() => setInquiryFilter(st)}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      inquiryFilter === st
+                        ? 'bg-[#1c1917] text-white'
+                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900'
+                    }`}
+                  >
+                    {st} ({count})
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64">
+              <input
+                type="text"
+                placeholder="Search name, phone, email..."
+                value={inquirySearch}
+                onChange={(e) => setInquirySearch(e.target.value)}
+                className="w-full px-3.5 py-2 pl-9 rounded-xl text-xs border border-stone-300 focus:border-[#A85532] outline-none"
+              />
+              <span className="absolute left-3 top-2.5 text-stone-400 text-xs">🔍</span>
+            </div>
+          </div>
+
+          {/* Inquiries Table / Grid */}
+          {loadingInquiries ? (
+            <div className="text-center py-16 bg-white rounded-2xl border border-stone-200">
+              <div className="w-8 h-8 border-3 border-[#A85532] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-xs text-stone-500 font-medium">Fetching client inquiries from database...</p>
+            </div>
+          ) : inquiries.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-2xl border border-stone-200 p-8">
+              <span className="text-4xl block mb-3">📬</span>
+              <h4 className="font-['Cormorant_Garamond'] text-2xl font-bold text-stone-800 mb-2">No Inquiries Yet</h4>
+              <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
+                When visitors fill out the contact form on your website, their event inquiry details will appear right here in real time.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {inquiries
+                .filter((inq) => {
+                  if (inquiryFilter !== 'all' && inq.status !== inquiryFilter) return false
+                  if (!inquirySearch.trim()) return true
+                  const q = inquirySearch.toLowerCase()
+                  return (
+                    inq.name.toLowerCase().includes(q) ||
+                    inq.phone.toLowerCase().includes(q) ||
+                    inq.email.toLowerCase().includes(q) ||
+                    (inq.service_type && inq.service_type.toLowerCase().includes(q)) ||
+                    (inq.event_location && inq.event_location.toLowerCase().includes(q))
+                  )
+                })
+                .map((inq) => {
+                  const statusColors = {
+                    new: 'bg-amber-100 text-amber-900 border-amber-300',
+                    contacted: 'bg-blue-100 text-blue-900 border-blue-300',
+                    booked: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+                    archived: 'bg-stone-200 text-stone-700 border-stone-300',
+                  }
+                  const formattedDate = inq.created_at
+                    ? new Date(inq.created_at).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : 'Recent'
+
+                  const waMessage = `Hello ${inq.name}! Thank you for reaching out to Punniyakotti Photography regarding your ${inq.service_type || 'event'}. We would love to discuss your booking details!`
+                  const waUrl = `https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMessage)}`
+
+                  return (
+                    <div
+                      key={inq.id}
+                      className={`bg-white rounded-2xl border p-6 shadow-xs transition-all hover:shadow-md ${
+                        inq.status === 'new' ? 'border-amber-300 ring-2 ring-amber-400/20' : 'border-stone-200'
+                      }`}
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-stone-100 pb-4 mb-4">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="font-['Cormorant_Garamond'] text-xl font-bold text-stone-900">
+                            {inq.name}
+                          </span>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-stone-100 text-stone-700 border border-stone-300">
+                            {inq.service_type || 'General Inquiry'}
+                          </span>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                              statusColors[inq.status || 'new']
+                            }`}
+                          >
+                            ● {inq.status || 'new'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-xs text-stone-400 font-mono">
+                          <span>📅 {formattedDate}</span>
+                        </div>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs mb-4">
+                        <div>
+                          <span className="text-stone-400 font-semibold block mb-0.5 uppercase tracking-wider text-[10px]">Contact Phone</span>
+                          <a href={`tel:${inq.phone}`} className="font-semibold text-stone-800 hover:text-[#A85532]">
+                            📞 {inq.phone}
+                          </a>
+                        </div>
+
+                        <div>
+                          <span className="text-stone-400 font-semibold block mb-0.5 uppercase tracking-wider text-[10px]">Email Address</span>
+                          <a href={`mailto:${inq.email}`} className="font-semibold text-stone-800 hover:text-[#A85532] truncate block">
+                            ✉️ {inq.email}
+                          </a>
+                        </div>
+
+                        <div>
+                          <span className="text-stone-400 font-semibold block mb-0.5 uppercase tracking-wider text-[10px]">Event Date / Location</span>
+                          <p className="font-semibold text-stone-800">
+                            🗓️ {inq.event_date || 'N/A'} {inq.event_location ? `• 📍 ${inq.event_location}` : ''}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span className="text-stone-400 font-semibold block mb-0.5 uppercase tracking-wider text-[10px]">Budget / Source</span>
+                          <p className="font-semibold text-stone-800">
+                            💰 {inq.budget_range || 'Not specified'} {inq.referral_source ? `• 📣 ${inq.referral_source}` : ''}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Message Box */}
+                      {inq.message && (
+                        <div className="bg-stone-50 border border-stone-200 rounded-xl p-3.5 mb-4 text-xs text-stone-700 leading-relaxed italic">
+                          "{inq.message}"
+                        </div>
+                      )}
+
+                      {/* Action Bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                        {/* WhatsApp & Call Quick Actions */}
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3.5 py-1.5 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs rounded-lg transition-all inline-flex items-center gap-1.5 shadow-xs"
+                          >
+                            <svg className="w-3.5 h-3.5 fill-white shrink-0" viewBox="0 0 800 800">
+                              <path d="M571 474.5C561.5 470 516 447.5 507.5 444C499 440.5 493 439.5 486.5 449C480 458.5 462.5 479 457 485.5C451.5 492 446.5 492.5 437 485.5C409.713 474.55 384.513 458.99 362.5 439.5C342.572 420.738 325.702 398.975 312.5 375C307 366 312.5 361 316.5 356C320.5 351 325.5 345.5 330.5 340C334.156 335.243 337.181 330.033 339.5 324.5C340.74 321.927 341.384 319.107 341.384 316.25C341.384 313.393 340.74 310.573 339.5 308C339.5 303.5 318.5 258 310.5 239.5C302.5 221 295.5 223.5 290 223.5H270C260.472 223.871 251.481 228.007 245 235C234.537 244.983 226.25 257.021 220.658 270.357C215.065 283.693 212.288 298.04 212.5 312.5C215.057 347.999 228.11 381.936 250 410C290.168 469.672 345.123 517.908 409.5 550C431.5 559.5 448.5 565 462 569.5C480.957 575.23 500.994 576.429 520.5 573C533.454 570.372 545.731 565.11 556.568 557.541C567.405 549.972 576.572 540.258 583.5 529C589.265 515.097 591.165 499.894 589 485C586.5 481.5 580.5 479 571 474.5Z" />
+                              <path d="M664.5 134C629.921 99.0942 588.703 71.4663 543.275 52.7457C497.848 34.0252 449.132 24.5912 400 25C334.915 25.3406 271.058 42.7517 214.807 75.4941C158.556 108.237 111.881 155.165 79.4419 211.591C47.0031 268.017 29.9365 331.967 29.9467 397.053C29.9569 462.139 47.0435 526.084 79.5 582.5L29.5 775L226.5 725C280.962 754.635 341.997 770.109 404 770H400C473.896 770.482 546.261 748.944 607.867 708.132C669.473 667.321 717.528 609.087 745.904 540.855C774.281 472.623 781.692 397.485 767.194 325.024C752.696 252.563 716.945 186.061 664.5 134ZM400 706C344.528 706.044 290.087 691.008 242.5 662.5L231.5 656L114.5 686.5L145.5 572.5L138.5 561C98.5678 496.692 83.6306 419.963 96.5224 345.371C109.414 270.779 149.238 203.514 208.438 156.339C267.638 109.164 342.096 85.361 417.683 89.4459C493.27 93.5309 564.729 125.22 618.5 178.5C647.327 207.095 670.175 241.14 685.712 278.654C701.25 316.167 709.166 356.397 709 397C708.868 478.911 676.27 557.43 618.35 615.35C560.43 673.27 481.911 705.868 400 706Z" />
+                            </svg>
+                            <span>WhatsApp Client</span>
+                          </a>
+
+                          <a
+                            href={`tel:${inq.phone}`}
+                            className="px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold text-xs rounded-lg transition-all"
+                          >
+                            📞 Call
+                          </a>
+
+                          <a
+                            href={`mailto:${inq.email}`}
+                            className="px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold text-xs rounded-lg transition-all"
+                          >
+                            ✉️ Email
+                          </a>
+                        </div>
+
+                        {/* Status Change & Delete */}
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={inq.status || 'new'}
+                            onChange={(e) => handleUpdateInquiryStatus(inq.id!, e.target.value as any)}
+                            className="px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-semibold text-stone-700 bg-white outline-none cursor-pointer"
+                          >
+                            <option value="new">Status: NEW</option>
+                            <option value="contacted">Status: CONTACTED</option>
+                            <option value="booked">Status: BOOKED</option>
+                            <option value="archived">Status: ARCHIVED</option>
+                          </select>
+
+                          <button
+                            onClick={() => handleDeleteInquiry(inq.id!)}
+                            className="px-2.5 py-1.5 text-red-600 hover:bg-red-50 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          )}
         </div>
       )}
 

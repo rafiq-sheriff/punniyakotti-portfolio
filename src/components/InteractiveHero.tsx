@@ -350,20 +350,20 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
       )}
 
       {/* 4-Corner Layout Overlay (Center completely clear for photographer subject) */}
-      <div className="relative z-10 h-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-16 pt-24 pb-12 flex flex-col justify-between pointer-events-none">
+      <div className="relative z-10 h-full max-w-[1440px] mx-auto px-4 sm:px-12 lg:px-16 pt-20 sm:pt-24 pb-8 sm:pb-12 flex flex-col justify-between pointer-events-none">
         
         {/* TOP ROW */}
-        <div className="flex items-start justify-between w-full">
+        <div className="flex items-start justify-between w-full gap-2">
           {/* TOP LEFT (Left Side Up): Studio Tag */}
           <div
-            className={`pointer-events-auto inline-flex items-center gap-3 px-4 py-2 rounded-[12px] backdrop-blur-md shadow-lg ${
+            className={`pointer-events-auto inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-[12px] backdrop-blur-md shadow-lg ${
               isDark
                 ? 'border border-[#D07A55]/35 bg-[#0c0b09]/65'
                 : 'border border-[#A85532]/35 bg-[#ffffff]/85'
             }`}
             style={{ animation: 'fadeUp 0.85s ease 0.2s both' }}
           >
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-2 w-2 shrink-0">
               <span
                 className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                   isDark ? 'bg-[#D07A55]' : 'bg-[#A85532]'
@@ -376,7 +376,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
               />
             </span>
             <span
-              className={`text-[13px] font-['Manrope'] font-medium tracking-[0.22em] uppercase ${
+              className={`text-[11px] sm:text-[13px] font-['Manrope'] font-medium tracking-[0.16em] sm:tracking-[0.22em] uppercase whitespace-nowrap ${
                 isDark ? 'text-[#D07A55]' : 'text-[#A85532]'
               }`}
             >
@@ -386,21 +386,21 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
 
           {/* TOP RIGHT (Right Side Up): People · Emotion · Moments */}
           <div
-            className={`pointer-events-auto inline-flex items-center gap-3 px-4.5 py-2 rounded-[12px] backdrop-blur-md shadow-lg ${
+            className={`pointer-events-auto inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4.5 py-1.5 sm:py-2 rounded-[12px] backdrop-blur-md shadow-lg ${
               isDark
                 ? 'border border-[#f2ece0]/20 bg-[#0c0b09]/65 text-[#f2ece0]/90'
                 : 'border border-[#1c1917]/15 bg-[#ffffff]/85 text-[#1c1917]'
             }`}
             style={{ animation: 'fadeUp 0.85s ease 0.3s both' }}
           >
-            <span className="text-[13px] font-['Manrope'] font-medium tracking-[0.22em] uppercase">
-              People <span className={isDark ? 'text-[#D07A55] mx-1' : 'text-[#A85532] mx-1'}>·</span> Emotion <span className={isDark ? 'text-[#D07A55] mx-1' : 'text-[#A85532] mx-1'}>·</span> Moments
+            <span className="text-[11px] sm:text-[13px] font-['Manrope'] font-medium tracking-[0.16em] sm:tracking-[0.22em] uppercase whitespace-nowrap">
+              People <span className={isDark ? 'text-[#D07A55] mx-0.5 sm:mx-1' : 'text-[#A85532] mx-0.5 sm:mx-1'}>·</span> Emotion <span className={isDark ? 'text-[#D07A55] mx-0.5 sm:mx-1' : 'text-[#A85532] mx-1'}>·</span> Moments
             </span>
           </div>
         </div>
 
         {/* BOTTOM ROW */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between w-full gap-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between w-full gap-6 sm:gap-8">
           {/* BOTTOM LEFT (Left Side Down): Headline */}
           <div className="pointer-events-auto max-w-xl">
             <h1
@@ -413,7 +413,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
                 className={`font-['Cormorant_Garamond'] font-semibold block ${
                   isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'
                 }`}
-                style={{ fontSize: 'clamp(72px, 5.5vw, 88px)' }}
+                style={{ fontSize: 'clamp(44px, 5.5vw, 88px)' }}
               >
                 I Capture
               </span>
@@ -421,7 +421,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
                 className={`font-['Cormorant_Garamond'] font-bold italic block ${
                   isDark ? 'text-[#D07A55]' : 'text-[#A85532]'
                 }`}
-                style={{ fontSize: 'clamp(72px, 5.5vw, 88px)' }}
+                style={{ fontSize: 'clamp(44px, 5.5vw, 88px)' }}
               >
                 What Words Can't.
               </span>
@@ -430,7 +430,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
 
           {/* BOTTOM RIGHT (Right Side Down): CTA Buttons */}
           <div
-            className="pointer-events-auto flex flex-wrap items-center gap-4 sm:justify-end"
+            className="pointer-events-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 sm:justify-end"
             style={{ animation: 'fadeUp 0.9s ease 0.7s both' }}
           >
             <a
@@ -442,7 +442,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
                   navFn('/projects', e.currentTarget)
                 }
               }}
-              className={`group inline-flex items-center gap-3 text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 transition-all duration-350 shadow-xl rounded-[12px] ${
+              className={`group inline-flex items-center justify-center gap-3 text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-6 sm:px-8 py-3.5 sm:py-4 transition-all duration-350 shadow-xl rounded-[12px] ${
                 isDark
                   ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
                   : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
@@ -455,7 +455,7 @@ export default function InteractiveHero({ onNavigate, onNavigateWithFlash, theme
               href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20book%20a%20photography%20session."
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-8 py-4 border transition-all duration-350 backdrop-blur-sm shadow-md rounded-[12px] ${
+              className={`inline-flex items-center justify-center text-[12px] sm:text-[13px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-6 sm:px-8 py-3.5 sm:py-4 border transition-all duration-350 backdrop-blur-sm shadow-md rounded-[12px] ${
                 isDark
                   ? 'border-[#f2ece0]/30 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
                   : 'border-[#1c1917]/25 bg-[#ffffff]/60 text-[#1c1917] hover:border-[#A85532] hover:text-[#A85532]'

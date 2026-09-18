@@ -4,6 +4,7 @@ import HeroAnimation from './components/HeroAnimation'
 import DistortedTypography from './components/DistortedTypography'
 import ProjectsPage from './components/ProjectsPage'
 import Preloader, { type IntroPhase } from './components/Preloader'
+import ContactForm from './components/ContactForm'
 import puniyakottiImg from '../assets/image/puniyakotti (2).webp'
 import { CMSProvider, useCMS } from './context/CMSContext'
 import AdminLayout from './admin/AdminLayout'
@@ -946,7 +947,7 @@ function VideoSection({ theme }: { theme: 'dark' | 'light' }) {
             className={`font-['Cormorant_Garamond'] font-semibold mb-5 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
             style={{ fontSize: 'clamp(2.2rem, 5vw, 5rem)' }}
           >
-            Every Frame Tells a Story.
+            Every Frame Tells a Story
           </h2>
           <p className={`text-sm max-w-[500px] mx-auto leading-[1.85] ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/70'}`}>
             From emotional wedding films to brand stories and event highlights — cinematic narratives that move people.
@@ -1087,7 +1088,7 @@ function DroneSection({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark
             className={`font-['Cormorant_Garamond'] font-semibold leading-[1.0] mb-9 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
             style={{ fontSize: 'clamp(2.8rem, 6vw, 6rem)' }}
           >
-            See the Moment<br />from a Different<br />Angle.
+            See the Moment<br />from a Different<br />Angle
           </h2>
           <p className={`text-sm max-w-[400px] leading-[1.85] mb-11 font-medium ${isDark ? 'text-[#f2ece0]/65' : 'text-[#1c1917]/75'}`}>
             Elevate your story with cinematic aerial photography and drone cinematography. Sweeping perspectives for weddings, events, and brand campaigns.
@@ -1152,7 +1153,7 @@ function WeddingStory({ theme }: { theme: 'dark' | 'light' }) {
             className={`font-['Cormorant_Garamond'] font-semibold leading-[1.08] ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
             style={{ fontSize: 'clamp(2.4rem, 5vw, 5rem)' }}
           >
-            From the First Look<br />to the Last Dance.
+            From the First Look<br />to the Last Dance
           </h2>
         </Reveal>
       </div>
@@ -1220,7 +1221,7 @@ function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
           className={`font-['Cormorant_Garamond'] font-semibold mb-7 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
           style={{ fontSize: 'clamp(2rem, 3.5vw, 3.2rem)' }}
         >
-          Follow the Stories.
+          Follow the Stories
         </h2>
       </Reveal>
 
@@ -1269,56 +1270,139 @@ function InstagramGrid({ theme }: { theme: 'dark' | 'light' }) {
 }
 
 // ─── FINAL CTA ───────────────────────────────────────────────────────────────
+// ─── FINAL CTA & CONTACT SECTION ───────────────────────────────────────────────
 function FinalCTA({ theme }: { theme: 'dark' | 'light' }) {
-  const { getSectionAsset } = useCMS()
   const isDark = theme === 'dark'
-  const contactBg = getSectionAsset('contact_bg', '/assets/image/COUPLES/RAM_0599.webp').src
 
   return (
-    <section id="contact" className="relative w-full flex items-center justify-center overflow-hidden" style={{ minHeight: '85vh' }}>
-      <img
-        src={contactBg}
-        alt="Couple silhouette — Get in Touch"
-        decoding="async"
-        className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
-        style={{ filter: isDark ? 'brightness(0.35)' : 'brightness(0.75)' }}
+    <section
+      id="contact"
+      className={`relative w-full overflow-hidden py-24 lg:py-32 flex items-center justify-center transition-colors duration-500 border-t ${
+        isDark
+          ? 'bg-[#080706] border-[#f2ece0]/10 text-[#f2ece0]'
+          : 'bg-[#FBF9F5] border-stone-200 text-[#1c1917]'
+      }`}
+    >
+      {/* Luxury Ambient Lighting Glows */}
+      <div
+        className={`absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full blur-[140px] pointer-events-none transition-all duration-700 ${
+          isDark ? 'bg-[#D07A55]/12' : 'bg-[#A85532]/10'
+        }`}
       />
-      <div className={`absolute inset-0 transition-all duration-500 ${isDark ? 'bg-[#0c0b09]/50' : 'bg-white/30'}`} />
-      <div className="relative z-10 text-center px-8 py-28">
+      <div
+        className={`absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none transition-all duration-700 ${
+          isDark ? 'bg-amber-600/08' : 'bg-amber-500/08'
+        }`}
+      />
+
+      {/* Subtle Background Pattern Mesh */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+          backgroundSize: '32px 32px',
+        }}
+      />
+
+      <div className="relative z-10 max-w-[1380px] w-full mx-auto px-6 sm:px-8 lg:px-12">
         <Reveal>
-          <p className={`text-[11px] font-['Manrope'] tracking-[0.35em] uppercase font-semibold mb-7 ${isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}`}>Get in Touch</p>
-          <h2
-            className={`font-['Cormorant_Garamond'] font-semibold leading-[1.04] mb-8 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
-            style={{ fontSize: 'clamp(2.6rem, 6vw, 6rem)' }}
-          >
-            Let's Create Something<br />Worth Remembering.
-          </h2>
-          <p className={`text-sm max-w-[380px] mx-auto leading-[1.85] mb-12 font-medium ${isDark ? 'text-[#f2ece0]/60' : 'text-[#1c1917]/70'}`}>
-            Have an event, wedding, brand story, or celebration coming up? Let's talk.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20check%20availability%20for%20a%20photography%20session."
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 transition-all duration-350 shadow-md rounded-[12px] ${isDark
-                ? 'bg-[#D07A55] text-[#0c0b09] hover:bg-[#f2ece0]'
-                : 'bg-[#A85532] text-[#ffffff] hover:bg-[#1c1917]'
-                }`}
-            >
-              Check Availability
-            </a>
-            <a
-              href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20start%20a%20conversation%20about%20booking."
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`text-[12px] font-['Manrope'] font-bold tracking-[0.18em] uppercase px-11 py-4 border transition-all duration-350 shadow-sm rounded-[12px] ${isDark
-                ? 'border-[#f2ece0]/35 text-[#f2ece0] hover:border-[#D07A55] hover:text-[#D07A55]'
-                : 'border-[#1c1917]/35 text-[#1c1917] bg-[#ffffff]/60 hover:border-[#A85532] hover:text-[#A85532]'
-                }`}
-            >
-              Start a Conversation
-            </a>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            {/* Left Column: Contact Info & Studio Credentials */}
+            <div className="lg:col-span-5 flex flex-col justify-between h-full pt-4">
+              <div>
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border mb-6 text-[11px] font-['Manrope'] tracking-[0.25em] uppercase font-semibold backdrop-blur-md" style={{ borderColor: isDark ? 'rgba(208, 122, 85, 0.3)' : 'rgba(168, 85, 50, 0.3)' }}>
+                  <span className={`w-2 h-2 rounded-full animate-ping ${isDark ? 'bg-[#D07A55]' : 'bg-[#A85532]'}`} />
+                  <span className={isDark ? 'text-[#D07A55]' : 'text-[#A85532]'}>Get in Touch</span>
+                </div>
+
+                <h2
+                  className={`font-['Cormorant_Garamond'] font-semibold leading-[1.08] mb-6 ${isDark ? 'text-[#f2ece0]' : 'text-[#1c1917]'}`}
+                  style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)' }}
+                >
+                  Let's Create Something<br />
+                  <span className="italic font-light opacity-90">Worth Remembering</span>
+                </h2>
+
+                <p className={`text-sm sm:text-base leading-[1.8] mb-10 max-w-lg ${isDark ? 'text-[#f2ece0]/70' : 'text-[#1c1917]/80'}`}>
+                  Have an upcoming wedding, pre-wedding shoot, cinematic film, or brand story? Share your vision with us and let's turn your moments into timeless imagery.
+                </p>
+              </div>
+
+              {/* Direct Info Cards */}
+              <div className="space-y-4 mb-8">
+                {/* Phone */}
+                <a
+                  href="tel:+917708665274"
+                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 group ${
+                    isDark
+                      ? 'bg-[#100f0c]/70 border-[#f2ece0]/10 hover:border-[#D07A55]/50 hover:bg-[#151310]'
+                      : 'bg-white/80 border-stone-200 hover:border-[#A85532]/50 hover:bg-stone-50'
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${isDark ? 'bg-[#D07A55]/10 border-[#D07A55]/30 text-[#D07A55]' : 'bg-[#A85532]/10 border-[#A85532]/30 text-[#A85532]'}`}>
+                    📞
+                  </div>
+                  <div>
+                    <p className={`text-[10px] font-['Manrope'] uppercase tracking-wider font-semibold ${isDark ? 'text-[#f2ece0]/50' : 'text-stone-500'}`}>Call / Direct Inquiry</p>
+                    <p className={`text-sm font-semibold tracking-wide ${isDark ? 'text-[#f2ece0] group-hover:text-[#D07A55]' : 'text-stone-900 group-hover:text-[#A85532]'}`}>+91 77086 65274</p>
+                  </div>
+                </a>
+
+                {/* Email */}
+                <a
+                  href="mailto:punniyakottiphotography@gmail.com"
+                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 group ${
+                    isDark
+                      ? 'bg-[#100f0c]/70 border-[#f2ece0]/10 hover:border-[#D07A55]/50 hover:bg-[#151310]'
+                      : 'bg-white/80 border-stone-200 hover:border-[#A85532]/50 hover:bg-stone-50'
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${isDark ? 'bg-[#D07A55]/10 border-[#D07A55]/30 text-[#D07A55]' : 'bg-[#A85532]/10 border-[#A85532]/30 text-[#A85532]'}`}>
+                    ✉️
+                  </div>
+                  <div>
+                    <p className={`text-[10px] font-['Manrope'] uppercase tracking-wider font-semibold ${isDark ? 'text-[#f2ece0]/50' : 'text-stone-500'}`}>Official Email</p>
+                    <p className={`text-xs sm:text-sm font-semibold tracking-wide ${isDark ? 'text-[#f2ece0] group-hover:text-[#D07A55]' : 'text-stone-900 group-hover:text-[#A85532]'}`}>punniyakottiphotography@gmail.com</p>
+                  </div>
+                </a>
+
+                {/* Location */}
+                <div
+                  className={`flex items-center gap-4 p-4 rounded-xl border ${
+                    isDark ? 'bg-[#100f0c]/70 border-[#f2ece0]/10' : 'bg-white/80 border-stone-200'
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${isDark ? 'bg-[#D07A55]/10 border-[#D07A55]/30 text-[#D07A55]' : 'bg-[#A85532]/10 border-[#A85532]/30 text-[#A85532]'}`}>
+                    📍
+                  </div>
+                  <div>
+                    <p className={`text-[10px] font-['Manrope'] uppercase tracking-wider font-semibold ${isDark ? 'text-[#f2ece0]/50' : 'text-stone-500'}`}>Studio Base & Travel</p>
+                    <p className={`text-xs font-semibold ${isDark ? 'text-[#f2ece0]' : 'text-stone-900'}`}>Chennai, Tamil Nadu • Available Worldwide</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Direct WhatsApp Quick Chat */}
+              <div className="pt-2">
+                <a
+                  href="https://wa.me/917708665274?text=Hello!%20I%20would%20like%20to%20check%20availability%20for%20a%20photography%20session."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-xl font-['Manrope'] text-xs font-bold uppercase tracking-widest bg-[#25D366] text-white hover:bg-[#20bd5a] transition-all duration-300 shadow-lg"
+                >
+                  <svg className="w-4 h-4 fill-white shrink-0" viewBox="0 0 800 800">
+                    <path d="M571 474.5C561.5 470 516 447.5 507.5 444C499 440.5 493 439.5 486.5 449C480 458.5 462.5 479 457 485.5C451.5 492 446.5 492.5 437 485.5C409.713 474.55 384.513 458.99 362.5 439.5C342.572 420.738 325.702 398.975 312.5 375C307 366 312.5 361 316.5 356C320.5 351 325.5 345.5 330.5 340C334.156 335.243 337.181 330.033 339.5 324.5C340.74 321.927 341.384 319.107 341.384 316.25C341.384 313.393 340.74 310.573 339.5 308C339.5 303.5 318.5 258 310.5 239.5C302.5 221 295.5 223.5 290 223.5H270C260.472 223.871 251.481 228.007 245 235C234.537 244.983 226.25 257.021 220.658 270.357C215.065 283.693 212.288 298.04 212.5 312.5C215.057 347.999 228.11 381.936 250 410C290.168 469.672 345.123 517.908 409.5 550C431.5 559.5 448.5 565 462 569.5C480.957 575.23 500.994 576.429 520.5 573C533.454 570.372 545.731 565.11 556.568 557.541C567.405 549.972 576.572 540.258 583.5 529C589.265 515.097 591.165 499.894 589 485C586.5 481.5 580.5 479 571 474.5Z" />
+                    <path d="M664.5 134C629.921 99.0942 588.703 71.4663 543.275 52.7457C497.848 34.0252 449.132 24.5912 400 25C334.915 25.3406 271.058 42.7517 214.807 75.4941C158.556 108.237 111.881 155.165 79.4419 211.591C47.0031 268.017 29.9365 331.967 29.9467 397.053C29.9569 462.139 47.0435 526.084 79.5 582.5L29.5 775L226.5 725C280.962 754.635 341.997 770.109 404 770H400C473.896 770.482 546.261 748.944 607.867 708.132C669.473 667.321 717.528 609.087 745.904 540.855C774.281 472.623 781.692 397.485 767.194 325.024C752.696 252.563 716.945 186.061 664.5 134ZM400 706C344.528 706.044 290.087 691.008 242.5 662.5L231.5 656L114.5 686.5L145.5 572.5L138.5 561C98.5678 496.692 83.6306 419.963 96.5224 345.371C109.414 270.779 149.238 203.514 208.438 156.339C267.638 109.164 342.096 85.361 417.683 89.4459C493.27 93.5309 564.729 125.22 618.5 178.5C647.327 207.095 670.175 241.14 685.712 278.654C701.25 316.167 709.166 356.397 709 397C708.868 478.911 676.27 557.43 618.35 615.35C560.43 673.27 481.911 705.868 400 706Z" />
+                  </svg>
+                  <span>Instant WhatsApp Chat</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Right Column: Contact Form Component */}
+            <div className="lg:col-span-7">
+              <ContactForm theme={theme} />
+            </div>
           </div>
         </Reveal>
       </div>
@@ -1347,7 +1431,7 @@ function Footer({ theme, onNavigate, onNavigateWithFlash }: { theme: 'dark' | 'l
   }
 
   return (
-    <footer className={`transition-colors duration-400 ${isDark ? 'bg-[#080706] border-t border-[#f2ece0]/07' : 'bg-white border-t border-[#1c1917]/08'}`}>
+    <footer className={`transition-colors duration-400 ${isDark ? 'bg-[#080706]' : 'bg-white'}`}>
       <div className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16 lg:py-20">
         <div className="grid lg:grid-cols-[2fr_1fr_1fr_1.4fr] gap-12 lg:gap-16 mb-16">
           <div>
@@ -1532,8 +1616,8 @@ function MainContent() {
           <VideoSection theme="light" />
           <DroneSection theme="light" onNavigate={handleNavigate} onNavigateWithFlash={handleNavigate} />
           <WeddingStory theme="light" />
-          <InstagramGrid theme="light" />
           <FinalCTA theme="light" />
+          <InstagramGrid theme="light" />
         </>
       )}
       <Footer theme="light" onNavigate={handleNavigate} onNavigateWithFlash={handleNavigate} />

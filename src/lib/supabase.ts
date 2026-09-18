@@ -80,3 +80,81 @@ export async function uploadWebsiteAsset(file: File, folder: string = 'general')
 
   return publicUrlData.publicUrl
 }
+
+export interface ContactInquiry {
+  id?: string
+  name: string
+  email: string
+  phone: string
+  service_type?: string
+  event_date?: string
+  event_location?: string
+  budget_range?: string
+  referral_source?: string
+  message?: string
+  status?: 'new' | 'contacted' | 'booked' | 'archived'
+  created_at?: string
+}
+
+export async function submitContactInquiry(inquiry: Omit<ContactInquiry, 'id' | 'created_at' | 'status'>): Promise<ContactInquiry> {
+  const payload = {
+    ...inquiry,
+    status: 'new',
+  }
+  const { data, error } = await supabase
+    .from('contact_inquiries')
+    .insert([payload])
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error submitting contact inquiry to Supabase:', error)
+    throw new Error(error.message || 'Failed to submit inquiry')
+  }
+
+  return data
+}
+
+export async function fetchContactInquiries(): Promise<ContactInquiry[]> {
+  const { data, error } = await supabase
+    .from('contact_inquiries')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching contact inquiries:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export async function updateInquiryStatus(id: string, status: 'new' | 'contacted' | 'booked' | 'archived'): Promise<boolean> {
+  const { error } = await supabase
+    .from('contact_inquiries')
+    .update({ status })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error updating inquiry status:', error)
+    return false
+  }
+
+  return true
+}
+
+export async function deleteInquiry(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('contact_inquiries')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error deleting inquiry:', error)
+    alert(`Failed to delete from database: ${error.message}`)
+    return false
+  }
+
+  return true
+}
+
